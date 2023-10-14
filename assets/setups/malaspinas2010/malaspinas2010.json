@@ -1,0 +1,10 @@
+{
+	"viscoelastic": {
+		"viscosityShuffleFraction": 1,
+		"R_nu": 0.1,
+		"Re": 1,
+		"Wi": 1
+	},
+	"channelResolution": 25,
+	"channelWidthSI": 20e-6
+}

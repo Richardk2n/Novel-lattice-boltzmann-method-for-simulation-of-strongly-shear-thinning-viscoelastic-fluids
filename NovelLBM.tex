@@ -1,0 +1,778 @@
+\documentclass[a4paper,12pt]{scrartcl}
+\usepackage[american]{babel} % default is american but allow for cyrillic text via \textcyrillic{...}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+\usepackage[toc, page]{appendix}
+\usepackage{float} %better image positions
+\DeclareUnicodeCharacter{2212}{-} %Mathplotlib uses 2212 instead of -
+\usepackage{adjustbox} %Adjust boxed content
+\usepackage{graphicx} %graphics support
+% \usepackage{svg} % only works with inkscape shell scirpt as dependency (convert to eps instead) move to pdf
+\usepackage{wrapfig}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{sidecap}
+
+\usepackage{hyperref} %link support
+\usepackage{pdflscape} %pages can be landscape
+\usepackage{colortbl} %colored table rows and columns
+
+\usepackage[
+backend=bibtex,
+citestyle=numeric-comp,
+maxbibnames=10,
+sorting=none
+]{biblatex}
+\addbibresource{assets/bib/bib.bib}
+
+\usepackage{todonotes}
+
+\usepackage[locale=US]{siunitx}
+\sisetup{per-mode=fraction}
+\sisetup{separate-uncertainty=true}
+
+\usepackage{pythonhighlightRK} % provides python environment
+
+\setlength\parindent{0pt}
+
+%\newcommand{\mover}[2]{\pdfmarkupcomment[color=yellow, markup=Highlight]{#1}{#2}}
+\newcommand{\parab}[1]{\paragraph{#1}\mbox{}\newline}
+\newcommand{\n}{\newline}
+\newcommand{\abs}[1]{\lvert#1\rvert}
+\newcommand{\vecColumn}[1]{\begin{pmatrix}#1\end{pmatrix}}
+
+\usepackage{bbm} % provides unit tensor via \mathbbm{1}
+\newcommand{\ma}[1]{\underline{#1}}
+\newcommand{\uT}{\mathbbm{1}}
+\DeclareMathOperator{\Tr}{Tr}
+\DeclareMathOperator{\dif}{d}
+\DeclareMathOperator{\Dif}{D}
+
+\definecolor{background}{RGB}{51,51,51} % Because i can lol
+\definecolor{secondaryBackground}{RGB}{60,60,60} % Because i can lol
+\usepackage[enable=true]{darkmode}
+\pagecolor{background}
+
+\title{Novel lattice Boltzmann method for simulation of strongly shear thinning viscoelastic fluids}
+\author{Richard Kellnberger$^1$}
+\date{October, 2023}
+\begin{document}
+	\maketitle
+	
+	\begin{center}
+		$^1$ Biofluid Simulation and Modeling – Theoretische Physik VI, University of Bayreuth, Bayreuth, Germany
+	\end{center}
+	\vspace{\fill}
+	\begin{center}
+		%TODO abstact
+	\end{center}
+	%TODO keywords
+	
+	\newpage
+	\null
+	\newpage
+	
+	\tableofcontents
+	
+	\newpage
+	
+	\section{Introduction}
+	\todo{do}
+	
+	\section{Rheology of viscoelastic fluids}
+	Viscoelastic behavior in fluids was first discovered during the second world war when mixing flamethrower liquid\cite{franck2017}. Since then many models have been derived to describe the different effects exhibited by this class of material. In general the stress exhibited by these fluids is not only dependent on the current shear, but is also time-dependent. This complex behavior can often be decoupled into a shear dependent viscosity and a normal stress. These can be for the most part understood separately. The viscosity usually exhibits shear thinning behavior. This behavior is well understood because it has many technical applications and is a common side effect of increasing the viscosity of fluids which is also often desired. Therefore, there exist many phenomenological descriptions of shear thinning. A particularly general one is the Carreau-Yasuda model. It will be discussed in the following to illustrate qualitatively how such fluids behave. The elastic components will be discussed afterward.
+	\subsection{Carreau-Yasuda - phenomenological description for shear thinning viscosity}
+	In Yasudas 1979 PhD-Thesis\cite{yasuda1979} the earlier Carreau model\cite{carreau1972} was extended to describe the shear thinning behavior of polymers and polymer solutions for many parameters. The viscosity $\eta$ decreases with the shear rate $\dot{\gamma}$ as follows.
+	\begin{equation}
+		\eta\left(\dot{\gamma}\right) = \eta_\infty + \frac{\eta_0 - \eta_\infty}{\left[1+\left(\lambda\dot{\gamma}\right)^{a_1}\right]^\frac{a_2}{a_1}}
+	\end{equation}
+	Here $\eta_0$ is the zero shear viscosity, $\eta_\infty$ is the infinite shear viscosity, $\lambda$ is the relaxation time and $a_1$ and $a_2$ are parameters in regard to the slope. As can be seen in figure \ref{fig:CY}, the Carreau-Yasuda model describes two plateaus of constant viscosity ($\eta_0$ and $\eta_\infty$) connected by a $Wi^{-a_2}$ power law. $a_1$ governs how gradual the connection between the initial plateau and the power law is. Here the Weissenberg number $Wi = \lambda\dot{\gamma}$ has been introduced. The start of the actual thinning is around $Wi = 1$. Values below are often considered \glqq small\grqq{ } Weissenber numbers, while the ones above are considered \glqq large\grqq. The onset of the second plateau depends on a material parameter, which we term the viscosity ratio and define as follows.
+	\begin{equation}\label{eq:R_eta_CY}
+		R_\eta = \frac{\eta_0 - \eta_\infty}{\eta_\infty}
+	\end{equation}
+	As will be shown later, this is actually a crucial stability parameter for the simulations. This means, that the widely available parameters obtained by fitting this phenomenological model are sufficient to predict the stability of simulations. However, to actually simulate viscoelastic fluids, a model es required, that predicts a viscosity similar to the one shown here, and the normal stress exhibited by such fluids. This will be discussed in the following section.
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/CY.eps}
+		\caption{Double logarithmic plot of the Carreau-Yasuda model for different $a_1$.}
+		\label{fig:CY}
+	\end{figure}
+	\subsection{Constitutive equations for the polymer stress}
+	Both the viscosity and the normal stress can be viewed as components of a stress tensor. For some linear viscoelastic liquids simulations without modeling the constitutive equation of this tensor are possible using a slightly modified lattice Boltzmann method\cite{giraud1998,lallemand2003}. More general cases have used elastic dumbbells to model the polymers typically contained in viscoelastic fluids. The first of which was the Oldroyd-B model introduced in 1958\cite{oldroyd1958}. Also, it does not reproduce all effects shown by viscoelastic fluids (critically it is not shear thinning), it is still the most popular model today due to its simplicity. In elongational flow, the dumbbells modeled by Oldroyd-B can be stretched infinitely, leading to unphysical behavior. To avoid this the finite extensible FENE-P model was developed by Bird et al.\cite{bird1980,bird1987}. This model is also particularly popular, but we found it to be problematic, as fitting it to rheological data for some of the materials we work with results in unphysical parameters. Furthermore, using it is detrimental for stability, especially for high Weissenberg numbers (for details see appendix \ref{app:FENE-P}). There also exist many other derived or extended FENE type models one could choose from. Oliveira showed, that many of them follow a common formalism\cite{oliveira2009} and can be brought to a common form despite looking quite different in their original formulation. Among this group of models is also the Phan-Thien Tanner (PTT) model\cite{phan-thien1977,phan-thien1978}. It was originally derived for polymer networks in solution, but also fits well with the fluids we use. As these models all have similar mathematical forms and produce similar shapes, the physical background likely does not matter much. There exists an exponential version and a more general form of the PTT model using the gamma function\cite{ferras2019}. As our simulations algorithm is GPU based, using the more general form would necessitate the implementation of the gamma function incurring segnificant computational cost for limited gain. Therefore, we opted for the exponential version. For this the constitutive equation for the stress reads as follows.
+	\begin{equation}
+		\overset{\nabla}{\ma{\tau}} = -\xi\left(\ma{\tau}\cdot\ma{D} + \ma{D}\cdot\ma{\tau}\right) - e^{\frac{\epsilon\lambda}{\eta_\text{p}}\Tr\ma{\tau}}\frac{\ma{\tau}}{\lambda} + 2\frac{\eta_\text{p}}{\lambda}\ma{D}
+	\end{equation}
+	Here, $\ma{\tau}$ is the polymer stress tensor and $\ma{D}$ is the strain rate tensor. $\eta_\text{p}$ is the polymer viscosity and $\lambda$ is the relaxation time. $\epsilon$ is the extensibility parameter and $\xi$ describes the slip in the polymer network. This model uses the upper convected derivative, which is defined as follows.\todo{clarify nabla u and fix Ts}
+	\begin{equation}
+		\overset{\nabla}{\ma{A}} = \frac{\Dif\ma{A}}{\Dif t} - \left(\left(\nabla\vec{u}\right)^\text{T}\cdot\ma{A} + \ma{A}\cdot\left(\nabla\vec{u}\right)\right)
+	\end{equation}
+	Where $\vec{u}$ is the fluid velocity. This equation contains the material derivative defined as follows.
+	\begin{equation}
+		\frac{\Dif\ma{A}}{\Dif t} = \frac{\partial\ma{A}}{\partial t} + \vec{u}\cdot\nabla\ma{A}
+	\end{equation}
+	The semi analytical solution reads as follows\cite{ferras2019}.
+	\begin{equation}
+		\exp\left[\frac{\epsilon\lambda}{\eta_\text{p}}\left(\frac{2-2\xi}{2-\xi}\right)\tau_{xx}\right]^2\tau_{xx}=\left(2-\xi\right)\left(\lambda\dot{\gamma}\right)^2\left(\frac{\eta_\text{p}}{\lambda} - \tau_{xx}\xi\right)
+	\end{equation}
+	\begin{equation}
+		\tau_{xy}\left(\dot{\gamma}\right) = \frac{\eta_\text{p}\dot{\gamma}-\tau_{xx}Wi\xi}{\exp\left[\frac{\epsilon\lambda}{\eta_\text{p}}\left(\frac{2-2\xi}{2-\xi}\right)\tau_{xx}\right]}
+	\end{equation}
+	\begin{equation}
+		\eta\left(\dot{\gamma}\right) = \frac{\tau_{xy}\left(\dot{\gamma}\right)}{\dot{\gamma}}
+	\end{equation}
+	\begin{equation}
+		N_1 = \frac{2\tau_{xx}}{2-\xi}
+	\end{equation}
+	Where $N_1$ is the first normal stress difference.
+
+	The shear dependent viscosity in this model can be seen in figure \ref{fig:ptt_eta}. One can see a Newtonian plateau and a $Wi{-1}$ power law. Other constitutive equations lead to other power laws. Therefore, one can pick a model, that fits the data best. The parameter $\epsilon$ controls the $Wi$ at which thinning takes place. Compared to the phenomenological CY model, PTT does not have a minimum viscosity and keeps trending towards zero. This is unphysical and current lattice Boltzmann methods require a viscosity to be present. This is remedied by adding an offset $\eta_\text{s}$ to the viscosity. The resulting curve can be seen in figure \ref{fig:ptt_eta_s}. The resulting curve is very similar to the CY model and thus is also suited to describe many different viscoelastic liquids. Furthermore, this allows to see some similarities. The $\eta_\text{s}$ parameter is equivalent to $\eta_\infty$ and $\eta_\text{p} + \eta_\text{s} = \eta_0$. With this the viscosity ratio defined in equation \ref{eq:R_eta_CY} can be rewritten with these parameters as follows.
+	\begin{equation}\label{eq:R_eta_ptt}
+		R_\eta = \frac{\eta_\text{p}}{\eta_\text{s}}
+	\end{equation}
+	The index p expresses the viscosity from polymers, while the s means viscosity from solvent. This alleges, that the viscosity for infinite shear becomes the solvent viscosity. This however is not entirely accurate in general. That being said, the exact value of $\eta_\text{s}$ is not relevant given $Wi$ is low enough, which it often is. Given, that data is rarely available at shear rates high enough to determine $\eta_\text{s}$ reliably, due to technical difficulties, it can usually not be determined from data. Therefore, it is common to just use the solvent viscosity.
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/ptt_eta.eps}
+		\caption{Double logarithmic plot of the PTT model for $\xi=0$ and different $\epsilon$.}
+		\label{fig:ptt_eta}
+	\end{figure}
+		\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/ptt_eta_s.eps}
+		\caption{Double logarithmic plot of the PTT model for $\xi=0$ and different $\epsilon$ with an offset.}
+		\label{fig:ptt_eta_s}
+	\end{figure}
+	For the polymers solutions we work with, $\xi$ is effectively zero, as can be suspected from its physical interpretation. Therefore, we set it to zero for the rest of this work. This also simplifies the model significantly and allows it to be solved analytically using the Lambert $W$ function. In the following we show fits for several viscoelastic fluids, to show, that PTT does fit and to establish an expected range for the parameters.
+	\subsection{Fitting PTT to experimental data}
+	For $\xi = 0$ and using the Lambert $W$ function, the solutions for PTT are as follows.
+	\begin{equation}
+		\eta\left(\dot{\gamma}\right) = \frac{\eta_\text{p}}{\exp\left[0.5W_0\left(4\epsilon Wi^2\right)\right]}
+	\end{equation}
+	\begin{equation}
+		N_1 = \frac{\eta_\text{p}}{2\epsilon\lambda}W_0\left(4\epsilon Wi^2\right)
+	\end{equation}
+	From this, one can see, that it is not sufficient to fit the viscosity as it could be formulated using two parameters ($\eta_\text{p}$ and $\epsilon\lambda^2$). Therefore, it has to many parameters and the fit has a one dimensional solution space.
+	The same holds for $N_1$ using $\eta_\text{p}\lambda$ and $\epsilon\lambda^2$. Therefore, it is necessary to fit both curves at the same time. This is not a unique feature of PTT, it is also the case for e.g. FENE-P (see appendix \ref{app:FENE-P}). In the following we show the fit results for an Alginate solution, for several concentrations of methyl cellulose solution and for a few other fluids.
+	\subsubsection{Alginate}
+	Alginate solutions are very important as bioinks or as scaffolding in the field of biofabrication. Alginate is also a common food additive. The solutions used here are \SI{4}{\percent} by weight of DuPont VIVAPHARM Alginate PH176 in PBS (essentially water)\todo{cite email from Tomasz Jüngst from 23.03.2023?}. The solution were prepared and measured by the Group of Tomasz Jüngst\todo{cite properly}. The measurements were done using a plate-plate rheometer. The first normal stress difference $N_1$ was calculated from the measured normal force using the following equation\cite{kulicke1977}.\todo{data so far does not include second correction term; needed info: was this plate plate? where is shear rate in PP rheometer? we claim $N_2$ is 0, therefore PP is fine, but we would really prefer CP}\todo{confirm diameter}
+	\begin{equation}
+		N_1 = \frac{2F}{\pi R^2} + \frac{3}{20}\rho\omega^2R^2
+	\end{equation}
+	Where $F$ is the measured normal force, $R$ is the radius of the rheometer, $\rho$ is the density of the fluid and $\omega$ is the angular velocity of the rheometer.
+	
+	The data for viscosity and first normal stress difference was fitted simultaneously for all 21 individual measurements in the dataset. The results can be seen in figures \ref{fig:fit_alginate_eta} and \ref{fig:fit_alginate_N}. The steps that can be seen in the plot of the first normal stress difference are due to the limited resolution of the rheometer used. It can be seen, that the data varies significantly, due to variations on preparation and/or measurement. The fit does not reproduce the shape perfectly but does always stay within the variation of the data. This is sufficient. While setting $\eta_\text{s} = \SI{1}{\milli\pascal\second}$, the parameters obtained are as follows.\todo{subject to change; different than before!!}
+	\begin{align}
+		\eta_\text{p} &= \SI{48.2\pm0.4}{\pascal\second}\\
+		\lambda &= \SI{0.343 \pm 0.004}{\second}\\
+		\epsilon &= \num{0.545 \pm 0.010}
+	\end{align}
+	With this the viscosity ratio becomes $R_\eta = \num{48.2\pm0.4e3}$. However, this carries the assumption of $\eta_\text{s}$. Strictly from the data, we can only specify $R_\eta > 70$, using $\eta_\text{s} < \min\left(\eta\right)$. Given, the data shows no sign of flattening the actual value of $R_\eta$ is significantly higher than $70$.
+	
+	These parameters (predominately $\eta_\text{p}$) are dependent on concentration. This will be shown in the next section with the example of methyl cellulose.
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/fit_alginate_eta.eps}
+		\caption{Double logarithmic plot of 21 measurements of the viscosity of an alginate solution and a PTT fit.}
+		\label{fig:fit_alginate_eta}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/fit_alginate_N.eps}
+		\caption{Double logarithmic plot of 21 measurements of the normal force (converted to stress) of an alginate solution and a PTT fit.}
+		\label{fig:fit_alginate_N}
+	\end{figure}
+	\subsubsection{Methyl cellulose}
+	Methyl cellulose is also used in research involving cells as a nontoxic thickening agent. It is also widely used in the food industry. The data used here\cite{buyukurganci2023}, was measured using plate-plate and cone-plate rheometer geometry. The three solutions measured are \SI{0.49}{\percent}, \SI{0.59}{\percent} and \SI{0.83}{\percent} methyl cellulose in PBS. The measured data as well as the fit results can be seen in figures \ref{fig:fit_mc_eta} and \ref{fig:fit_mc_N}. One can see, that while PTT is not the optimal model for this solution, the agreement is still acceptable. The fit gives the following parameters.
+	\begin{center}
+		\begin{tabular}{c|c|c|c}
+			Concentration/\unit{\percent} & $\eta_\text{p}/\unit{\milli\pascal\second}$ & $\lambda/\unit{\milli\second}$ & $\epsilon$ \\
+			\hline
+			\num{0.49} & \num{18.7\pm0.4} & \num{0.344\pm0.003} & \num{0.270\pm0.003} \\
+			\num{0.59} & \num{32.5\pm0.7} & \num{0.433\pm0.004} & \num{0.365\pm0.004} \\
+			\num{0.83} & \num{81\pm2} & \num{0.714\pm0.009} & \num{0.496\pm0.006}
+		\end{tabular}
+	\end{center}
+	From the derivation of the model it would be expected, that only $\eta_\text{p}$ scales with the concentration. However, all the parameter show a significant dependency on concentration. $R_\eta$ can be approximated from the data as $R_\eta > 3$, $R_\eta > 4$ and $R_\eta > 9$ for \SI{0.49}{\percent}, \SI{0.59}{\percent} and \SI{0.83}{\percent} receptively. They again are likely much higher. The expected values based on the assumed $\eta_\text{s}$ are $R_\eta = \num{18.7\pm0.4}$, $R_\eta = \num{32.5\pm0.7}$ and $R_\eta = \num{81\pm2}$ respectively.
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/fit_mc_eta.eps}
+		\caption{Double logarithmic plot of measurements of the viscosity of three methyl cellulose solutions and a PTT fit.}
+		\label{fig:fit_mc_eta}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/fit_mc_N.eps}
+		\caption{Double logarithmic plot of measurements of the normal force (converted to stress) of three methyl cellulose solutions and a PTT fit.}
+		\label{fig:fit_mc_N}
+	\end{figure}
+	\subsubsection{Other fluids}
+	\todo{mostly mention $R_\eta$ for different fluids}
+	\todo{do}
+	With the usual range of the parameters and $R_\eta$ established, we provide a quick overview about the current literature and capabilities in the following section.
+	
+	\section{Existing LBM methods}
+	There are many existing LBM methods to simulate viscoelastic materials in three dimensions. Some simple linear viscoelastic effects can be described through multi-relaxation-time models \cite{lallemand2003}, but in general more complicated methods are required. For more general cases the solving of a second equation is required. There are several options for the equation describing the polymer. Among these are the constitutive equation\cite{gupta2015} and a Fokker-Planck equation\cite{onishi2005}. Solving these equations can be done through multiple ways. These include a finite volume solver, a finite difference solver\cite{gupta2015}, another LBM like solver\cite{ma2020} and an advection-diffusion scheme\cite{onishi2005}. These secondary solvers need to be coupled to the primary LBM solver. Options to do that include introducing an additional forcing term to the LBM and altering the LBM stress directly\cite{dzanic2022}.
+	
+	Among the publications implementing a constitutive equation most use Oldroyd-B or older models. Many also use FENE-P despite its shortcomings. The PTT model, which is currently the model used by us is rarely employed, though many authors do mention it.
+	
+	While these options lead to wide range of different coupled solvers, the results are similar. Some authors note, that the Weissenberg number could be extremely high using their scheme\cite{malaspinas2010}, the simulations actually presented in the publications usually only go up to $Wi = 10$\cite{malaspinas2010,su2013_2} or $Wi = 100$\cite{gupta2015,ma2020,gupta2016}. As can be seen in figure \ref{fig:ptt_eta_s} above, $Wi \leq 100$ covers most of the range already, and it seems plausible, that current capabilities cover most of not all experiments in this regard.
+	
+	However, another stability criterion, which only some others mention is the viscosity ratio. Its definition in literature varies significantly. We use equation \ref{eq:R_eta_ptt} whenever possible. For some publications we have to estimate it using data extracted from plots and equation \ref{eq:R_eta_CY}. Publications often stay at or below $R_\eta = 1$\cite{gupta2015,onishi2006,wang2020,su2013_2,gupta2015_2}, while the ones trying higher ratios report being limited below $R_\eta = 10$\cite{malaspinas2010,ma2020,kuron2021} due to stability issues. There are several options being explored in the literature to increase stability. The most prominent among them is the inclusion of an artificial diffusivity, which introduces a small error compared to the analytical solution of th constitutive equation. All of these ultimately fail to extend the range of stable viscosity ratios significantly. This means, that for the existing simulation approaches, the zero shear viscosity and the infinite shear viscosity are similar, which is only sufficient for very dilute solutions. The methods currently available do not allow the simulation of the real fluids mentioned before. Therefore, we developed a new method capable of much higher viscosity ratios. This novel approach will be discussed in the following section.
+	
+	\section{Numerical method}
+	Our numerical consists of several well known methods and our novel viscosity shuffling. In the following we provide a brief overview about the well known basics and an in depth explanation of our novel method.
+	\subsection{Basics}
+	To solve the fluid we use a lattice Boltzmann algorithm with a single relaxation time. One could also use multi relaxation time, but we found the benefit to be negligible. For the velocity set we use D3Q19 as D3Q27 did not provide significant benefit for us but increases computational cost significantly. We solve the constitutive equation with a finite volume solver. This simplifies the boundary conditions significantly as we set the stress flux through the walls to zero. The advection term in the constitutive equation is handled with the corner transport upwind scheme. The source terms are integrated using the Euler method. The exact implemented and its derivation can be found in appendix \ref{app:implementation}. The coupling to the main lattice Boltzmann solver happens using the stress directly according to Dzanic et al.\cite{dzanic2022_2}. However, we modify the coupled stress as is explained in the following.
+	\subsection{Novel viscosity shuffling}
+	Performing Chapman-Enskog analysis on the LBM reveals the total stress experienced by the fluid ($\ma{\sigma}$) to be as follows\cite{onishi2006}.
+	\begin{align}
+		\ma{\sigma} &= 2\eta_\text{s}\ma{D} + \ma{\tau}
+		\intertext{We now add a zero.}
+		&= 2\eta_\text{s}\ma{D} + \ma{\tau}_\text{shuffle} + \ma{\tau} - \ma{\tau}_\text{shuffle}
+		\intertext{With $\ma{\tau}_\text{shuffle} = 2\alpha_\text{s}\eta_\text{p}\ma{D}$}
+		&= 2\left(\eta_\text{s} + \alpha_\text{s}\eta_\text{p}\right)\ma{D} + \left(\ma{\tau} - 2\alpha_\text{s}\eta_\text{p}\ma{D}\right)
+	\end{align}
+	With this new parameter $\alpha_\text{s}$ we can shuffle an arbitrary amount of viscosity around, as we use $\eta_\text{s} + \alpha_\text{s}\eta_\text{p}$ as the viscosity in the LBM algorithm, and the stress calculated via the constitutive equation gets a relatively simple offset applied to it before being included in the LBM. This allows for the first time to our knowledge to pick $\eta_\text{s} = 0$. This allows for accurate comparisons to the analytical solutions of the constitutive equation, as these usually do not include $\eta_\text{s}$. Furthermore, instead of using artificial diffusivity to stabilize the simulation or employing any other artificial remedy, this scheme allows to not modify the parameters and to simulate the exact physical system that is desired. The reason for the instability is, simply speaking, that the polymer contribution overpowers the LBM stress. This can be compared to the inclusion of very large forces, which cause some equilibrium populations to become negative resulting in the LBM become unstable. The viscosity shuffling allows us to increase the LBM stress while decreasing the polymer contribution. This shifts the balance towards stability. Crucially, this happens without altering the physical system simulated. In terms of stability, we could define an effective $R_\eta$, calculated from the stress contributions as follows.
+	\begin{equation}
+		R_{\eta\text{, eff}} = \frac{\eta_\text{p}-\alpha_\text{s}\eta_\text{p}}{\eta_\text{s} + \alpha_\text{s}\eta_\text{p}} = \frac{1-\alpha_\text{s}}{\frac{\eta_\text{s}}{\eta_\text{p}} + \alpha_\text{s}} = \frac{1-\alpha_\text{s}}{1 + \alpha_\text{s}R_{\eta}}R_{\eta} \overset{\alpha_\text{s}R_{\eta}\gg1}{=} \frac{1-\alpha_\text{s}}{\alpha_\text{s}}
+	\end{equation}
+	Given $\alpha_\text{s}$ is large enough, arbitrary $R_{\eta\text{, eff}}$ can be reached, bringing the simulation within the range, that is stable with current methods, and thus arbitrary $R_{\eta}$ become stable. A trade-off is, that $\alpha_\text{s}$ decreases the time-step. In the following section we validate this novel approach against analytical solutions for realistic parameters. Furthermore, we compare the accuracy of this scheme with literature.
+	
+	\section{Validation and comparison}
+	To validate the simulations we compare the simulated velocity field of analytically solvable geometries to theory. For pressure gradient driven channel and pipe geometries, the analytical solution is as follows\cite{oliveira1999}.
+	\begin{equation}
+		u\left(r\right) = \frac{Gl^2}{2^{j+1}\eta_\text{p}}\left(e^\frac{R^2}{l^2}-e^\frac{r^2}{l^2}\right)
+	\end{equation}
+	Where $u\left(r\right)$ is the radius dependent velocity, $G = -\partial_xp$ is the pressure gradient in the direction of the pipe and $l$ is a constant defined as follows.
+	\begin{equation}
+	l^2 = \frac{2^{2j-1}\eta_\text{p}^2}{\epsilon\lambda^2G^2}
+	\end{equation}
+	The index $j$ gives the solution for the channel for $j=0$ and the pipe for $j=1$.
+	
+	We need this solution to compare to literature. However, this solution does not include $\eta_\text{s}$, which is required in general. With the inclusion of the solvent viscosity (for details see appendix \ref{app:PTT}), the solution reads as follows.\todo{also wrong}
+	\begin{equation}
+		u\left(r\right) = \frac{Gl^2}{2^{j+1}\eta_\text{s}}\left[\ln\left(1+\frac{\eta_\text{s}}{\eta_\text{p}}e^\frac{R^2}{l^2}\right)-\ln\left(1+\frac{\eta_\text{s}}{\eta_\text{p}}e^\frac{r^2}{l^2}\right)\right]
+	\end{equation}
+	In the following we compare results for channel and pipe flow to these equations for realistic parameters. Afterward we compare the accuracy of our simulation algorithm against literature.
+	%We use richard/master fe0fc04115b9b6ea6628bcc6cb6593d3f72ac0ea (2023-11-05)
+	\subsection{2D Poiseuille vs theory}\todo{rename to channel flow?}\todo{include cylindrical nozzle from conical nozzle sim}
+	
+	\subsection{3D Poiseuille vs theory}\todo{rename to pipe flow?}
+
+	\subsection{Comparison with literature}
+	Malaspinas et al.\cite{ma2020} provide a detailed validation and claim very high accuracy. Therefore, we pick this as a comparison. We aim at the reproduction of figures 17 and 18 from said paper. We calculate this 2D flow in 3D as the viscoelastic algorithm has not been validated for 2D velocity sets. Otherwise the geometry is identical. It is not entirely clear to us, how they define typical scales. We define the typical velocity as the maximum velocity, as is likely done in the paper. The typical length, we set as half of the channel width. We define the typical shear rate as typical velocity divided by typical length. We set $\eta_\text{s} = \SI{1}{\milli\pascal\second}$ as the paper only gives ratios, and it probably does not matter here. Nevertheless, our lattice units do not line up exactly with those from Malaspinas, as our viscosity is different due to the shuffling.
+	%Beware equation 61 in the paper is wrong. It should have an 8 instead of the 4.
+	The parameters from the paper ($R_\nu$, $Wi$ and $N$) are varied as in the paper. The error is calculated as follows.
+	\begin{equation}\label{eq:l2error}
+		E_\text{u} = \frac{1}{u_\text{max}}\sqrt{\frac{1}{N}\sum\abs{u_\text{simulation}-u_\text{theory}}^2}
+	\end{equation}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/malaspinas2010.eps}
+		\caption{Double logarithmic plot of the L2 error as defined in equation \ref{eq:l2error} from Malaspinas et al.\cite{malaspinas2010} (dots) compared to our algorithm (x) as a function of grid resolution.}
+		\label{fig:malaspinas2010}
+	\end{figure}
+	As can be seen in figure \ref{fig:malaspinas2010}, our results notably do not depend on the Weissenberg Number. While our error decreases with N with a constant power, Malaspinas et al. see diminishing returns. While these results are excellent, the error in our implementation is still dependent on the viscosity ratio. When going to significantly higher ratios, this needs to be checked to ensure it does not get too large.\todo{link to appendix where we validate this}
+	With this, one can see, that we are not only capable to simulate parameters not yet accessible, but our implementation is also better for the parameters used in literature. Knowing our simulations to be good we in the following show results for interesting systems, that are not analytically solvable.
+	\section{Results for non analytically solvable systems}\todo{do all of these with MC}
+	\subsection{Conical nozzle}
+	\todo{do}
+	\subsection{Cell in shear flow}
+	\todo{do}
+	\subsection{RT-DC}
+	\todo{do}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/RT-DC_v.eps}
+		\caption{Plot of the velocity in the RT-DC channel.}
+		\label{fig:RT-DC_v}
+	\end{figure}
+	\begin{figure}[H]
+	\centering
+	\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/RT-DC_tau.eps}
+	\caption{Plot of the polymer stress in the RT-DC channel.}
+	\label{fig:RT-DC_tau}
+	\end{figure}
+	
+	\section{Conclusion}
+	\todo{do}
+
+	\newpage
+	\printbibliography[heading=bibintoc]
+	
+	\appendix
+	\appendixpage
+	\section{Implementation of constitutive equations}\label{app:implementation}\todo{Note available analytical solutions}
+	There is a large amount of viscoelastic models. It is also common to extend these to create new models. As Oliveira shows\cite{oliveira2009} many of these can be expressed to a common form and thus actually are variants of a common idea. This allows both to easily find new models and implement them. In the following polymer contributions $\ma{\tau}$ of the models we have currently implemented are described. For notation, we mostly follow close to Oliveira\cite{oliveira2009}.
+	\parab{Implementation}
+	The actual implementation uses tensors related to $\tau$ to unify the calculations as much as possible. We denote these tensors as $\ma{A}$ and give the relation for each model. Whenever we explicitly need $\ma{\tau}$, we convert it. For Oldroyd-B this does not seem necessary and might even be slightly detrimental to performance. However, such a replacement simplifies the constitutive equation for FENE-P significantly and doing it for the other models as well allows a unified code with little adaptation for each model. It also makes the equations easier to understand and analyze. We stick with $\ma{A}$ as the Tensor containing the stress information, although its meaning is different for the different models listed here. This way, it can be seen, that all the models listed here can be brought to the common form listed below.\todo{claryfy nabla u and fix Ts}
+	\begin{equation}
+		\frac{\partial\ma{A}}{\partial t} + \vec{u}\cdot\nabla\ma{A} = \left(\left(\nabla\vec{u}\right)^\text{T}\cdot\ma{A} + \ma{A}\cdot\left(\nabla\vec{u}\right)\right)+\ma{S}_\text{R} + 2\ma{D}
+	\end{equation}
+	Where $\ma{S}_\text{R}$ is a model-dependent term. In the following only this will be specified as all other terms are the same for all models. The second term on the left-hand side is handled via CTU, the rest is Euler-integrated.
+	
+	\subsection{Oldroyd-B}
+	This model was originally developed by Oldroyd\cite{oldroyd1958}. The constitutive equation reads as follows.
+	\begin{equation}
+		\overset{\nabla}{\ma{\tau}} = -\frac{\ma{\tau}}{\lambda} + 2\frac{\eta}{\lambda}\ma{D}
+	\end{equation}
+	$\lambda$ is the polymer relaxation time and $\eta$ is the polymer viscosity. This viscosity also defines the magnitude of the elastic forces. Both these parameters also appear in the other models. We usually do not use this model, as it is not shear thinning.
+	\parab{Implementation}
+	\begin{equation}
+		\ma{S}_\text{R} = -\frac{\ma{A}}{\lambda}
+	\end{equation}
+	\begin{equation}
+		\ma{\tau} = \frac{\eta}{\lambda}\ma{A}
+	\end{equation}
+	
+	\subsection{FENE-P}\todo{cite oliveira for theory}\todo{a lot more detail can be found in my dedicated FENE-P repo -> include derivation?}
+	This model was originally developed by Bird\cite{bird1980}\cite{bird1987}. It can be viewed as an Extension of the Oldroyd-B by limiting the polymers to finite extensibility. It has particularly many derivatives. Its constitutive equation reads as follows.
+	\begin{equation}
+		\overset{\nabla}{\ma{\tau}} = -Z\frac{\ma{\tau}}{\lambda} + \left(\ma{\tau}+(1-e b)\frac{\eta}{\lambda}\uT\right)\frac{\Dif\ln Z}{\Dif t} + 2(1-eb)\frac{\eta}{\lambda}\ma{D}
+	\end{equation}
+	With the extensibility parameter b, $e = \frac{2}{b\left(b + 2\right)}$ and
+	\begin{equation}
+		Z = 1 + \frac{3}{b}\left(\frac{b}{b + 2}+\frac{\Tr\ma{\tau}}{3\frac{\eta}{\lambda}}\right)
+	\end{equation}
+	Note, that the sign of $\ma{\tau}$ differs from Birds formulation. Also, the relation $nk_\text{B}\theta = \frac{\eta}{\lambda}$ has already been used to avoid introducing additional parameters. Particularly for large shear rates, it is numerically possible, that the polymer exceeds its maximal extensibility. If it is extended beyond the maximum the equations cause it to extend further, making this model unstable for high shear rates. Even with the decomposition proposed by Dzanic\cite{dzanic2022}, we were not yet able to get it stable. Thus, it is currently unused.
+	\parab{Implementation}
+	\begin{equation}
+		\ma{S}_\text{R} = \frac{\Tr\ma{A}\uT + \left(b + 2\right)\ma{A}}{\lambda\frac{b+2}{b+5}\left(\Tr\ma{A}-b-2\right)}
+	\end{equation}
+	\begin{equation}
+		\ma{\tau} = \frac{\eta}{\lambda}\frac{b}{b+2-\Tr\ma{A}}\left(\ma{A}+\frac{\Tr\ma{A}}{b+2}\uT\right)
+	\end{equation}
+	This seems complicated, but removes the highly problematic $\frac{\Dif\ln Z}{\Dif t}$ term, which causes issues in implementation details.
+	
+	\subsection{PTT}
+	Originating from Phan-Thien and Tanner\cite{phan-thien1977} it was soon after slightly extended by Phan-Thien\cite{phan-thien1978} to the exponential form we use. There is also an even more general form from Ferrás\cite{ferras2019}, which due to its use of the Gamma function is hard to implement on GPUs. The constitutive equation reads as follows.
+	\begin{equation}
+		\overset{\nabla}{\ma{\tau}} = -\xi\left(\ma{\tau}\cdot\ma{D} + \ma{D}\cdot\ma{\tau}\right) - e^{\frac{\epsilon\lambda}{\eta}\Tr\ma{\tau}}\frac{\ma{\tau}}{\lambda} + 2\frac{\eta}{\lambda}\ma{D}
+	\end{equation}
+	Where $\epsilon$ and $\xi$ are additional parameters related to the network this model is supposed to model. For our polymer solutions $\xi$ is always (effectively) zero.
+	\parab{Implementation}
+	\begin{equation}
+		\ma{S}_\text{R} = -\xi\left(\ma{A}\cdot\ma{D} + \ma{D}\cdot\ma{A}\right) - e^{\epsilon\Tr\ma{A}}\frac{\ma{A}}{\lambda}
+	\end{equation}
+	\begin{equation}
+		\ma{\tau} = \frac{\eta}{\lambda}\ma{A}
+	\end{equation}
+
+	\section{FENE-P}\label{app:FENE-P}
+	\todo{stability issue, fitting parameter, see fenep repo}
+	\section{Analytical solution for PTT}\label{app:PTT}\todo{This is wrong (to the best of my knoledge) not analytically solveable -> semi analytic solution}
+	Our derivation is analogous to Oliveira\cite{oliveira1999}. To account for the added viscous stress due to $\eta_\text{s}$, equilibrium is reached at lower polymer stresses. Therefore, Oliveiras equation (7) needs to be modified as follows.
+	\begin{equation}
+		\tau_{xy} = \partial_xp\frac{r}{2^j} - \eta_\text{s}\dot{\gamma}
+	\end{equation}
+	Where the second term is added due to the presence of the solvent viscosity. This term also propagates to Oliveiras equation (9) as follows.
+	\begin{align}
+		\dot{\gamma} &= f\left(\frac{2\lambda}{\eta_\text{p}}\left[\partial_xp\right]^2\frac{r^2}{2^{2j}}\right)\frac{1}{\eta_\text{p}}\left(\partial_xp\frac{r}{2^j}-\eta_\text{s}\dot{\gamma}\right)
+		\intertext{This cannot be integrated as easily as without $\eta_\text{s}$, but is still solvable.}
+		\dot{\gamma}\left\{1+\frac{\eta_\text{s}}{\eta_\text{p}}f\left(\frac{2\lambda}{\eta_\text{p}}\left[\partial_xp\right]^2\frac{r^2}{2^{2j}}\right)\right\} &= f\left(\frac{2\lambda}{\eta_\text{p}}\left[\partial_xp\right]^2\frac{r^2}{2^{2j}}\right)\partial_xp\frac{r}{\eta_\text{p}2^j} \\
+		\dot{\gamma} &= \frac{f\left(...\right)}{1+\frac{\eta_\text{s}}{\eta_\text{p}}f\left(...\right)}\partial_xp\frac{r}{\eta_\text{p}2^j}
+	\end{align}
+	For the exponential version of PTT the following $f$ is defined as follows.
+	\begin{equation}
+		f\left(\Tr\ma{\tau}\right) = \exp\left(\frac{\epsilon\lambda}{\eta_\text{p}}\Tr\ma{\tau}\right)
+	\end{equation}
+	The equation can be solved by integration as $\dot{\gamma} = \partial_ru$. We start with the following substitution.
+	\begin{equation}
+		v = \frac{\epsilon\lambda^2}{\eta_\text{p}^2}\left(\partial_xp\right)^2\frac{r^2}{2^{2j-1}}
+	\end{equation}
+	With this $u$ is as follows.
+	\begin{align}
+		u\left(r\right) &= \frac{\eta_\text{p}2^{j-2}}{\epsilon\lambda^2\partial_xp}\int\frac{e^v}{1+\frac{\eta_\text{s}}{\eta_\text{p}}e^v}dv
+		\intertext{Substitute $v^\prime = 1+\frac{\eta_\text{s}}{\eta_\text{p}}e^v$}
+		&= \frac{\eta_\text{p}2^{j-2}}{\epsilon\lambda^2\partial_xp}\frac{\eta_\text{p}}{\eta_\text{s}}\int\frac{1}{v^\prime}dv^\prime \\
+		&= \frac{\eta_\text{p}2^{j-2}}{\epsilon\lambda^2\partial_xp}\frac{\eta_\text{p}}{\eta_\text{s}}\left(\ln v^\prime + C\right) \\
+		&= \frac{\eta_\text{p}2^{j-2}}{\epsilon\lambda^2\partial_xp}\frac{\eta_\text{p}}{\eta_\text{s}}\left[\ln\left(1+\frac{\eta_\text{s}}{\eta_\text{p}}e^v\right) + C\right]
+		\intertext{Using $l^2:= \frac{r^2}{v^2}$}
+		&= \frac{\eta_\text{p}2^{j-2}}{\epsilon\lambda^2\partial_xp}\frac{\eta_\text{p}}{\eta_\text{s}}\left[\ln\left(1+\frac{\eta_\text{s}}{\eta_\text{p}}e^\frac{r^2}{l^2}\right) + C\right]
+	\end{align}
+	Using $u\left(R\right)\overset{!}{=}0$ and $G = -\partial_xp$ the following is recovered.
+	\begin{equation}
+		u\left(r\right) = \frac{Gl^2}{2^{j+1}\eta_\text{s}}\left[\ln\left(1+\frac{\eta_\text{s}}{\eta_\text{p}}e^\frac{R^2}{l^2}\right)-\ln\left(1+\frac{\eta_\text{s}}{\eta_\text{p}}e^\frac{r^2}{l^2}\right)\right]
+	\end{equation}
+	\section{Parameter studies}
+	\todo{do}
+	\subsection{Viscosity shuffle fraction dependency}\label{app:viscSuffleDependency}
+	We use PTT with the methyl cellulose parameters. In a shear flow with the very small shearrate of $\dot{\gamma} = \SI{1}{\per\second}$, the viscosity shuffle fraction is varied. As can be seen in figure \ref{fig:suffleParameterStudy}, the observed viscosity does not depend on $\alpha_\text{s}$. The simulation gives $\eta = \SI{19.6999988048\pm0.0000000002}{\milli\pascal}$, while theory gives $\eta = \SI{19.699998805}{\milli\pascal}$. Therefore, the simulation is incredibly accurate.\todo{maybe add alphas < 1}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/suffleParameterStudy.eps}
+		\caption{Plot of the simulated viscosity as a dependency of the viscosity shuffle fraction. The axis label does not have enough digits to reflect the precision archived.}
+		\label{fig:suffleParameterStudy}
+	\end{figure}
+	\subsection{Weissenberg number dependency}
+	We use the same setup as in section \ref{app:viscSuffleDependency}, but vary the shear rate instead of $\alpha_\text{s}$, which is equal to unity here. As can be seen in figure \ref{fig:wiParameterStudy}, the agreement is very good. The maximum relative error is \num{2e-11}. The simulation becomes asymptotic. For higher shear, it equilibrates faster. Those data points have significantly smaller errors (\num{7e-16}) suggesting, that the simulation was not fully equilibrated for the smaller shear rates. Also, this suggests, that when the simulation has fully equilibrated the error is smaller than can be captured in a 32-bit float.
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/wiParameterStudy.eps}
+		\caption{Plot of the simulated viscosity as a dependency of the Weissenber number.}
+		\label{fig:wiParameterStudy}
+	\end{figure}
+	\subsection{2D Poiseuille vs theory}\todo{not finished}
+	setup above R = 10µm; shear rate approximation to px\n
+	Worst $G$.
+	\iffalse
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyU0.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:2DParameterStudyU0}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyU1.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:2DParameterStudyU1}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyU2.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:2DParameterStudyU2}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyU3.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:2DParameterStudyU3}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyU4.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:2DParameterStudyU4}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyU5.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:2DParameterStudyU5}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyU6.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:2DParameterStudyU6}
+	\end{figure}
+	\fi
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyU7.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:2DParameterStudyU7}
+	\end{figure}
+	\iffalse
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyU8.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:2DParameterStudyU8}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyU9.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:2DParameterStudyU9}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyU10.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:2DParameterStudyU10}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyU11.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:2DParameterStudyU11}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyU12.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:2DParameterStudyU12}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyU13.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:2DParameterStudyU13}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyU14.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:2DParameterStudyU14}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErr0.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:2DParameterStudyErr0}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErr1.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:2DParameterStudyErr1}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErr2.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:2DParameterStudyErr2}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErr3.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:2DParameterStudyErr3}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErr4.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:2DParameterStudyErr4}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErr5.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:2DParameterStudyErr5}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErr6.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:2DParameterStudyErr6}
+	\end{figure}
+	\fi
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErr7.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:2DParameterStudyErr7}
+	\end{figure}
+	\iffalse
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErr8.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:2DParameterStudyErr8}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErr9.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:2DParameterStudyErr9}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErr10.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:2DParameterStudyErr10}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErr11.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:2DParameterStudyErr11}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErr12.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:2DParameterStudyErr12}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErr13.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:2DParameterStudyErr13}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErr14.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:2DParameterStudyErr14}
+	\end{figure}
+	\fi
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErr.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:2DParameterStudyErr}
+	\end{figure}
+	Interestingly, the last one work besides Ma being approx 10.\n
+	This error is not influenced by shuffling fraction or lattice resolution\n
+	The shape the sim returns can be obtained by the theory by modifying px and or etap\n
+	The resulting error is (approx) centered around Wi of max viscosity gradient.
+	
+	\subsection{3D Poiseuille vs theory}\todo{not finished}
+	Like above but 3D\n
+	Worst $G$.
+	\iffalse
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyU0.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:3DParameterStudyU0}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyU1.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:3DParameterStudyU1}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyU2.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:3DParameterStudyU2}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyU3.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:3DParameterStudyU3}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyU4.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:3DParameterStudyU4}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyU5.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:3DParameterStudyU5}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyU6.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:3DParameterStudyU6}
+	\end{figure}
+	\fi
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyU7.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:3DParameterStudyU7}
+	\end{figure}
+	\iffalse
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyU8.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:3DParameterStudyU8}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyU9.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:3DParameterStudyU9}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyU10.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:3DParameterStudyU10}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyU11.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:3DParameterStudyU11}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyErr0.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:3DParameterStudyErr0}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyErr1.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:3DParameterStudyErr1}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyErr2.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:3DParameterStudyErr2}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyErr3.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:3DParameterStudyErr3}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyErr4.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:3DParameterStudyErr4}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyErr5.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:3DParameterStudyErr5}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyErr6.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:3DParameterStudyErr6}
+	\end{figure}
+	\fi
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyErr7.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:3DParameterStudyErr7}
+	\end{figure}
+	\iffalse
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyErr8.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:3DParameterStudyErr8}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyErr9.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:3DParameterStudyErr9}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyErr10.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:3DParameterStudyErr10}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyErr11.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:3DParameterStudyErr11}
+	\end{figure}
+	\fi
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyErr.eps}
+		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\label{fig:3DParameterStudyErr}
+	\end{figure}
+	Worse due to wall approx.\n
+	Failed for high Ma.
+
+\end{document}
