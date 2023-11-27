@@ -46,8 +46,8 @@ void example(SimulationOptions& options, Parameters& parameters) {
 
 	// Length of simulation box
 	uint Lx = 2;
-	uint Ly = 335;
-	uint Lz = 335;
+	uint Ly = 191;
+	uint Lz = 191;
 
 	/*
 	 * this parameter decreases the viscosity
@@ -62,7 +62,7 @@ void example(SimulationOptions& options, Parameters& parameters) {
 	initInfo(numberSteps);
 
 	const double R_SI = 1.8e-3;
-	const double R = 166.5;
+	const double R = 94.5;
 	const double grid_SI = R_SI/R; // Cell has a radius of 15 Lattice units
 	const double rho_SI = 1e3f;
 

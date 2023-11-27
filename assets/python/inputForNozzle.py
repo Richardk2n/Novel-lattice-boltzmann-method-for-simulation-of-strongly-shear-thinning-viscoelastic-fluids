@@ -43,6 +43,9 @@ def process():
     vField = dataV.get_array("data") * V0
     vField = np.reshape(vField, (Lx, Ly, Lz, 3), "F")
 
+    outFlow = np.sum(vField[..., 0])
+    print(outFlow)
+
     out = open(f"../setups/Nozzle/2/input.tsv", "w")
     for y in range(Ly):
         for z in range(Lz):
@@ -57,7 +60,7 @@ def process():
             yz = cField[Lx // 2, y, z, 4]
             xz = cField[Lx // 2, y, z, 5]
             out.write(
-                f"{1666}\t{y+(335-39)//2}\t{z+(335-39)//2}\t{vx}\t{vy}\t{vz}\t{xx}\t{yy}\t{zz}\t{xy}\t{yz}\t{xz}\n"
+                f"{947-1}\t{y+(191-23)//2}\t{z+(191-23)//2}\t{vx}\t{vy}\t{vz}\t{xx}\t{yy}\t{zz}\t{xy}\t{yz}\t{xz}\n"
             )
 
     baseDir = Path(f"../data/Nozzle/{1}/")
@@ -80,6 +83,12 @@ def process():
     cField = np.reshape(cField, (Lx, Ly, Lz, 6), "F")
     vField = dataV.get_array("data") * V0
     vField = np.reshape(vField, (Lx, Ly, Lz, 3), "F")
+
+    inFlow = np.sum(vField[..., 0])
+    print(inFlow)
+
+    vField *= outFlow / inFlow  # Needed
+    cField *= outFlow / inFlow  # Might be approximately ok
 
     for y in range(Ly):
         for z in range(Lz):

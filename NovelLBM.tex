@@ -275,9 +275,15 @@ sorting=none
 	\end{figure}
 	As can be seen in figure \ref{fig:malaspinas2010}, our results notably do not depend on the Weissenberg Number. While our error decreases with N with a constant power, Malaspinas et al. see diminishing returns. While these results are excellent, the error in our implementation is still dependent on the viscosity ratio. When going to significantly higher ratios, this needs to be checked to ensure it does not get too large.\todo{link to appendix where we validate this}
 	With this, one can see, that we are not only capable to simulate parameters not yet accessible, but our implementation is also better for the parameters used in literature. Knowing our simulations to be good we in the following show results for interesting systems, that are not analytically solvable.
-	\section{Results for non analytically solvable systems}\todo{do all of these with MC}
+	\section{Results for non analytically solvable systems}\todo{do all of these with MC}\todo{Do we want walls?}
 	\subsection{Conical nozzle}
 	\todo{do}
+		\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/Nozzle_v.eps}
+		\caption{Plot of the velocity in a conical nozzle.}
+		\label{fig:Nozzle_v}
+	\end{figure}
 	\subsection{Cell in shear flow}
 	\todo{do}
 	\subsection{RT-DC}
@@ -774,5 +780,6 @@ sorting=none
 	\end{figure}
 	Worse due to wall approx.\n
 	Failed for high Ma.
-
+	\subsection{Viscoelastic Reynolds-Scaling}
+	Does not reproduce transitory behavior\todo{NEEDS TO WORK}
 \end{document}

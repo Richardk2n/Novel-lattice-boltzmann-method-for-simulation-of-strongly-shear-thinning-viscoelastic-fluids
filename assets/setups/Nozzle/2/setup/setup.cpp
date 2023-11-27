@@ -54,9 +54,9 @@ void example(SimulationOptions& options, Parameters& parameters) {
 	//uint Lx = 1847; // 369 * 5 +2
 	//uint Ly = 371; //43-2 = 41; 41*9+2
 	//uint Lz = 371; // 39 * 9 + 2
-	uint Lx = 1667; // 333 * 5 +2
-	uint Ly = 335; //39-2 = 37; 37*9+2
-	uint Lz = 335; // 37 * 9 + 2
+	uint Lx = 947; // 333 * 5 +2
+	uint Ly = 191; //39-2 = 37; 37*9+2
+	uint Lz = 191; // 37 * 9 + 2
 
 	/*
 	 * this parameter decreases the viscosity
@@ -71,7 +71,7 @@ void example(SimulationOptions& options, Parameters& parameters) {
 	initInfo(numberSteps);
 
 	const double R_SI = 1.8e-3;
-	const double R = 166.5;
+	const double R = 94.5;
 	const double grid_SI = R_SI/R; // Cell has a radius of 15 Lattice units
 	const double rho_SI = 1e3f;
 
@@ -144,12 +144,12 @@ void example(SimulationOptions& options, Parameters& parameters) {
 	double localR;
 	// Define geometry
 	for(uint n=0, x=0, y=0, z=0, sx=lattice.size_x(), sy=lattice.size_y(), sz=lattice.size_z(), s=sx*sy*sz; n<s; n++, x=n%(s/sz)%sx, y=n%(s/sz)/sx, z=n/sx/sy) {
-		localR = (18.5-166.5)/(Lx-3)*(x-1) + 166.5;
+		localR = (10.5-94.5)/(Lx-3)*(x-1) + 94.5;
 		if(x == 0) {
-			localR = 166.5;
+			localR = 94.5;
 		}
 		if(x == Lx-1) {
-			localR = 18.5;
+			localR = 10.5;
 		}
 		if(std::hypot(y - (Ly/2.) + 0.5, z - (Lz/2.) + 0.5) >= localR + 0.5) {
 			lattice.flags[n] = TYPE_W;
