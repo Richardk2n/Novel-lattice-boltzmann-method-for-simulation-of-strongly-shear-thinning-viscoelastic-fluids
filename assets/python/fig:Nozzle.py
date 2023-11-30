@@ -44,7 +44,7 @@ def process():
     # print(p0 / L0)
     # print(G)
 
-    # cFile = cDir / "C_500000.vtk"
+    cFile = cDir / "C_500000.vtk"
     # sFile = sDir / "S_500000.vtk"
     vFile = vDir / "u_500000.vtk"
     eta_p_SI = 18.7e-3
@@ -52,12 +52,12 @@ def process():
     epsilon = 0.27
     # print(uHP(0, G, eta_p_SI))
     # print("---")
-    # data = pv.read(cFile)
+    data = pv.read(cFile)
     # dataS = pv.read(sFile)
     dataV = pv.read(vFile)
     Lx, Ly, Lz = dataV.dimensions
-    # tauField = data.get_array("data") * eta_p_SI / lambda_SI
-    # tauField = np.reshape(tauField, (Lx, Ly, Lz, 6), "F")
+    tauField = data.get_array("data") * eta_p_SI / lambda_SI
+    tauField = np.reshape(tauField, (Lx, Ly, Lz, 6), "F")
     # sField = dataS.get_array("data") / T0
     # sField = np.reshape(sField, (Lx, Ly, Lz, 6), "F")
     vField = dataV.get_array("data") * V0
@@ -77,6 +77,33 @@ def process():
         vField = ma.masked_array(vField, mask=mask)
 
     vSlice = vField[..., Lz // 2, 0]
+
+    deviator = [[0] * 3] * 3
+    idx = [[0, 3, 5], [3, 1, 4], [5, 4, 2]]
+
+    vonMieses = np.zeros((Lx, Ly, Lz))
+    for i in range(3):
+        for j in range(3):
+            deviator[i][j] = tauField[..., idx[i][j]] - (
+                np.sum(tauField[..., :3], axis=-1) / 3 if idx[i][j] < 3 else 0  # Assume correct?
+            )
+            # print(np.sum(tauField[..., :3], axis=-1)[-1, Ly // 2 + 10, Lz // 2])
+            # print(np.sum(tauField[..., :3], axis=-1)[-1, Ly // 2 - 10, Lz // 2])
+            # print("##")
+            # print(deviator[i][j][-1, Ly // 2 + 10, Lz // 2])
+            # print(deviator[i][j][-1, Ly // 2 - 10, Lz // 2])
+
+            # print(
+            #    f"{tauField[-1, Ly // 2 + 10, Lz // 2, idx[i][j]]} - {np.sum(tauField[..., :3], axis=-1)[-1, Ly // 2 + 10, Lz // 2]} = {deviator[i][j][-1, Ly // 2 + 10, Lz // 2]}"
+            # )
+            # print(
+            #    f"{tauField[-1, Ly // 2 - 10, Lz // 2, idx[i][j]]} - {np.sum(tauField[..., :3], axis=-1)[-1, Ly // 2 - 10, Lz // 2]} = {deviator[i][j][-1, Ly // 2 - 10, Lz // 2]}"
+            # )
+
+            vonMieses += 3 / 2 * deviator[i][j] * deviator[i][j]
+    vonMieses = np.sqrt(vonMieses)
+    vonMiesesSlice = vonMieses[..., Lz // 2]
+
     # tau12 = tauField[..., Lz // 2, 3]
     # D12 = sField[..., Lz // 2, 3]
     # eta = tau12 / D12 / 2 + 1e-3
@@ -114,6 +141,28 @@ def process():
     # plt.gca().spines["top"].set_visible(False)
     # plt.gca().spines["right"].set_visible(False)
     plt.savefig("../plots/Nozzle_v.eps")
+    plt.show()
+
+    plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
+    # print(tauField[-1, Ly // 2 + 10, Lz // 2])
+    # print(tauField[-1, Ly // 2 - 10, Lz // 2])
+    # print(vonMieses[-1, Ly // 2 + 10, Lz // 2])
+    # print(vonMieses[-1, Ly // 2 - 10, Lz // 2])
+    plt.imshow(
+        vonMiesesSlice.T,
+        cmap="coolwarm",
+        extent=[
+            -0.5 * L0 * 1e3,
+            (Lx - 1 + 0.5) * L0 * 1e3,
+            -0.5 * L0 * 1e3,
+            (Ly - 1 + 0.5) * L0 * 1e3,
+        ],
+        # interpolation="none",
+    )
+    plt.xlabel(r"$x/\unit{\milli\meter}$")
+    plt.ylabel(r"$y/\unit{\milli\meter}$")
+    plt.colorbar(location="top", label=r"$\sigma_\text{vM}/\unit{\pascal}$")
+    plt.savefig(f"../plots/Nozzle_sigma_vM.eps")
     plt.show()
 
     r"""

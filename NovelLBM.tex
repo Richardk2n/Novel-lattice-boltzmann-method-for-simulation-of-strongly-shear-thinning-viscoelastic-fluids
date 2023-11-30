@@ -261,7 +261,7 @@ sorting=none
 	\subsection{3D Poiseuille vs theory}\todo{rename to pipe flow?}
 
 	\subsection{Comparison with literature}
-	Malaspinas et al.\cite{ma2020} provide a detailed validation and claim very high accuracy. Therefore, we pick this as a comparison. We aim at the reproduction of figures 17 and 18 from said paper. We calculate this 2D flow in 3D as the viscoelastic algorithm has not been validated for 2D velocity sets. Otherwise the geometry is identical. It is not entirely clear to us, how they define typical scales. We define the typical velocity as the maximum velocity, as is likely done in the paper. The typical length, we set as half of the channel width. We define the typical shear rate as typical velocity divided by typical length. We set $\eta_\text{s} = \SI{1}{\milli\pascal\second}$ as the paper only gives ratios, and it probably does not matter here. Nevertheless, our lattice units do not line up exactly with those from Malaspinas, as our viscosity is different due to the shuffling.
+	Malaspinas et al.\cite{ma2020} provide a detailed validation and claim very high accuracy. Therefore, we pick this as a comparison. We aim at the reproduction of figures 17 and 18 from said paper. We calculate this 2D flow in 3D as the viscoelastic algorithm has not been validated for 2D velocity sets. Otherwise, the geometry is identical. It is not entirely clear to us, how they define typical scales. We define the typical velocity as the maximum velocity, as is likely done in the paper. The typical length, we set as half of the channel width. We define the typical shear rate as typical velocity divided by typical length. We set $\eta_\text{s} = \SI{1}{\milli\pascal\second}$ as the paper only gives ratios, and it probably does not matter here. Nevertheless, our lattice units do not line up exactly with those from Malaspinas, as our viscosity is different due to the shuffling.
 	%Beware equation 61 in the paper is wrong. It should have an 8 instead of the 4.
 	The parameters from the paper ($R_\nu$, $Wi$ and $N$) are varied as in the paper. The error is calculated as follows.
 	\begin{equation}\label{eq:l2error}
@@ -278,11 +278,17 @@ sorting=none
 	\section{Results for non analytically solvable systems}\todo{do all of these with MC}\todo{Do we want walls?}
 	\subsection{Conical nozzle}
 	\todo{do}
-		\begin{figure}[H]
+	\begin{figure}[H]
 		\centering
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/Nozzle_v.eps}
 		\caption{Plot of the velocity in a conical nozzle.}
 		\label{fig:Nozzle_v}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/Nozzle_sigma_vM.eps}
+		\caption{Plot of the von Mises stress in a conical nozzle.}
+		\label{fig:Nozzle_sigma_vM}
 	\end{figure}
 	\subsection{Cell in shear flow}
 	\todo{do}
