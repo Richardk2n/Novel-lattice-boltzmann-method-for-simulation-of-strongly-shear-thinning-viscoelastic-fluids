@@ -218,7 +218,7 @@ sorting=none
 	
 	While these options lead to wide range of different coupled solvers, the results are similar. Some authors note, that the Weissenberg number could be extremely high using their scheme\cite{malaspinas2010}, the simulations actually presented in the publications usually only go up to $Wi = 10$\cite{malaspinas2010,su2013_2} or $Wi = 100$\cite{gupta2015,ma2020,gupta2016}. As can be seen in figure \ref{fig:ptt_eta_s} above, $Wi \leq 100$ covers most of the range already, and it seems plausible, that current capabilities cover most of not all experiments in this regard.
 	
-	However, another stability criterion, which only some others mention is the viscosity ratio. Its definition in literature varies significantly. We use equation \ref{eq:R_eta_ptt} whenever possible. For some publications we have to estimate it using data extracted from plots and equation \ref{eq:R_eta_CY}. Publications often stay at or below $R_\eta = 1$\cite{gupta2015,onishi2006,wang2020,su2013_2,gupta2015_2}, while the ones trying higher ratios report being limited below $R_\eta = 10$\cite{malaspinas2010,ma2020,kuron2021} due to stability issues. There are several options being explored in the literature to increase stability. The most prominent among them is the inclusion of an artificial diffusivity, which introduces a small error compared to the analytical solution of th constitutive equation. All of these ultimately fail to extend the range of stable viscosity ratios significantly. This means, that for the existing simulation approaches, the zero shear viscosity and the infinite shear viscosity are similar, which is only sufficient for very dilute solutions. The methods currently available do not allow the simulation of the real fluids mentioned before. Therefore, we developed a new method capable of much higher viscosity ratios. This novel approach will be discussed in the following section.
+	However, another stability criterion, which only some others mention is the viscosity ratio. Its definition in literature varies significantly. We use equation \ref{eq:R_eta_ptt} whenever possible. For some publications we have to estimate it using data extracted from plots and equation \ref{eq:R_eta_CY}. The exact details can be found in section \ref{app:viscosityRatio}. Publications often stay at or below $R_\eta = 1$\cite{gupta2015,onishi2006,wang2020,su2013_2,gupta2015_2}, while the ones trying higher ratios report being limited below $R_\eta = 10$\cite{malaspinas2010,ma2020,kuron2021} due to stability issues. There are several options being explored in the literature to increase stability. The most prominent among them is the inclusion of an artificial diffusivity, which introduces a small error compared to the analytical solution of th constitutive equation. All of these ultimately fail to extend the range of stable viscosity ratios significantly. This means, that for the existing simulation approaches, the zero shear viscosity and the infinite shear viscosity are similar, which is only sufficient for very dilute solutions. The methods currently available do not allow the simulation of the real fluids mentioned before. Therefore, we developed a new method capable of much higher viscosity ratios. This novel approach will be discussed in the following section.
 	
 	\section{Numerical method}
 	Our numerical consists of several well known methods and our novel viscosity shuffling. In the following we provide a brief overview about the well known basics and an in depth explanation of our novel method.
@@ -788,4 +788,29 @@ sorting=none
 	Failed for high Ma.
 	\subsection{Viscoelastic Reynolds-Scaling}
 	Does not reproduce transitory behavior\todo{NEEDS TO WORK}
+	\section{Viscosity Ratio in literature}\label{app:viscosityRatio}
+		\begin{center}
+			\begin{tabular}{l|r|r|l}
+				Author & max(Wi) & max($R_\eta$) & $R_\eta$ estimation \\
+				\hline
+				Malaspinas\cite{malaspinas2010} & 10 & 9 & In 4.3: $R_\nu = \num{0.1}$ \& equation (38) \\
+				\rowcolor{secondaryBackground}
+				Gupta\cite{gupta2015} & 100 & 0.7 & In IV.B: $\frac{\eta_\text{p}}{\eta_\text{A} + \eta_\text{p}} = \num{0.4}$ \\
+				Dzanic\cite{dzanic2022} & 10 & 0.5 & In 4.1: $\beta = \frac{\nu_\text{p}}{\nu_\text{s}} = \num{0.5}$ \\
+				\rowcolor{secondaryBackground}
+				Ma\cite{ma2020} & 100 & 9 & In 4.1: $\beta = \frac{\mu_\text{s}}{\mu_\text{s} + \mu_\text{p}} = \num{0.1}$ \\
+				Onishi\cite{onishi2006} & ? & 1 & In 3.1: $\beta = \frac{\mu_\text{p}}{\mu_\text{s} + \mu_\text{p}}$ \& Table 1: $\beta=\num{0.5}$ \\
+				\rowcolor{secondaryBackground}
+				Wang\cite{wang2020} & \glqq up to O(1)\grqq & 5 & In II: $\eta_\text{p} = c\eta_\text{s}$ \& FIG. 9: $c = \num{5}$\\
+				Dzanic\cite{dzanic2022_2} & 10 & 9 & In 5.1: $\beta = \frac{\nu_\text{s}}{\nu_\text{s} + \nu_\text{p}}$ \& In 5.1.2: $\beta = \num{0.1}$ \\
+				\rowcolor{secondaryBackground}
+				Su\cite{su2013_2} & 10 & 1  & In II: $\beta = \frac{\eta_\text{s}}{\eta_\text{s} + \eta_\text{p}}$ \& In IV.A: $\beta = \num{0.5}$ \\
+				Gupta\cite{gupta2015_2} & ? & 0.7 & In 2: $\frac{\eta_\text{p}}{\eta_\text{d}} = \num{0.4}$ \& $\eta_\text{d} = \eta_\text{A} + \eta_\text{p}$ \\
+				\rowcolor{secondaryBackground}
+				Kuron\cite{kuron2021} & 1 & 9 & In 4.1: $\beta = \num{0.9}$ \& equations (14) \& (15) \\
+				Gupta\cite{gupta2016} & 80 & 0.7 & In 3: $\frac{\eta_\text{p}}{\eta_\text{c,d} + \eta_\text{p}} = \num{0.4}$ \\
+				\rowcolor{secondaryBackground}
+				Onishi\cite{onishi2005} & 1000 & 1 & In 3.2: $\frac{\eta_\text{p}}{\eta_\text{s}} = \num{1}$ \\
+			\end{tabular}
+		\end{center}
 \end{document}
