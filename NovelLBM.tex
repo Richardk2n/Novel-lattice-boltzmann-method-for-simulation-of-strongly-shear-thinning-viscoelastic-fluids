@@ -49,10 +49,16 @@ sorting=none
 \DeclareMathOperator{\dif}{d}
 \DeclareMathOperator{\Dif}{D}
 
-\definecolor{background}{RGB}{51,51,51} % Because i can lol
-\definecolor{secondaryBackground}{RGB}{60,60,60} % Because i can lol
-\usepackage[enable=true]{darkmode}
-\pagecolor{background}
+\def\dark{}
+
+\ifdefined\dark
+	\definecolor{background}{RGB}{51,51,51} % Because i can lol
+	\definecolor{secondaryBackground}{RGB}{60,60,60} % Because i can lol
+	\usepackage[enable=true]{darkmode}
+	\pagecolor{background}
+\else
+	\definecolor{secondaryBackground}{RGB}{195,195,195} % Because i can lol
+\fi
 
 \title{Novel lattice Boltzmann method for simulation of strongly shear thinning viscoelastic fluids}
 \author{Richard Kellnberger$^1$}
