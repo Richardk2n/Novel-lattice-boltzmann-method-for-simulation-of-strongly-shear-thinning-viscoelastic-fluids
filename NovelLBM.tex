@@ -161,13 +161,13 @@ sorting=none
 	From this, one can see, that it is not sufficient to fit the viscosity as it could be formulated using two parameters ($\eta_\text{p}$ and $\epsilon\lambda^2$). Therefore, it has to many parameters and the fit has a one dimensional solution space.
 	The same holds for $N_1$ using $\eta_\text{p}\lambda$ and $\epsilon\lambda^2$. Therefore, it is necessary to fit both curves at the same time. This is not a unique feature of PTT, it is also the case for e.g. FENE-P (see appendix \ref{app:FENE-P}). In the following we show the fit results for an Alginate solution, for several concentrations of methyl cellulose solution and for a few other fluids.
 	\subsubsection{Alginate}
-	Alginate solutions are very important as bioinks or as scaffolding in the field of biofabrication. Alginate is also a common food additive. The solutions used here are \SI{4}{\percent} by weight of DuPont VIVAPHARM Alginate PH176 in PBS (essentially water)\todo{cite email from Tomasz Jüngst from 23.03.2023?}. The solution were prepared and measured by the Group of Tomasz Jüngst\todo{cite properly}. The measurements were done using a plate-plate rheometer. The first normal stress difference $N_1$ was calculated from the measured normal force using the following equation\cite{kulicke1977}.\todo{data so far does not include second correction term; needed info: was this plate plate? where is shear rate in PP rheometer? we claim $N_2$ is 0, therefore PP is fine, but we would really prefer CP}\todo{confirm diameter}
+	Alginate solutions are very important as bioinks or as scaffolding in the field of biofabrication. Alginate is also a common food additive. The solutions used here are \SI{4}{\percent} by weight of DuPont VIVAPHARM Alginate PH176 in PBS (essentially water)\todo{cite email from Tomasz Jüngst from 23.03.2023?}. The solution were prepared and measured by the Group of Tomasz Jüngst\todo{cite properly}. The measurements were done using a plate-plate rheometer. The first normal stress difference $N_1$ is calculated from the measured normal force using the following equation\cite{kulicke1977}.\todo{confirm diameter}
 	\begin{equation}
 		N_1 = \frac{2F}{\pi R^2} + \frac{3}{20}\rho\omega^2R^2
 	\end{equation}
-	Where $F$ is the measured normal force, $R$ is the radius of the rheometer, $\rho$ is the density of the fluid and $\omega$ is the angular velocity of the rheometer.
+	Where $F$ is the measured normal force, $R$ is the radius of the rheometer, $\rho$ is the density of the fluid and $\omega$ is the angular velocity of the rheometer. The second term is usually omitted and as we found it to matter little, and as the quality of the data we have available is too limited to warrant such detailed corrections, we also choose to omit it. A cone-rheometer would be preferred here, but as $N_2 = 0$ for PTT with $\xi = 0$, the difference is negligible.
 	
-	The data for viscosity and first normal stress difference was fitted simultaneously for all 21 individual measurements in the dataset. The results can be seen in figures \ref{fig:fit_alginate_eta} and \ref{fig:fit_alginate_N}. The steps that can be seen in the plot of the first normal stress difference are due to the limited resolution of the rheometer used. It can be seen, that the data varies significantly, due to variations on preparation and/or measurement. The fit does not reproduce the shape perfectly but does always stay within the variation of the data. This is sufficient. While setting $\eta_\text{s} = \SI{1}{\milli\pascal\second}$, the parameters obtained are as follows.\todo{subject to change; different than before!!}
+	The data for viscosity and first normal stress difference was fitted simultaneously for all 21 individual measurements in the dataset. The results can be seen in figures \ref{fig:fit_alginate_eta} and \ref{fig:fit_alginate_N}. The steps that can be seen in the plot of the first normal stress difference are due to the limited resolution of the rheometer used. It can be seen, that the data varies significantly, due to variations on preparation and/or measurement. The fit does not reproduce the shape perfectly but does always stay within the variation of the data. This is sufficient. While setting $\eta_\text{s} = \SI{1}{\milli\pascal\second}$, the parameters obtained are as follows.
 	\begin{align}
 		\eta_\text{p} &= \SI{48.2\pm0.4}{\pascal\second}\\
 		\lambda &= \SI{0.343 \pm 0.004}{\second}\\
@@ -213,8 +213,20 @@ sorting=none
 		\label{fig:fit_mc_N}
 	\end{figure}
 	\subsubsection{Other fluids}
-	\todo{mostly mention $R_\eta$ for different fluids}
-	\todo{do}
+	While the fluids mentioned above are of great importance, they are by no means the only ones used in such experiments. From these two examples alone, it can be seen, that the parameters of magnitude. As the viscosity can change be several orders of magnitude before the change in behavior of the fluid becomes noticeable to human perceptions, the fluids commonly referred to as shear thinning have a large viscosity ratio. In the following values from a few publications are listed to establish the typical values for the ratio. It is common (due to experimental limitations), that the shear rate is limited in the experiments in a way, that does not allow seeing both Newtonian plateaus. In these cases we provide an upper or lower bound.
+	\begin{center}
+		\begin{tabular}{l|p{3cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}|p{2cm}}
+			Author & Material & $\eta_0/\unit{\pascal\second}$ & $\eta_\infty/\unit{\pascal\second}$ & $R_\eta$ & extracted from \\
+			\hline
+			Amorim\cite{amorim2021} & pre-crosslinked alginate &  >1e4 & <3e-1 & >3e4 & Fig. 3b \\
+			\rowcolor{secondaryBackground}
+			Pössl\cite{possl2021} & blend & 3e2 & 1e-4 & 3e6 & Table 4 \\
+			Paxton\cite{paxton2017} &Nivea Creme\n Alginate& 1e5\n5e4 & <1\n<5e1 & >1e5\n>1e3 & Fig. 4b \\
+			\rowcolor{secondaryBackground}
+			O'Connell\cite{oconnell2020} & pluronic F-127 & >1e6 & <8 & > 2e5 & Chapter 7 Fig. 13 \\
+		\end{tabular}
+	\end{center}
+	Many of these fractions are likely much larger than listed here. This is only a lower bound. There are many slightly shear thinning fluids, where this fraction is a lot smaller and it also decreases with concentration. However, such large values in the tens of thousands are typical for bio-inks and fluids used in adjacent fields. This is by design, as a very high zero shear viscosity is desirable to stabilize the construct after printing.
 	With the usual range of the parameters and $R_\eta$ established, we provide a quick overview about the current literature and capabilities in the following section.
 	
 	\section{Existing LBM methods}
@@ -256,13 +268,11 @@ sorting=none
 	\end{equation}
 	The index $j$ gives the solution for the channel for $j=0$ and the pipe for $j=1$.
 	
-	We need this solution to compare to literature. However, this solution does not include $\eta_\text{s}$, which is required in general. With the inclusion of the solvent viscosity (for details see appendix \ref{app:PTT}), the solution reads as follows.\todo{also wrong}
-	\begin{equation}
-		u\left(r\right) = \frac{Gl^2}{2^{j+1}\eta_\text{s}}\left[\ln\left(1+\frac{\eta_\text{s}}{\eta_\text{p}}e^\frac{R^2}{l^2}\right)-\ln\left(1+\frac{\eta_\text{s}}{\eta_\text{p}}e^\frac{r^2}{l^2}\right)\right]
-	\end{equation}
+	We need this solution to compare to literature. However, this solution does not include $\eta_\text{s}$, which is required in general. With the inclusion of the solvent viscosity an analytical solution can no longer be found and the use of a semi-analytic solution is required (for details see appendix \ref{app:PTT}).
 	In the following we compare results for channel and pipe flow to these equations for realistic parameters. Afterward we compare the accuracy of our simulation algorithm against literature.
 	%We use richard/master fe0fc04115b9b6ea6628bcc6cb6593d3f72ac0ea (2023-11-05)
 	\subsection{2D Poiseuille vs theory}\todo{rename to channel flow?}\todo{include cylindrical nozzle from conical nozzle sim}
+	10 µm
 	
 	\subsection{3D Poiseuille vs theory}\todo{rename to pipe flow?}
 
@@ -379,40 +389,28 @@ sorting=none
 
 	\section{FENE-P}\label{app:FENE-P}
 	\todo{stability issue, fitting parameter, see fenep repo}
-	\section{Analytical solution for PTT}\label{app:PTT}\todo{This is wrong (to the best of my knoledge) not analytically solveable -> semi analytic solution}
+	\section{Analytical solution for PTT}\label{app:PTT}
 	Our derivation is analogous to Oliveira\cite{oliveira1999}. To account for the added viscous stress due to $\eta_\text{s}$, equilibrium is reached at lower polymer stresses. Therefore, Oliveiras equation (7) needs to be modified as follows.
 	\begin{equation}
 		\tau_{xy} = \partial_xp\frac{r}{2^j} - \eta_\text{s}\dot{\gamma}
 	\end{equation}
 	Where the second term is added due to the presence of the solvent viscosity. This term also propagates to Oliveiras equation (9) as follows.
 	\begin{align}
-		\dot{\gamma} &= f\left(\frac{2\lambda}{\eta_\text{p}}\left[\partial_xp\right]^2\frac{r^2}{2^{2j}}\right)\frac{1}{\eta_\text{p}}\left(\partial_xp\frac{r}{2^j}-\eta_\text{s}\dot{\gamma}\right)
-		\intertext{This cannot be integrated as easily as without $\eta_\text{s}$, but is still solvable.}
-		\dot{\gamma}\left\{1+\frac{\eta_\text{s}}{\eta_\text{p}}f\left(\frac{2\lambda}{\eta_\text{p}}\left[\partial_xp\right]^2\frac{r^2}{2^{2j}}\right)\right\} &= f\left(\frac{2\lambda}{\eta_\text{p}}\left[\partial_xp\right]^2\frac{r^2}{2^{2j}}\right)\partial_xp\frac{r}{\eta_\text{p}2^j} \\
-		\dot{\gamma} &= \frac{f\left(...\right)}{1+\frac{\eta_\text{s}}{\eta_\text{p}}f\left(...\right)}\partial_xp\frac{r}{\eta_\text{p}2^j}
+		\dot{\gamma} &= f\left(\frac{2\lambda}{\eta_\text{p}}\left[\partial_xp\frac{r}{2^j} - \eta_\text{s}\dot{\gamma}\right]^2\right)\frac{1}{\eta_\text{p}}\left(\partial_xp\frac{r}{2^j}-\eta_\text{s}\dot{\gamma}\right)
+		\intertext{This cannot be integrated as easily as without $\eta_\text{s}$, and is only solvable semi-analytically.}
+		1 &= f\left(\frac{2\lambda}{\eta_\text{p}}\left[\partial_xp\frac{r}{2^j} - \eta_\text{s}\dot{\gamma}\right]^2\right)\frac{1}{\eta_\text{p}}\left(\partial_xp\frac{r}{2^j\dot{\gamma}}-\eta_\text{s}\right)
 	\end{align}
-	For the exponential version of PTT the following $f$ is defined as follows.
+	For the exponential version of PTT $f$ is defined as follows.
 	\begin{equation}
 		f\left(\Tr\ma{\tau}\right) = \exp\left(\frac{\epsilon\lambda}{\eta_\text{p}}\Tr\ma{\tau}\right)
 	\end{equation}
-	The equation can be solved by integration as $\dot{\gamma} = \partial_ru$. We start with the following substitution.
-	\begin{equation}
-		v = \frac{\epsilon\lambda^2}{\eta_\text{p}^2}\left(\partial_xp\right)^2\frac{r^2}{2^{2j-1}}
-	\end{equation}
-	With this $u$ is as follows.
+	This can be inserted in the above equation.
 	\begin{align}
-		u\left(r\right) &= \frac{\eta_\text{p}2^{j-2}}{\epsilon\lambda^2\partial_xp}\int\frac{e^v}{1+\frac{\eta_\text{s}}{\eta_\text{p}}e^v}dv
-		\intertext{Substitute $v^\prime = 1+\frac{\eta_\text{s}}{\eta_\text{p}}e^v$}
-		&= \frac{\eta_\text{p}2^{j-2}}{\epsilon\lambda^2\partial_xp}\frac{\eta_\text{p}}{\eta_\text{s}}\int\frac{1}{v^\prime}dv^\prime \\
-		&= \frac{\eta_\text{p}2^{j-2}}{\epsilon\lambda^2\partial_xp}\frac{\eta_\text{p}}{\eta_\text{s}}\left(\ln v^\prime + C\right) \\
-		&= \frac{\eta_\text{p}2^{j-2}}{\epsilon\lambda^2\partial_xp}\frac{\eta_\text{p}}{\eta_\text{s}}\left[\ln\left(1+\frac{\eta_\text{s}}{\eta_\text{p}}e^v\right) + C\right]
-		\intertext{Using $l^2:= \frac{r^2}{v^2}$}
-		&= \frac{\eta_\text{p}2^{j-2}}{\epsilon\lambda^2\partial_xp}\frac{\eta_\text{p}}{\eta_\text{s}}\left[\ln\left(1+\frac{\eta_\text{s}}{\eta_\text{p}}e^\frac{r^2}{l^2}\right) + C\right]
+		1 &= \exp\left(\frac{2\epsilon\lambda^2}{\eta_\text{p}^2}\left[\partial_xp\frac{r}{2^j} - \eta_\text{s}\dot{\gamma}\right]^2\right)\frac{1}{\eta_\text{p}}\left(\partial_xp\frac{r}{2^j\dot{\gamma}}-\eta_\text{s}\right) \\
+		0 &= \frac{2\epsilon\lambda^2}{\eta_\text{p}^2}\left[\partial_xp\frac{r}{2^j} - \eta_\text{s}\dot{\gamma}\right]^2 - \ln\eta_\text{p} + \ln\left(\partial_xp\frac{r}{2^j\dot{\gamma}}-\eta_\text{s}\right)
 	\end{align}
-	Using $u\left(R\right)\overset{!}{=}0$ and $G = -\partial_xp$ the following is recovered.
-	\begin{equation}
-		u\left(r\right) = \frac{Gl^2}{2^{j+1}\eta_\text{s}}\left[\ln\left(1+\frac{\eta_\text{s}}{\eta_\text{p}}e^\frac{R^2}{l^2}\right)-\ln\left(1+\frac{\eta_\text{s}}{\eta_\text{p}}e^\frac{r^2}{l^2}\right)\right]
-	\end{equation}
+	With this, $\dot{\gamma}$ can be found for each $r$ numerically. With $\dot{\gamma} = \partial_ru$, the result can be numerically integrated to find the velocity profile. To do this, the radial distance needs to be discretized. We split it into \num{1e5} steps and interpolate between them as needed.
+
 	\section{Parameter studies}
 	\todo{do}
 	\subsection{Viscosity shuffle fraction dependency}\label{app:viscSuffleDependency}
