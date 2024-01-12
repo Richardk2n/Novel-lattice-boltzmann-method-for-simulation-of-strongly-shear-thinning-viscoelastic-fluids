@@ -407,9 +407,23 @@ sorting=none
 	This can be inserted in the above equation.
 	\begin{align}
 		1 &= \exp\left(\frac{2\epsilon\lambda^2}{\eta_\text{p}^2}\left[\partial_xp\frac{r}{2^j} - \eta_\text{s}\dot{\gamma}\right]^2\right)\frac{1}{\eta_\text{p}}\left(\partial_xp\frac{r}{2^j\dot{\gamma}}-\eta_\text{s}\right) \\
-		0 &= \frac{2\epsilon\lambda^2}{\eta_\text{p}^2}\left[\partial_xp\frac{r}{2^j} - \eta_\text{s}\dot{\gamma}\right]^2 - \ln\eta_\text{p} + \ln\left(\partial_xp\frac{r}{2^j\dot{\gamma}}-\eta_\text{s}\right)
+		0 &= \frac{2\epsilon\lambda^2}{\eta_\text{p}^2}\left[\partial_xp\frac{r}{2^j} - \eta_\text{s}\dot{\gamma}\right]^2 - \ln\eta_\text{p} + \ln\left(\partial_xp\frac{r}{2^j\dot{\gamma}}-\eta_\text{s}\right) \\
+		0 &= 2\epsilon\lambda^2\dot{\gamma}^2\left[\partial_xp\frac{r}{2^j\dot{\gamma}\eta_\text{p}} - \frac{\eta_\text{s}}{\eta_\text{p}}\right]^2 + \ln\left(\partial_xp\frac{r}{2^j\dot{\gamma}\eta_\text{p}}-\frac{\eta_\text{s}}{\eta_\text{p}}\right) \\
+		0 &= 2\epsilon\lambda^2\dot{\gamma}^2\left[\partial_xp\frac{r}{2^j\dot{\gamma}\eta_\text{p}} - \frac{\eta_\text{s}}{\eta_\text{p}}\right]^2 + \ln\left(\partial_xp\frac{r}{2^j\dot{\gamma}\eta_\text{p}}-\frac{\eta_\text{s}}{\eta_\text{p}}\right)
+		\intertext{This has the following form}
+		0 &= ab^2 + \ln b
 	\end{align}
-	With this, $\dot{\gamma}$ can be found for each $r$ numerically. With $\dot{\gamma} = \partial_ru$, the result can be numerically integrated to find the velocity profile. To do this, the radial distance needs to be discretized. We split it into \num{1e5} steps and interpolate between them as needed.
+	This can be solved using the Lambert W function as follows.
+	\begin{align}
+		b &= -\sqrt{\frac{W_0\left(2a\right)}{2a}}
+		\intertext{Resolving for $r$ yields the following.}
+		r &=  \frac{2^j\eta_\text{s}}{\partial_xp}\dot{\gamma} - \frac{\eta_\text{p}2^{j-1}}{\lambda\sqrt{\epsilon}\partial_xp}\sqrt{W_0\left(4\epsilon\lambda^2\dot{\gamma}^2\right)}
+	\end{align}
+	We notice, that this is the solution for a poiseuille flow with viscosity $\eta_\text{s}$ expanded by a term that applies a nonuniform scaling of the profile  along the $r$-axis towards higher radii. We simplify again using $c < 0$ and $d > 0$.
+	\begin{equation}
+		r = c\dot{\gamma} - R_\eta\frac{c}{d}\sqrt{W_0\left(d^2\dot{\gamma}^2\right)}
+	\end{equation}
+	Finally this function needs to be inverted. This needs to be done numerically. We calculate a range of $\dot{\gamma}$ from $0$ to $\frac{R}{c}$ with a small step interval. Here $R$ is the radius of the channel or pipe. This is guaranteed to contain all relevant radii. We flip the axis and integrate numerically using scipy.integrate.cumulative\_trapezoid\todo{cite}. This is very accurate as we conveniently picked the spacing of our now $x$-axis in a way, that the $y$-axis ($\dot{\gamma}$) varies little for each step. From the recovered curve $u$ is calculated at each required $r$ through linear interpolation.
 
 	\section{Parameter studies}
 	\todo{do}
