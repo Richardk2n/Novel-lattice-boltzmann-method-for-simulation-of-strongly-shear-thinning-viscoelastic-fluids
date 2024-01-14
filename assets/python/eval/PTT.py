@@ -10,6 +10,9 @@ Created on Fri Jan 12 19:03:29 2024
 import numpy as np
 from scipy.special import lambertw
 from scipy.integrate import cumulative_trapezoid, trapezoid
+import matplotlib.pyplot as plt
+from style import cm
+from style import *
 
 
 channel = 0
@@ -23,6 +26,8 @@ class PTT:
         self.epsilon = epsilon
         self.eta_s = eta_s
         self.xi = xi
+        if xi != 0:
+            print("xi != 0 is not implemented!")
 
     def prepareVelocityProfile(self, R, G, j):
         c = 2**j * self.eta_s / (-G)
@@ -54,11 +59,11 @@ class PTT:
                 if rguessesFine[idx] > r:
                     idx -= 1
                 elif rguessesFine[idx] == r:
-                    return guessesFine[idx] - offset
+                    return guessesFine[idx]
                 m = (guessesFine[idx + 1] - guessesFine[idx]) / (
                     rguessesFine[idx + 1] - rguessesFine[idx]
                 )
-                return guessesFine[idx] + m * (r - rguessesFine[idx]) - offset
+                return guessesFine[idx] + m * (r - rguessesFine[idx])
 
             def interpolLoop(r):  # Slow Python loop
                 out = []
@@ -150,12 +155,70 @@ class PTT:
             )
         )
 
+    def eta(self, gd):
+        return (
+            self.eta_p / np.exp(0.5 * lambertw(4 * self.epsilon * (gd * self.lambda_p) ** 2).real)
+            + self.eta_s
+        )
+
+    def N_1(self, gd):
+        return (
+            self.eta_p
+            / (2 * self.epsilon * self.lambda_p)
+            * lambertw(4 * self.epsilon * (self.lambda_p * gd) ** 2).real
+        )
+
+    def plot(self, r):
+        u = self.u(r)
+
+        plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
+        plt.plot(r * 1e6, u, label=r"$v_x$")
+        plt.xlabel(r"$r/\unit{\micro\meter}$")
+        plt.ylabel(r"$v_x/\unit{\meter\per\second}$")
+        plt.legend()
+        plt.show()
+
+        gd = self.gd(r)
+
+        plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
+        plt.plot(r * 1e6, gd, label=r"$\dot{\gamma}$")
+        plt.xlabel(r"$r/\unit{\micro\meter}$")
+        plt.ylabel(r"$\dot{\gamma}/\unit{\per\second}$")
+        plt.legend()
+        plt.show()
+
+        eta = self.eta(gd)
+        plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
+        plt.plot(r * 1e6, eta, label=r"$\eta$")
+        plt.xlabel(r"$r/\unit{\micro\meter}$")
+        plt.ylabel(r"$\eta/\unit{\pascal\second}$")
+        plt.legend()
+        plt.show()
+
+        plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
+        plt.plot(r * 1e6, self.N_1(gd), label=r"$N_1$")
+        plt.xlabel(r"$r/\unit{\micro\meter}$")
+        plt.ylabel(r"$N_1/\unit{\pascal}$")
+        plt.legend()
+        plt.show()
+
+        rho = 1e3
+        Re = rho * u * np.max(r) / eta
+
+        plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
+        plt.plot(r * 1e6, Re, label=r"$Re$")
+        plt.xlabel(r"$r/\unit{\micro\meter}$")
+        plt.ylabel(r"$Re$")
+        plt.legend()
+        plt.show()
+
 
 alginate = PTT(48.2, 0.343, 0.545, 1e-3)
 
 R = 10e-6
 G = 1e8  # Looks nice
-# G = 4e6  # Similar to steffen
+G = 4e6  # Similar to steffen
+G = 1e7  # Used in sim
 alginate.prepareVelocityProfile(R, G, channel)  # Q is per thickness for 2D case
 print(alginate.Q)
 
@@ -164,13 +227,23 @@ l = 1e1**3  # convert to liter
 h = 1 / 3600  # convert to per hour
 print(alginate.Q * µ * l / h)
 
-r = np.arange(0, R, R * 1e-3)
-import matplotlib.pyplot as plt
-from time import time
+r = np.arange(0, R * (1 + 1e-3), R * 1e-3)
+print(r)
+alginate.plot(r)
 
-t1 = time()
-u = np.asarray(alginate.u(r))
-# print(time() - t1)
-plt.plot(r, u)
-plt.plot(r, -alginate.gd(r) * 1e-6)
+step = R / 20.5
+points = np.arange(21)
+print(points * step)
+
+gd = alginate.gd(points * step)
+N_1 = alginate.N_1(gd)
+vs = alginate.eta(gd) * gd
+
+plt.plot(points * step, N_1)
+plt.plot(points * step, vs)
 plt.show()
+
+f = open("preset.csv", "w")
+for i in points:
+    f.write(f"{i};{N_1[i]};{vs[i]}\n")  # TODO remove solvent stress
+f.close()
