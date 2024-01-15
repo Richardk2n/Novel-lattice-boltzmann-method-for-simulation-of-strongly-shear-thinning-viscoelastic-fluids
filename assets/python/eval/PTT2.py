@@ -217,8 +217,8 @@ alginate = PTT(48.2, 0.343, 0.545, 1e-3)
 R = 10e-6
 G = 1e8  # Looks nice
 G = 4e6  # Similar to steffen
-G = 1e7  # Used in sim
-alginate.prepareVelocityProfile(R, G, channel)  # Q is per thickness for 2D case
+G = 2e7  # Used in sim
+alginate.prepareVelocityProfile(R, G, pipe)  # Q is per thickness for 2D case
 print(alginate.Q)
 
 µ = 1e6  # convert to µ
@@ -234,15 +234,25 @@ step = R / 20.5
 points = np.arange(21)
 print(points * step)
 
-gd = alginate.gd(points * step)
+radii = []
+for y in points:
+    for z in points:
+        if np.sqrt(y**2 + z**2) < 20.5:
+            radii.append(np.sqrt(y**2 + z**2) * step)
+
+gd = alginate.gd(np.asarray(radii))
 N_1 = alginate.N_1(gd)
 vs = alginate.eta(gd) * gd
 
-plt.plot(points * step, N_1)
-plt.plot(points * step, vs)
+plt.plot(radii, N_1)
+plt.plot(radii, vs)
 plt.show()
 
-f = open("preset.csv", "w")
-for i in points:
-    f.write(f"{i};{N_1[i]:.20f};{vs[i]-1e-3*gd[i]:.20f}\n")
+f = open("preset3D.csv", "w")
+i = 0
+for y in points:
+    for z in points:
+        if np.sqrt(y**2 + z**2) < 20.5:
+            f.write(f"{y};{z};{N_1[i]:.20f};{vs[i]-1e-3*gd[i]:.20f}\n")
+            i += 1
 f.close()

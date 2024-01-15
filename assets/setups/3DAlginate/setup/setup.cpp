@@ -9,6 +9,8 @@
 using std::filesystem::path;
 #include <fstream>
 using std::ofstream;
+#include <numbers>
+using std::numbers::pi;
 
 #include <fmt/core.h>
 // using fmt::format
@@ -32,7 +34,7 @@ void example(SimulationOptions& options, Parameters& parameters) {
 	json raw = parameters.getRaw();
 	const int id = raw.at("id");
 	//const string path_files = "/tp6-gekle/nas/bt307867/cellsim/novel_2023-10-24/" + std::to_string(id) + "/";
-	const string path_files = fmt::format("/tp6-gekle/nas/bt307867/cellsim/novel_2024-01-15/{}/", id); // id = 0
+	const string path_files = fmt::format("/tp6-gekle/nas/bt307867/cellsim/novel_2024-01-15/{}/", id); // id = 1
 	const path filesPath(path_files);
 	const string path_vtk = path_files + "vtkfiles/";
 	const string path_vtk_velocity = path_vtk + "velocity/";
@@ -51,7 +53,7 @@ void example(SimulationOptions& options, Parameters& parameters) {
 	// Length of simulation box
 	uint Lx = 2;
 	uint Ly = 43;
-	uint Lz = 2;
+	uint Lz = 43;
 
 	/*
 	 * this parameter decreases the viscosity
@@ -140,30 +142,49 @@ void example(SimulationOptions& options, Parameters& parameters) {
 	info["conversions"] = {{"L0", L0}, {"T0", T0}, {"V0", V0}};
 	info["px"] = px;
 
-	vector<double> ys;
+	vector<int> ys;
+	vector<int> zs;
 	vector<double> Ns;
 	vector<double> VSs;
 
-	string lines = IO::readFile("preset.csv");
+	string lines = IO::readFile("preset3D.csv");
 	for(string line : split(lines, "\n")) {
 		if (line == "") {
 			continue;
 		}
 		auto parts = split(line, ";");
-		ys.push_back(stod(parts[0]));
-		Ns.push_back(stod(parts[1]));
-		VSs.push_back(stod(parts[2]));
+		ys.push_back(stoi(parts[0]));
+		zs.push_back(stoi(parts[1]));
+		Ns.push_back(stod(parts[2]));
+		VSs.push_back(stod(parts[3]));
 	}
 
 	// Define geometry
 	for(uint n=0, x=0, y=0, z=0, sx=lattice.size_x(), sy=lattice.size_y(), sz=lattice.size_z(), s=sx*sy*sz; n<s; n++, x=n%(s/sz)%sx, y=n%(s/sz)/sx, z=n/sx/sy) {
-		if(y == 0 || y == Ly-1){
+		int ry = y - (Ly-1)/2;
+		int rz = z - (Lz-1)/2;
+		double r = std::hypot(ry, rz);
+		if(r >= (Ly-2)/2.){
 			lattice.flags[n] = TYPE_W;
 		}else{
-			lattice.flags[n] = TYPE_F; //TODO should be globally set  //TODO does not seem to be an issue??? Or is this messing with my sims?
-			int r = y - (Ly-1)/2;
-			lattice.polymerConformationTensor[n] = Ns[abs(r)]/(eta_polymer_SI/lambda_polymer_SI);
-			lattice.polymerConformationTensor[3*s+n] = (r < 0? -1 : 1)*VSs[abs(r)]/(eta_polymer_SI/lambda_polymer_SI);
+			lattice.flags[n] = TYPE_F; //TODO should be globally set
+			for(int i = 0; i < ys.size(); i++) { // Yes, this is terrible
+				if(std::abs(ry) == ys[i] && std::abs(rz) == zs[i]) {
+					double xy = 0, xz = 0;
+					if(ry == 0){
+						xz = (rz >= 0? 1: -1)*VSs[i]/(eta_polymer_SI/lambda_polymer_SI);
+					} else if(rz == 0) {
+						xy = (ry >= 0? 1: -1)*VSs[i]/(eta_polymer_SI/lambda_polymer_SI);
+					} else {
+						double angle = std::atan(rz/(double)ry);
+						xy = (ry>=0?1:-1)*std::cos(angle)*VSs[i]/(eta_polymer_SI/lambda_polymer_SI);
+						xz = (ry>=0?1:-1)*std::sin(angle)*VSs[i]/(eta_polymer_SI/lambda_polymer_SI);
+					}
+					lattice.polymerConformationTensor[n] = Ns[i]/(eta_polymer_SI/lambda_polymer_SI);
+					lattice.polymerConformationTensor[3*s+n] = xy;
+					lattice.polymerConformationTensor[5*s+n] = xz;
+				}
+			}
 		}
 	}
 	lattice.polymerConformationTensor.write_to_gpu(1);
