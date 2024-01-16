@@ -272,12 +272,23 @@ sorting=none
 	In the following we compare results for channel and pipe flow to these equations for realistic parameters. Afterward we compare the accuracy of our simulation algorithm against literature.
 	%We use richard/vtk 4dbc4d379842c538f084e68a5dcfe2555a674495 (2024-01-09)
 	\subsection{Channel flow vs theory}
-	Channel flow (also known as 2D Poiseuille) is one of the simplest flows and a very typical example. We pick a channel with a radius of \SI{10}{\micro\meter}, meaning the total width is \SI{20}{\micro\meter}. This is done with the parameters obtained for the alginate based solution, as these represent the worst case scenario with respect to simulability among the fluids we work with. While our scheme is capable of simulating flows of to our knowledge arbitrary parameters, it increases runtime. For this parameter set the simulation time on our hardware becomes unreasonable. Therefore, for the simulations with the alginate based solutions we, contrary to all our other simulations, do not start from $0$ in all fields. We initialize the polymers in an extended state. This reduces the initial overshoot in the velocity by orders of magnitude allowing for larger time steps. Furthermore, the time to equilibrium of the polymer stretch is shortened considerably. This initialization leads to the simulation not accurately reproducing the time dependent behavior during startup, but leaves the steady state valid. The cross-section of the resulting flow field can be seen in figure \todo{figure}.
-	
-	\todo{describe figure and error}
+	Channel flow (also known as 2D Poiseuille) is one of the simplest flows and a very typical example. We pick a channel with a radius of \SI{10}{\micro\meter}, meaning the total width is \SI{20}{\micro\meter}. We pick periodic boundary conditions and drive the flow with a pressure gradient of \SI{-1e7}{\pascal\per\meter}. This simulation was done using the parameters obtained for the alginate based solution, as these represent the worst case scenario with respect to simulability among the fluids we work with. While our scheme is capable of simulating flows of to our knowledge arbitrary parameters, it increases runtime. For this parameter set the simulation time on our hardware becomes unreasonable. Therefore, for the simulations with the alginate based solutions we, contrary to all our other simulations, do not start from $0$ in all fields. We initialize the polymers in an extended state. This reduces the initial overshoot in the velocity by orders of magnitude allowing for larger time steps. Furthermore, the time to equilibrium of the polymer stretch is shortened considerably. This initialization leads to the simulation not accurately reproducing the time dependent behavior during startup, but leaves the steady state valid. The cross-section of the resulting flow field can be seen in figure \ref{fig:2DAlginateU}. Due to the long runtime, we stopped the simulation, early compared to the others. This means, that the simulation had not yet reached full equilibrium. Consequently, the error obtained here (see figure \ref{fig:2DAlginateErr}) is likely higher than what it would be after full relaxation. The average error as obtained by a typical L2 norm is \num{9e-4}.
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DAlginateU.eps}
+		\caption{Plot of the cross-section of the velocity of an alginate channel flow. Likely not fully in equilibrium.}
+		\label{fig:2DAlginateU}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DAlginateErr.eps}
+		\caption{Plot of error of the cross-section of the velocity of an alginate channel flow. Likely not fully in equilibrium.}
+		\label{fig:2DAlginateErr}
+	\end{figure}
+	The relative error is highest near the wall as the velocity is lowest there, but also because the simple half way bounce back boundaries used here allow some slip along the wall. The same simulation is done for the 3D case in the following.
 	
 	\subsection{Pipe flow vs theory}
-	For the 2D case above, the walls are smooth. For the 3D case the round pipe has to be approximated leading to a staircase pattern that is not accurate. The error introduced by this depends on the lattice resolution. We use a diameter of 41 lattice points here. We use the same parameter set as above and also initialize the polymers in a stressed state. The resulting cross-section can be seen in figure \todo{figure}.
+	For the 2D case above, the walls are smooth. For the 3D case the round pipe has to be approximated leading to a staircase pattern that is not accurate. The error introduced by this depends on the lattice resolution. We use a diameter of 41 lattice points here. We use the same parameter set as above, aside from doubling the pressure gradient and also initialize the polymers in a stressed state. The resulting cross-section can be seen in figure \todo{figure}.
 	
 	\todo{describe figure and error}
 	
