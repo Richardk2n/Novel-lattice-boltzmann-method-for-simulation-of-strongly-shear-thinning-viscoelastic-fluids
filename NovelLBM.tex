@@ -270,12 +270,20 @@ sorting=none
 	
 	We need this solution to compare to literature. However, this solution does not include $\eta_\text{s}$, which is required in general. With the inclusion of the solvent viscosity an analytical solution can no longer be found and the use of a semi-analytic solution is required (for details see appendix \ref{app:PTT}).
 	In the following we compare results for channel and pipe flow to these equations for realistic parameters. Afterward we compare the accuracy of our simulation algorithm against literature.
-	%We use richard/master fe0fc04115b9b6ea6628bcc6cb6593d3f72ac0ea (2023-11-05)
-	\subsection{2D Poiseuille vs theory}\todo{rename to channel flow?}\todo{include cylindrical nozzle from conical nozzle sim}
-	10 µm
+	%We use richard/vtk 4dbc4d379842c538f084e68a5dcfe2555a674495 (2024-01-09)
+	\subsection{Channel flow vs theory}
+	Channel flow (also known as 2D Poiseuille) is one of the simplest flows and a very typical example. We pick a channel with a radius of \SI{10}{\micro\meter}, meaning the total width is \SI{20}{\micro\meter}. This is done with the parameters obtained for the alginate based solution, as these represent the worst case scenario with respect to simulability among the fluids we work with. While our scheme is capable of simulating flows of to our knowledge arbitrary parameters, it increases runtime. For this parameter set the simulation time on our hardware becomes unreasonable. Therefore, for the simulations with the alginate based solutions we, contrary to all our other simulations, do not start from $0$ in all fields. We initialize the polymers in an extended state. This reduces the initial overshoot in the velocity by orders of magnitude allowing for larger time steps. Furthermore, the time to equilibrium of the polymer stretch is shortened considerably. This initialization leads to the simulation not accurately reproducing the time dependent behavior during startup, but leaves the steady state valid. The cross-section of the resulting flow field can be seen in figure \todo{figure}.
 	
-	\subsection{3D Poiseuille vs theory}\todo{rename to pipe flow?}
+	\todo{describe figure and error}
+	
+	\subsection{Pipe flow vs theory}
+	For the 2D case above, the walls are smooth. For the 3D case the round pipe has to be approximated leading to a staircase pattern that is not accurate. The error introduced by this depends on the lattice resolution. We use a diameter of 41 lattice points here. We use the same parameter set as above and also initialize the polymers in a stressed state. The resulting cross-section can be seen in figure \todo{figure}.
+	
+	\todo{describe figure and error}
+	
+	As can easily be seen in comparison to the 2D case, the approximation of the walls carries considerable error. Still the error is acceptable, particularly for this moderate lattice resolution. Further validation of our implementation (using the faster-to-simulate methyl cellulose parameters and initialization at $0$) ca be found in appendix \ref{app:validation}.
 
+	%We use richard/master fe0fc04115b9b6ea6628bcc6cb6593d3f72ac0ea (2023-11-05)
 	\subsection{Comparison with literature}
 	Malaspinas et al.\cite{ma2020} provide a detailed validation and claim very high accuracy. Therefore, we pick this as a comparison. We aim at the reproduction of figures 17 and 18 from said paper. We calculate this 2D flow in 3D as the viscoelastic algorithm has not been validated for 2D velocity sets. Otherwise, the geometry is identical. It is not entirely clear to us, how they define typical scales. We define the typical velocity as the maximum velocity, as is likely done in the paper. The typical length, we set as half of the channel width. We define the typical shear rate as typical velocity divided by typical length. We set $\eta_\text{s} = \SI{1}{\milli\pascal\second}$ as the paper only gives ratios, and it probably does not matter here. Nevertheless, our lattice units do not line up exactly with those from Malaspinas, as our viscosity is different due to the shuffling.
 	%Beware equation 61 in the paper is wrong. It should have an 8 instead of the 4.
@@ -291,10 +299,11 @@ sorting=none
 	\end{figure}
 	As can be seen in figure \ref{fig:malaspinas2010}, our results notably do not depend on the Weissenberg Number. While our error decreases with N with a constant power, Malaspinas et al. see diminishing returns. While these results are excellent, the error in our implementation is still dependent on the viscosity ratio. When going to significantly higher ratios, this needs to be checked to ensure it does not get too large.\todo{link to appendix where we validate this}
 	With this, one can see, that we are not only capable to simulate parameters not yet accessible, but our implementation is also better for the parameters used in literature. Knowing our simulations to be good we in the following show results for interesting systems, that are not analytically solvable.
-	\section{Results for non analytically solvable systems}\todo{do all of these with MC}\todo{Do we want walls?}
+	\section{Results for non analytically solvable systems}\todo{do all of these with MC}
+	With the validity and accuracy of our scheme firmly established, we can demonstrate its results for some systems that cannot be solved analytically. In the following we will show the flow profiles for a conical nozzle, a cell in shear flow, and a chip for RT-DC measurements\todo{cite? spell our RT-DC?}. For all of these the methyl cellulose parameters found for a concentration of \SI{0.49}{\percent} have been used.
 	\subsection{Conical nozzle}
+	Conical nozzles are used for example in bio printing. For this use case in particular the stresses experienced within the nozzle are of importance. We simulate a cell with an inflow radius of \SI{1.8}{\milli\meter} and an outflow radius of \SI{200}{\micro\meter}. It has a length of \SI{18}{\milli\meter}. The boundary conditions for inflow and outflow are given as the result of a simulation of pipes of the respective radius with a fixed volume flow of \todo{find volume flow}. The resulting flow field can be seen in figure \ref{fig:Nozzle_v}. The von Mieses stress\todo{cite} can be seen in figure\ref{fig:Nozzle_sigma_vM}. It can be seen, that despite the high velocity in the center of the exit, the stress is actually smallest in the center. This means, that even for fast flows, given the bio ink and nozzle size is picked correctly, the cells flowing close to the center experience little stress.
 	\todo{complete sim is wrong due to init issue}
-	\todo{do}
 	\begin{figure}[H]
 		\centering
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/Nozzle_v.eps}
@@ -310,7 +319,7 @@ sorting=none
 	\subsection{Cell in shear flow}
 	\todo{do}
 	\subsection{RT-DC}
-	\todo{do}
+	Real-time deformability cytometry (RT-DC)\todo{cite} is a novel approach for single cell characterization. The cells are forced through a constriction. The observed deformation can be used to infer the mechanical properties of the cell. For this simulation we use periodic boundary conditions and a pressure gradient\todo{specify}. The resulting flow can be seen in figure \ref{fig:RT-DC_v}. The component typically associated with viscosity of the stress tensor can be see in figure \ref{fig:RT-DC_tau}. There are three qualitative differences compared to a purely viscous fluid. Directly after the inlet is a region of low stress. Due to the advection of the stress, the fluid here despite being inside the constriction has not reacted to it yet. This region therefore could produce unexpected cell behavior if one passes through it. Similarly directly after the constriction, the stress has not yet lowered. If one would divide the stress in these two regions by the strain rate in an attempt to obtain a viscosity one would find an extremely low and an extremely high viscosity respectively. Depending on the exact parameters \glqq viscosities\grqq{ } can be reached that cannot be obtained through rheological measurements with the fluid. Meaning these viscosities are not valid. This is even clearer along the walls directly after the outlet. Here the viscosites obtained in this manner become negative. This shows the breakdown of the viscosity interpretation in viscoelastic cases and signifies the regions of interesting behavior. This also shows why viscoelastic simulations cannot always be replaced by shear thinning models and should be considered despite the high computational cost.
 	\begin{figure}[H]
 		\centering
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/RT-DC_v.eps}
@@ -426,7 +435,7 @@ sorting=none
 	\end{equation}
 	Finally this function needs to be inverted. This needs to be done numerically. We calculate a range of $\dot{\gamma}$ from $0$ to $\frac{R}{c}$ with a small step interval. Here $R$ is the radius of the channel or pipe. This is guaranteed to contain all relevant radii. We flip the axis and integrate numerically using scipy.integrate.cumulative\_trapezoid\todo{cite}. This is very accurate as we conveniently picked the spacing of our now $x$-axis in a way, that the $y$-axis ($\dot{\gamma}$) varies little for each step. From the recovered curve $u$ is calculated at each required $r$ through linear interpolation.
 
-	\section{Parameter studies}
+	\section{Parameter studies and validation}\label{app:validation}
 	\todo{do}
 	\subsection{Viscosity shuffle fraction dependency}\label{app:viscSuffleDependency}
 	We use PTT with the methyl cellulose parameters. In a shear flow with the very small shearrate of $\dot{\gamma} = \SI{1}{\per\second}$, the viscosity shuffle fraction is varied. As can be seen in figure \ref{fig:suffleParameterStudy}, the observed viscosity does not depend on $\alpha_\text{s}$. The simulation gives $\eta = \SI{19.6999988048\pm0.0000000002}{\milli\pascal}$, while theory gives $\eta = \SI{19.699998805}{\milli\pascal}$. Therefore, the simulation is incredibly accurate.\todo{maybe add alphas < 1}
@@ -644,7 +653,7 @@ sorting=none
 	The shape the sim returns can be obtained by the theory by modifying px and or etap\n
 	The resulting error is (approx) centered around Wi of max viscosity gradient.
 	
-	\subsection{3D Poiseuille vs theory}\todo{not finished}
+	\subsection{3D Poiseuille vs theory}\todo{not finished}\todo{include cylindrical nozzle from conical nozzle sim for resolution dependency?}
 	Like above but 3D\n
 	Worst $G$.
 	\iffalse
