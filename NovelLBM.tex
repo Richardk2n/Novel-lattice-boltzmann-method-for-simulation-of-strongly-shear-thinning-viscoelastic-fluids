@@ -294,11 +294,21 @@ sorting=none
 	The relative error is highest near the wall as the velocity is lowest there, but also because the simple half way bounce back boundaries used here allow some slip along the wall. The same simulation is done for the 3D case in the following.
 	
 	\subsection{Pipe flow vs theory}
-	For the 2D case above, the walls are smooth. For the 3D case the round pipe has to be approximated leading to a staircase pattern that is not accurate. The error introduced by this depends on the lattice resolution. We use a diameter of 41 lattice points here. We use the same parameter set as above, aside from doubling the pressure gradient and also initialize the polymers in a stressed state. The resulting cross-section can be seen in figure \todo{figure}.
+	For the 2D case above, the walls are smooth. For the 3D case the round pipe has to be approximated leading to a staircase pattern that is not accurate. The error introduced by this depends on the lattice resolution. We use a diameter of 41 lattice points here. We use the same parameter set as above, aside from doubling the pressure gradient and also initialize the polymers in a stressed state. The resulting cross-section can be seen in figure \ref{fig:3DAlginateU}.
 	
-	\todo{describe figure and error}
-	
-	As can easily be seen in comparison to the 2D case, the approximation of the walls carries considerable error. Still the error is acceptable, particularly for this moderate lattice resolution. Further validation of our implementation (using the faster-to-simulate methyl cellulose parameters and initialization at $0$) ca be found in appendix \ref{app:validation}.
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DAlginateU.eps}
+		\caption{Plot of the cross-section of the velocity of an alginate pipe flow. Likely not fully in equilibrium.}
+		\label{fig:3DAlginateU}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DAlginateErr.eps}
+		\caption{Plot of error of the cross-section of the velocity of an alginate pipe flow. Likely not fully in equilibrium.}
+		\label{fig:3DAlginateErr}
+	\end{figure}
+	As can easily be seen in figure \ref{fig:3DAlginateErr} in comparison to the 2D case, the approximation of the walls carries considerable error. The L2 error is \num{0.014}. Still the error is acceptable, particularly for this moderate lattice resolution. Further validation of our implementation (using the faster-to-simulate methyl cellulose parameters and initialization at $0$) ca be found in appendix \ref{app:validation}.
 
 	%We use richard/master fe0fc04115b9b6ea6628bcc6cb6593d3f72ac0ea (2023-11-05)
 	\subsection{Comparison with literature}
