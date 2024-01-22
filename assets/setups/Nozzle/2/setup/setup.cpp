@@ -23,6 +23,8 @@ using fmt::color;
 #include <spdlog/spdlog.h>
 //using spdlog::info;
 
+#include "fieldWriter.hpp"
+using fluidx3d::io::fieldWriter::FieldWriter;
 #include "io.hpp"
 using fluidx3d::util::io::IO;
 #include "stringTools.hpp"
@@ -33,7 +35,7 @@ using fluidx3d::util::poiseuilleFlow::CircularPoiseuilleFlow;
 void example(SimulationOptions& options, Parameters& parameters) {
 	json raw = parameters.getRaw();
 	const int id = raw.at("id");
-	const string path_files = fmt::format("/tp6-gekle/nas/bt307867/cellsim/novel_2023-11-15/{}/", id);
+	const string path_files = fmt::format("/tp6-gekle/nas/bt307867/cellsim/novel_2024-01-22/{}/", id);
 	//const string path_files = fmt::format("Nozzle/{}/", id);
 	const path filesPath(path_files);
 	const string path_vtk = path_files + "vtkfiles/";
@@ -184,26 +186,28 @@ void example(SimulationOptions& options, Parameters& parameters) {
 			lattice.polymerConformationTensor[5*s+n] = stof(matches[12]);
 		}
 	}
+	lattice.polymerConformationTensor.write_to_gpu(1);
 
 	spdlog::info("Going to run {:e} steps...", (double)numberSteps);
 	spdlog::info("Which is equivalent to {:e} seconds.", numberSteps*T0);
 
 	run(0);
 
-	lattice.flags.read_from_gpu();
-	lattice.flags.cpu().write_vtk(path_vtk+"flags_0.vtk");
+	FieldWriter fw_flags(lattice.flags, {Lx, Ly, Lz});
+	fw_flags.write<uchar>(path_vtk+"flags_0.vtk");
+
+	FieldWriter fw_u(lattice.u, {Lx, Ly, Lz});
+	FieldWriter fw_strainRateTensor(lattice.strainRateTensor, {Lx, Ly, Lz});
+	FieldWriter fw_viscousStressTensor(lattice.viscousStressTensor, {Lx, Ly, Lz});
+	FieldWriter fw_polymer_conformationTensor(lattice.polymerConformationTensor, {Lx, Ly, Lz});
 
 	// function to write vtk files
 	auto vtk_routine = [&]() {
 		const string step_string_vtk = fmt::format("_{}.vtk", lattice.get_time_step());
-		lattice.u.read_from_gpu();
-		lattice.u.cpu().write_vtk(fmt::format("{}u{}", path_vtk_velocity, step_string_vtk));
-		lattice.strainRateTensor.read_from_gpu();
-		lattice.strainRateTensor.cpu().write_vtk(fmt::format("{}S{}", path_vtk_strainRateTensor, step_string_vtk));
-		lattice.viscousStressTensor.read_from_gpu();
-		lattice.viscousStressTensor.cpu().write_vtk(fmt::format("{}VS{}", path_vtk_viscousStressTensor, step_string_vtk));
-		lattice.polymerConformationTensor.read_from_gpu();
-		lattice.polymerConformationTensor.cpu().write_vtk(fmt::format("{}C{}", path_vtk_polymerConformationTensor, step_string_vtk));
+		fw_u.write<float>(fmt::format("{}u{}", path_vtk_velocity, step_string_vtk));
+		fw_strainRateTensor.write<float>(fmt::format("{}S{}", path_vtk_strainRateTensor, step_string_vtk));
+		fw_viscousStressTensor.write<float>(fmt::format("{}VS{}", path_vtk_viscousStressTensor, step_string_vtk));
+		fw_polymer_conformationTensor.write<float>(fmt::format("{}CT{}", path_vtk_polymerConformationTensor, step_string_vtk));
 	};
 
 
