@@ -167,6 +167,12 @@ class PTT:
             * lambertw(4 * self.epsilon * (self.lambda_p * gd) ** 2).real
         )
 
+    def u(self, _):
+        raise Exception("Forgot to call prepareVelocityProfile before u")
+
+    def gd(self, _):
+        raise Exception("Forgot to call prepareVelocityProfile before gd")
+
     def plot(self, r):
         u = self.u(r)
 
@@ -213,3 +219,4 @@ class PTT:
 
 
 alginate = PTT(48.2, 0.343, 0.545, 1e-3)
+mc0_49 = PTT(18.7e-3, 0.344e-3, 0.27, 1e-3)

@@ -13,9 +13,9 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import pyvista as pv
-from style import cm
-from style import *
 from fluidx3d.eval.models import PTT
+from style import *
+from style import cm
 
 
 def process(i):
@@ -52,10 +52,10 @@ def process(i):
     r = (np.arange(0, Ly, 1, dtype=np.float128) + origin[1]) * L0
     r[0] += L0 / 2
     r[-1] -= L0 / 2
+    PTT.alginate.prepareVelocityProfile(R, G, PTT.channel)
     uErr = PTT.alginate.u(np.abs(r))
 
     rTheory = np.arange(-R, R * (1 + 1e-3), R * 1e-3)
-    PTT.alginate.prepareVelocityProfile(R, G, PTT.channel)
     u = PTT.alginate.u(np.abs(rTheory))
 
     plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
