@@ -115,11 +115,11 @@ sorting=none
 	\begin{equation}
 		\overset{\nabla}{\ma{\tau}} = -\xi\left(\ma{\tau}\cdot\ma{D} + \ma{D}\cdot\ma{\tau}\right) - e^{\frac{\epsilon\lambda}{\eta_\text{p}}\Tr\ma{\tau}}\frac{\ma{\tau}}{\lambda} + 2\frac{\eta_\text{p}}{\lambda}\ma{D}
 	\end{equation}
-	Here, $\ma{\tau}$ is the polymer stress tensor and $\ma{D}$ is the strain rate tensor. $\eta_\text{p}$ is the polymer viscosity and $\lambda$ is the relaxation time. $\epsilon$ is the extensibility parameter and $\xi$ describes the slip in the polymer network. This model uses the upper convected derivative, which is defined as follows.\todo{clarify nabla u and fix Ts}
+	Here, $\ma{\tau}$ is the polymer stress tensor and $\ma{D}$ is the strain rate tensor. $\eta_\text{p}$ is the polymer viscosity and $\lambda$ is the relaxation time. $\epsilon$ is the extensibility parameter and $\xi$ describes the slip in the polymer network. This model uses the upper convected derivative, which is defined as follows.
 	\begin{equation}
 		\overset{\nabla}{\ma{A}} = \frac{\Dif\ma{A}}{\Dif t} - \left(\left(\nabla\vec{u}\right)^\text{T}\cdot\ma{A} + \ma{A}\cdot\left(\nabla\vec{u}\right)\right)
 	\end{equation}
-	Where $\vec{u}$ is the fluid velocity. This equation contains the material derivative defined as follows.
+	Where $\vec{u}$ is the fluid velocity and $\left(\nabla\vec{u}\right)_{ij} = \nabla_i\vec{u}_j$. This equation contains the material derivative defined as follows.
 	\begin{equation}
 		\frac{\Dif\ma{A}}{\Dif t} = \frac{\partial\ma{A}}{\partial t} + \vec{u}\cdot\nabla\ma{A}
 	\end{equation}
@@ -167,7 +167,7 @@ sorting=none
 	From this, one can see, that it is not sufficient to fit the viscosity as it could be formulated using two parameters ($\eta_\text{p}$ and $\epsilon\lambda^2$). Therefore, it has to many parameters and the fit has a one dimensional solution space.
 	The same holds for $N_1$ using $\eta_\text{p}\lambda$ and $\epsilon\lambda^2$. Therefore, it is necessary to fit both curves at the same time. This is not a unique feature of PTT, it is also the case for e.g. FENE-P (see appendix \ref{app:FENE-P}). In the following we show the fit results for an Alginate solution, for several concentrations of methyl cellulose solution and for a few other fluids.
 	\subsubsection{Alginate}
-	Alginate solutions are very important as bioinks or as scaffolding in the field of biofabrication. Alginate is also a common food additive. The solutions used here are \SI{4}{\percent} by weight of DuPont VIVAPHARM Alginate PH176 in PBS (essentially water)\todo{cite email from Tomasz Jüngst from 23.03.2023?}. The solution were prepared and measured by the Group of Tomasz Jüngst\todo{cite properly}. The measurements were done using a plate-plate rheometer. The first normal stress difference $N_1$ is calculated from the measured normal force using the following equation\cite{kulicke1977}.\todo{confirm diameter}
+	Alginate solutions are very important as bioinks or as scaffolding in the field of biofabrication. Alginate is also a common food additive. The solutions used here are \SI{4}{\percent} by weight of DuPont VIVAPHARM Alginate PH176 in PBS (essentially water)\todo{cite email from Tomasz Jüngst from 23.03.2023?}. The solution were prepared and measured by the Group of Tomasz Jüngst\todo{cite properly}. The measurements were done using a plate-plate rheometer. The first normal stress difference $N_1$ is calculated from the measured normal force using the following equation\cite{kulicke1977}.
 	\begin{equation}
 		N_1 = \frac{2F}{\pi R^2} + \frac{3}{20}\rho\omega^2R^2
 	\end{equation}
@@ -248,7 +248,7 @@ sorting=none
 	Our numerical consists of several well known methods and our novel viscosity shuffling. In the following we provide a brief overview about the well known basics and an in depth explanation of our novel method.
 	\subsection{Basics}
 	To solve the fluid we use a lattice Boltzmann algorithm with a single relaxation time. One could also use multi relaxation time, but we found the benefit to be negligible. For the velocity set we use D3Q19 as D3Q27 did not provide significant benefit for us but increases computational cost significantly. We solve the constitutive equation with a finite volume solver. This simplifies the boundary conditions significantly as we set the stress flux through the walls to zero. The advection term in the constitutive equation is handled with the corner transport upwind scheme. The source terms are integrated using the Euler method. The exact implemented and its derivation can be found in appendix \ref{app:implementation}. The coupling to the main lattice Boltzmann solver happens using the stress directly according to Dzanic et al.\cite{dzanic2022_2}. However, we modify the coupled stress as is explained in the following.
-	\subsection{Novel viscosity shuffling}
+	\subsection{Novel viscosity shuffling}\label{sec:shuffling}
 	Performing Chapman-Enskog analysis on the LBM reveals the total stress experienced by the fluid ($\ma{\sigma}$) to be as follows\cite{onishi2006}.
 	\begin{align}
 		\ma{\sigma} &= 2\eta_\text{s}\ma{D} + \ma{\tau}
@@ -371,7 +371,7 @@ sorting=none
 	\section{Implementation of constitutive equations}\label{app:implementation}\todo{Note available analytical solutions}
 	There is a large amount of viscoelastic models. It is also common to extend these to create new models. As Oliveira shows\cite{oliveira2009} many of these can be expressed to a common form and thus actually are variants of a common idea. This allows both to easily find new models and implement them. In the following polymer contributions $\ma{\tau}$ of the models we have currently implemented are described. For notation, we mostly follow close to Oliveira\cite{oliveira2009}.
 	\parab{Implementation}
-	The actual implementation uses tensors related to $\tau$ to unify the calculations as much as possible. We denote these tensors as $\ma{A}$ and give the relation for each model. Whenever we explicitly need $\ma{\tau}$, we convert it. For Oldroyd-B this does not seem necessary and might even be slightly detrimental to performance. However, such a replacement simplifies the constitutive equation for FENE-P significantly and doing it for the other models as well allows a unified code with little adaptation for each model. It also makes the equations easier to understand and analyze. We stick with $\ma{A}$ as the Tensor containing the stress information, although its meaning is different for the different models listed here. This way, it can be seen, that all the models listed here can be brought to the common form listed below.\todo{claryfy nabla u and fix Ts}
+	The actual implementation uses tensors related to $\tau$ to unify the calculations as much as possible. We denote these tensors as $\ma{A}$ and give the relation for each model. Whenever we explicitly need $\ma{\tau}$, we convert it. For Oldroyd-B this does not seem necessary and might even be slightly detrimental to performance. However, such a replacement simplifies the constitutive equation for FENE-P significantly and doing it for the other models as well allows a unified code with little adaptation for each model. It also makes the equations easier to understand and analyze. We stick with $\ma{A}$ as the Tensor containing the stress information, although its meaning is different for the different models listed here. This way, it can be seen, that all the models listed here can be brought to the common form listed below.
 	\begin{equation}
 		\frac{\partial\ma{A}}{\partial t} + \vec{u}\cdot\nabla\ma{A} = \left(\left(\nabla\vec{u}\right)^\text{T}\cdot\ma{A} + \ma{A}\cdot\left(\nabla\vec{u}\right)\right)+\ma{S}_\text{R} + 2\ma{D}
 	\end{equation}
@@ -463,9 +463,9 @@ sorting=none
 	Finally this function needs to be inverted. This needs to be done numerically. We calculate a range of $\dot{\gamma}$ from $0$ to $\frac{R}{c}$ with a small step interval. Here $R$ is the radius of the channel or pipe. This is guaranteed to contain all relevant radii. We flip the axis and integrate numerically using scipy.integrate.cumulative\_trapezoid\todo{cite}. This is very accurate as we conveniently picked the spacing of our now $x$-axis in a way, that the $y$-axis ($\dot{\gamma}$) varies little for each step. From the recovered curve $u$ is calculated at each required $r$ through linear interpolation.
 
 	\section{Parameter studies and validation}\label{app:validation}
-	\todo{do}
+	To validate, that our algorithm is indeed valid, we use it to simulate some typical system and determine the observed error. First we vary the shuffle fraction to assure that its value is irrelevant as its introduction in section \ref{sec:shuffling} predicts. Following that we calculate the shear flow for varying shear rates to reproduce the predicted shear thinning. Finally 2D and 3D poiseuille flows are simulated for different pressure gradients. A high degree of accuracy is observed in all these tests showing the validity of our algorithm.
 	\subsection{Viscosity shuffle fraction dependency}\label{app:viscSuffleDependency}
-	We use PTT with the methyl cellulose parameters. In a shear flow with the very small shearrate of $\dot{\gamma} = \SI{1}{\per\second}$, the viscosity shuffle fraction is varied. As can be seen in figure \ref{fig:suffleParameterStudy}, the observed viscosity does not depend on $\alpha_\text{s}$. The simulation gives $\eta = \SI{19.6999988048\pm0.0000000002}{\milli\pascal}$, while theory gives $\eta = \SI{19.699998805}{\milli\pascal}$. Therefore, the simulation is incredibly accurate.\todo{maybe add alphas < 1}
+	We use PTT with the methyl cellulose parameters. In a shear flow with the very small shearrate of $\dot{\gamma} = \SI{1}{\per\second}$, the viscosity shuffle fraction is varied. As can be seen in figure \ref{fig:suffleParameterStudy}, the observed viscosity does not depend on $\alpha_\text{s}$. The simulation gives $\eta = \SI{19.6999988048\pm0.0000000002}{\milli\pascal}$, while theory gives $\eta = \SI{19.699998805}{\milli\pascal}$. Therefore, the simulation is incredibly accurate.
 	\begin{figure}[H]
 		\centering
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/suffleParameterStudy.eps}
@@ -480,370 +480,55 @@ sorting=none
 		\caption{Plot of the simulated viscosity as a dependency of the Weissenber number.}
 		\label{fig:wiParameterStudy}
 	\end{figure}
-	\subsection{2D Poiseuille vs theory}\todo{not finished}
-	setup above R = 10µm; shear rate approximation to px\n
-	Worst $G$.
-	\iffalse
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyU0.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:2DParameterStudyU0}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyU1.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:2DParameterStudyU1}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyU2.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:2DParameterStudyU2}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyU3.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:2DParameterStudyU3}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyU4.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:2DParameterStudyU4}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyU5.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:2DParameterStudyU5}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyU6.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:2DParameterStudyU6}
-	\end{figure}
-	\fi
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyU7.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:2DParameterStudyU7}
-	\end{figure}
-	\iffalse
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyU8.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:2DParameterStudyU8}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyU9.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:2DParameterStudyU9}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyU10.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:2DParameterStudyU10}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyU11.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:2DParameterStudyU11}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyU12.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:2DParameterStudyU12}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyU13.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:2DParameterStudyU13}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyU14.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:2DParameterStudyU14}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErr0.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:2DParameterStudyErr0}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErr1.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:2DParameterStudyErr1}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErr2.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:2DParameterStudyErr2}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErr3.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:2DParameterStudyErr3}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErr4.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:2DParameterStudyErr4}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErr5.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:2DParameterStudyErr5}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErr6.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:2DParameterStudyErr6}
-	\end{figure}
-	\fi
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErr7.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:2DParameterStudyErr7}
-	\end{figure}
-	\iffalse
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErr8.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:2DParameterStudyErr8}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErr9.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:2DParameterStudyErr9}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErr10.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:2DParameterStudyErr10}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErr11.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:2DParameterStudyErr11}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErr12.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:2DParameterStudyErr12}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErr13.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:2DParameterStudyErr13}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErr14.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:2DParameterStudyErr14}
-	\end{figure}
-	\fi
+	\subsection{2D Poiseuille vs theory}
+	The setup remains as above, but the imposed shear flow is replaced by a pressure gradient. The radius of the channel flow is set as \SI{10}{\micro\meter}. The simulations were run for multiple values for the pressure gradient spaced in a way to approximately cover the range of the Weissenberg number seen in the section before. The resulting errors can be seen in figure \ref{fig:2DParameterStudyErr}. Due to the shear thinning behavior the shear rate is not constant for the whole channel, therefore the direct relation of the pressure gradient to the Weissenberg number is not possible. Averaging the shear rate it becomes clear that the error maximum here corresponds to the maximum slope seen in figure \ref{fig:wiParameterStudy}. The plots for the velocity profile and its error of this worst case parameter can be seen in figure \ref{fig:2DParameterStudyUWorst} and figure \ref{fig:2DParameterStudyErrWorst} respectively. It is clear, that the simple bounce back boundaries employed on the wall are a major cause of the observed error. The error in total is insignificant.
 	\begin{figure}[H]
 		\centering
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErr.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\caption{Plot of the simulation error in a channel flow as a dependency of the pressure gradient.}
 		\label{fig:2DParameterStudyErr}
 	\end{figure}
-	Interestingly, the last one work besides Ma being approx 10.\n
-	This error is not influenced by shuffling fraction or lattice resolution\n
-	The shape the sim returns can be obtained by the theory by modifying px and or etap\n
-	The resulting error is (approx) centered around Wi of max viscosity gradient.
-	
-	\subsection{3D Poiseuille vs theory}\todo{not finished}\todo{include cylindrical nozzle from conical nozzle sim for resolution dependency?}
-	Like above but 3D\n
-	Worst $G$.
-	\iffalse
 	\begin{figure}[H]
 		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyU0.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:3DParameterStudyU0}
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyUWorst.eps}
+		\caption{Plot of the simulated velocity in a channel flow as a dependency of the radius. This is the same as figure \ref{fig:2DAlginateU} but for methyl cellulose.}
+		\label{fig:2DParameterStudyUWorst}
 	\end{figure}
 	\begin{figure}[H]
 		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyU1.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:3DParameterStudyU1}
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErrWorst.eps}
+		\caption{Plot of the error of the simulated velocity in a channel flow as a dependency of the radius. This is the same as figure \ref{fig:2DAlginateErr} but for methyl cellulose.}
+		\label{fig:2DParameterStudyErrWorst}
 	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyU2.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:3DParameterStudyU2}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyU3.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:3DParameterStudyU3}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyU4.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:3DParameterStudyU4}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyU5.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:3DParameterStudyU5}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyU6.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:3DParameterStudyU6}
-	\end{figure}
-	\fi
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyU7.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:3DParameterStudyU7}
-	\end{figure}
-	\iffalse
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyU8.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:3DParameterStudyU8}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyU9.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:3DParameterStudyU9}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyU10.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:3DParameterStudyU10}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyU11.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:3DParameterStudyU11}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyErr0.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:3DParameterStudyErr0}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyErr1.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:3DParameterStudyErr1}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyErr2.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:3DParameterStudyErr2}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyErr3.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:3DParameterStudyErr3}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyErr4.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:3DParameterStudyErr4}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyErr5.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:3DParameterStudyErr5}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyErr6.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:3DParameterStudyErr6}
-	\end{figure}
-	\fi
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyErr7.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:3DParameterStudyErr7}
-	\end{figure}
-	\iffalse
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyErr8.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:3DParameterStudyErr8}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyErr9.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:3DParameterStudyErr9}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyErr10.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:3DParameterStudyErr10}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyErr11.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
-		\label{fig:3DParameterStudyErr11}
-	\end{figure}
-	\fi
+	%Interestingly, the last one work besides Ma being approx 10.\n
+	%This error is not influenced by shuffling fraction or lattice resolution\n
+	%The shape the sim returns can be obtained by the theory by modifying px and or etap\n
+	%The resulting error is (approx) centered around Wi of max viscosity gradient.
+	This is now repeated for a three-dimensional flow.
+	\subsection{3D Poiseuille vs theory}
+	The simulation was run as described in the section above, but the 2D channel geometry was changed into a 3D pipe flow. The errors show a similar behavior (see figure \ref{fig:3DParameterStudyErr}), but are considerably larger. The maximum pressure gradient is smaller for this series is smaller than the 2D series as those simulations exceeded the stability criterion for the Mach number. The worst result was obtained using the same pressure gradient as in the 2D case and can be seen in figure \ref{fig:3DParameterStudyUWorst} and figure \ref{fig:3DParameterStudyErrWorst}. Notably the error here, while still tolerable is a lot worse than the 2D case. With the error being particularly high around the wall it is likely that the wall approximation, which is significantly worse in the 3D case due to the required stair stepping, is the main reason for the 3D case exhibiting larger errors. 
 	\begin{figure}[H]
 		\centering
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyErr.eps}
-		\caption{Plot of the simulated velocity as a dependency of the radius.}
+		\caption{Plot of the simulation error in a pipe flow as a dependency of the pressure gradient}
 		\label{fig:3DParameterStudyErr}
 	\end{figure}
-	Worse due to wall approx.\n
-	Failed for high Ma.
-	\subsection{Viscoelastic Reynolds-Scaling}
-	Does not reproduce transitory behavior\todo{NEEDS TO WORK}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyUWorst.eps}
+		\caption{Plot of the simulated velocity in a pipe flow as a dependency of the radius. This was evaluated along a coordinate axis. This is the same as figure \ref{fig:3DAlginateU} but for methyl cellulose.}
+		\label{fig:3DParameterStudyUWorst}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyErrWorst.eps}
+		\caption{Plot of the error of the simulated velocity in a pipe flow as a dependency of the radius. This was evaluated along a coordinate axis. This is the same as figure \ref{fig:3DAlginateErr} but for methyl cellulose.}
+		\label{fig:3DParameterStudyErrWorst}
+	\end{figure}
+	\subsection{Validation summary}
+	The algorithm passes all typical test and behaves as expected. The error is very small for most problems. Only the pipe flow shows considerable error, however this is likely caused by the wall model and not by the viscosity shuffling method.
 	\section{Viscosity Ratio in literature}\label{app:viscosityRatio}
+		The viscosity ratios used in literature are limited. The following table contains overview of the maximum ratios typically used in literature. The last column shows how the ratio was calculated from the parameters given in the publications.
 		\begin{center}
 			\begin{tabular}{l|r|r|l}
 				Author & max(Wi) & max($R_\eta$) & $R_\eta$ estimation \\
