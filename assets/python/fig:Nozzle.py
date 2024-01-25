@@ -8,8 +8,6 @@ Created on Tue Sep  5 10:51:20 2023
 """
 
 import json
-import sys
-from multiprocessing import Pool
 from pathlib import Path
 from time import time
 
@@ -17,15 +15,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import numpy.ma as ma
 import pyvista as pv
-import scipy
-from scipy.special import lambertw
-from style import *
-
-eta_s = 1e-3
+from fluidx3d.eval.models import PTT
+from fluidx3d.eval.style import cm
 
 
 def process():
-    baseDir = Path("../data/Nozzle/2/")
+    baseDir = Path("../data/novel_2024-01-22/0/")
     cDir = baseDir / "vtkfiles/polymerConformationTensor/"
     sDir = baseDir / "vtkfiles/strainRateTensor/"
     vDir = baseDir / "vtkfiles/velocity/"
@@ -39,24 +34,16 @@ def process():
     T0 = parameters["info"]["conversions"]["T0"]
     rho0 = 1e3
     p0 = rho0 * V0**2
-    # print("###")
-    # print(parameters["info"]["px"])
-    # print(p0 / L0)
-    # print(G)
 
-    cFile = cDir / "C_500000.vtk"
+    cFile = cDir / "CT_5000000.vtk"
     # sFile = sDir / "S_500000.vtk"
-    vFile = vDir / "u_500000.vtk"
-    eta_p_SI = 18.7e-3
-    lambda_SI = 0.344e-3
-    epsilon = 0.27
-    # print(uHP(0, G, eta_p_SI))
-    # print("---")
+    vFile = vDir / "u_5000000.vtk"
+
     data = pv.read(cFile)
     # dataS = pv.read(sFile)
     dataV = pv.read(vFile)
     Lx, Ly, Lz = dataV.dimensions
-    tauField = data.get_array("data") * eta_p_SI / lambda_SI
+    tauField = data.get_array("data") * PTT.mc0_49.eta_p / PTT.mc0_49.lambda_p
     tauField = np.reshape(tauField, (Lx, Ly, Lz, 6), "F")
     # sField = dataS.get_array("data") / T0
     # sField = np.reshape(sField, (Lx, Ly, Lz, 6), "F")
@@ -87,18 +74,6 @@ def process():
             deviator[i][j] = tauField[..., idx[i][j]] - (
                 np.sum(tauField[..., :3], axis=-1) / 3 if idx[i][j] < 3 else 0  # Assume correct?
             )
-            # print(np.sum(tauField[..., :3], axis=-1)[-1, Ly // 2 + 10, Lz // 2])
-            # print(np.sum(tauField[..., :3], axis=-1)[-1, Ly // 2 - 10, Lz // 2])
-            # print("##")
-            # print(deviator[i][j][-1, Ly // 2 + 10, Lz // 2])
-            # print(deviator[i][j][-1, Ly // 2 - 10, Lz // 2])
-
-            # print(
-            #    f"{tauField[-1, Ly // 2 + 10, Lz // 2, idx[i][j]]} - {np.sum(tauField[..., :3], axis=-1)[-1, Ly // 2 + 10, Lz // 2]} = {deviator[i][j][-1, Ly // 2 + 10, Lz // 2]}"
-            # )
-            # print(
-            #    f"{tauField[-1, Ly // 2 - 10, Lz // 2, idx[i][j]]} - {np.sum(tauField[..., :3], axis=-1)[-1, Ly // 2 - 10, Lz // 2]} = {deviator[i][j][-1, Ly // 2 - 10, Lz // 2]}"
-            # )
 
             vonMieses += 3 / 2 * deviator[i][j] * deviator[i][j]
     vonMieses = np.sqrt(vonMieses)
@@ -144,10 +119,6 @@ def process():
     plt.show()
 
     plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
-    # print(tauField[-1, Ly // 2 + 10, Lz // 2])
-    # print(tauField[-1, Ly // 2 - 10, Lz // 2])
-    # print(vonMieses[-1, Ly // 2 + 10, Lz // 2])
-    # print(vonMieses[-1, Ly // 2 - 10, Lz // 2])
     plt.imshow(
         vonMiesesSlice.T,
         cmap="coolwarm",
@@ -162,7 +133,7 @@ def process():
     plt.xlabel(r"$x/\unit{\milli\meter}$")
     plt.ylabel(r"$y/\unit{\milli\meter}$")
     plt.colorbar(location="top", label=r"$\sigma_\text{vM}/\unit{\pascal}$")
-    plt.savefig(f"../plots/Nozzle_sigma_vM.eps")
+    plt.savefig("../plots/Nozzle_sigma_vM.eps")
     plt.show()
 
     r"""
