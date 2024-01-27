@@ -14,9 +14,6 @@
 \usepackage{amssymb}
 \usepackage{sidecap}
 
-\newcommand{\RK}[1]{{\color{orange}RK: #1}}
-\newcommand{\SG}[1]{{\color{red}SG: #1}}
-
 \usepackage{hyperref} %link support
 \usepackage{pdflscape} %pages can be landscape
 \usepackage{colortbl} %colored table rows and columns
@@ -95,93 +92,114 @@ sorting=none
 	
 	Here we show our novel simulation approach for bioinks. It is specifically tailored to support arbitrary viscosity ratios and thus is able to simulate common bioinks or any other viscoelastic material with similar properties while providing high accuracy and stability. This is archived by subtracting a viscous stress from the polymer stress calculated from the PTT model. This offset is corrected by increasing the viscosity of the base LBM algorithm accordingly.
 	
-%%
-%%
-%%
-
-\section{Rheology of cell carrier fluids}
-
-\subsection{Experimental data}
-
-To illustrate our novel LBM algorithm, we consider two prototypical cell carrier fluids.
-The first is an alginate solution which is often used in biofabrication, i.e., the 3D printing of living cells, but can also serve as a common food additive.
-Our solution contains 4\% alginate solvated in PBS as was measured in a commerical plate-plate rheometer (see appendix  XX for experimental details).
-The shear-dependent viscosity $ \eta$ and the first normal stress difference $N_1$ are shown as function of shear rate in a frequency-sweep \SG{ ? } measurement in figure~\ref{fig:fit_alginate}.
-We note the very high zero-shear viscosity of more than $10000 \si{ mPa \cdot s}$.
-Carrier fluids in bioprinting, termed bioinks, are characterized in general by such high viscosities to guarantee stability of the printed construct.
-On the other hand, during the actual printing process when the material is flowing, the viscosity should be as low as possible to avoid excessive mechanical stress on the embedded cells.
+	\section{Rheology of viscoelastic fluids}
+	Viscoelastic behavior in fluids was first discovered during the second world war when mixing flamethrower liquid\cite{franck2017}. Since then many models have been derived to describe the different effects exhibited by this class of material. In general the stress exhibited by these fluids is not only dependent on the current shear, but is also time-dependent. This complex behavior can often be decoupled into a shear dependent viscosity and a normal stress. These can be for the most part understood separately. The viscosity usually exhibits shear thinning behavior. This behavior is well understood because it has many technical applications and is a common side effect of increasing the viscosity of fluids which is also often desired. Therefore, there exist many phenomenological descriptions of shear thinning. A particularly general one is the Carreau-Yasuda model. It will be discussed in the following to illustrate qualitatively how such fluids behave. The elastic components will be discussed afterward.
+	\subsection{Carreau-Yasuda - phenomenological description for shear thinning viscosity}
+	In Yasudas 1979 PhD-Thesis\cite{yasuda1979} the earlier Carreau model\cite{carreau1972} was extended to describe the shear thinning behavior of polymers and polymer solutions for many parameters. The viscosity $\eta$ decreases with the shear rate $\dot{\gamma}$ as follows.
+	\begin{equation}
+		\eta\left(\dot{\gamma}\right) = \eta_\infty + \frac{\eta_0 - \eta_\infty}{\left[1+\left(\lambda\dot{\gamma}\right)^{a_1}\right]^\frac{a_2}{a_1}}
+	\end{equation}
+	Here $\eta_0$ is the zero shear viscosity, $\eta_\infty$ is the infinite shear viscosity, $\lambda$ is the relaxation time and $a_1$ and $a_2$ are parameters in regard to the slope. As can be seen in figure \ref{fig:CY}, the Carreau-Yasuda model describes two plateaus of constant viscosity ($\eta_0$ and $\eta_\infty$) connected by a $Wi^{-a_2}$ power law. $a_1$ governs how gradual the connection between the initial plateau and the power law is. Here the Weissenberg number $Wi = \lambda\dot{\gamma}$ has been introduced. The start of the actual thinning is around $Wi = 1$. Values below are often considered \glqq small\grqq{ } Weissenber numbers, while the ones above are considered \glqq large\grqq. The onset of the second plateau depends on a material parameter, which we term the viscosity ratio and define as follows.
+	\begin{equation}\label{eq:R_eta_CY}
+		R_\eta = \frac{\eta_0 - \eta_\infty}{\eta_\infty}
+	\end{equation}
+	As will be shown later, this is actually a crucial stability parameter for the simulations. This means, that the widely available parameters obtained by fitting this phenomenological model are sufficient to predict the stability of simulations. However, to actually simulate viscoelastic fluids, a model es required, that predicts a viscosity similar to the one shown here, and the normal stress exhibited by such fluids. This will be discussed in the following section.
 	\begin{figure}[H]
 		\centering
-		\includegraphics[width=7cm]{assets/plots/fit_alginate_eta.eps}
-		\includegraphics[width=7cm]{assets/plots/fit_alginate_N.eps}
-%		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/fit_alginate_eta.eps}
-%		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/fit_alginate_N.eps}
-		\caption{Rheology data for alginate solution from 21 measurements of the viscosity (a) and normal stress (b).
-				Orange lines show a fit of the PTT rheological model. \SG{ include second plateau }\SG{ larger font in figures }}
-		\label{fig:fit_alginate}
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/CY.eps}
+		\caption{Double logarithmic plot of the Carreau-Yasuda model for different $a_1$.}
+		\label{fig:CY}
 	\end{figure}
-
-The second cell carrier fluid modeled in this work is a methyl cellulose solution which is commonly used in real-time-deformation-cytometry (RT-DC) experiments.
-RT-DC experiments allow very high-throughput measurements of cell mechanical properties and have been used successfully for disease detection by screening blood samples.
-We extract our data from \cite{buyukurganci2023} where the shear rheology of methyl cellulose was measured using a plate-plate and cone-plate rheometer.
-Three concentrations of \SI{0.49}{\percent}, \SI{0.59}{\percent} and \SI{0.83}{\percent} methyl cellulose in PBS were investigated and their rheology is shown in figure~\ref{fig:fit_mc}.
-Even at the highest concentration the zero-shear viscosity is two orders of magnitude lower than for the considered alginate solution.
-	\begin{figure}[H]
-		\centering
-		\includegraphics[width=7cm]{assets/plots/fit_mc_eta.eps}
-		\includegraphics[width=7cm]{assets/plots/fit_mc_N.eps}
-		\caption{Rheology data of a methyl cellulose solution from \cite{buyukurganci2023}.
-				Orange lines show a fit of the PTT rheological model. \SG{ include second plateau }\SG{ larger font in figures }}
-		\label{fig:fit_mc}
-	\end{figure}
-	
-\subsection{Fitting data with the PTT model}	
-
-Due to the complexity of viscoelastic fluids, there is an abundance of (semi-)empirical models to describe rheological data.
-Common options include the Oldroyd-B \cite{oldroyd1958} and the FENE-P model \cite{bird1980,bird1987}.
-The Oldroyd-B model is not appropriate for most real complex fluids as it features a shear-independent viscosity in clear contradiction to the experimental data presented in figures~\ref{fig:fit_alginate} and \ref{fig:fit_mc}.
-Although the FENE-P does reproduce shear-thinning, we were not able to obtain a satisfactory fit to our data for alginate and methyl cellulose with physically reasonable values of the model parameters.
-The best fit was obtained with the so-called PTT model due to Phan-Thien and Tanner \cite{phan-thien1977,phan-thien1978} which was for explicitly derived for polymer networks in solution and thus appears to capture well the essential physics behind the alginate solution. \SG{ check that these papers have the exponentail version }.
-
-The PTT model is specified by a constitutive equation for the polymer stress $ \ma{\tau}$:
+	\subsection{Constitutive equations for the polymer stress}
+	Both the viscosity and the normal stress can be viewed as components of a stress tensor. For some linear viscoelastic liquids simulations without modeling the constitutive equation of this tensor are possible using a slightly modified lattice Boltzmann method\cite{giraud1998,lallemand2003}. More general cases have used elastic dumbbells to model the polymers typically contained in viscoelastic fluids. The first of which was the Oldroyd-B model introduced in 1958\cite{oldroyd1958}. Also, it does not reproduce all effects shown by viscoelastic fluids (critically it is not shear thinning), it is still the most popular model today due to its simplicity. In elongational flow, the dumbbells modeled by Oldroyd-B can be stretched infinitely, leading to unphysical behavior. To avoid this the finite extensible FENE-P model was developed by Bird et al.\cite{bird1980,bird1987}. This model is also particularly popular, but we found it to be problematic, as fitting it to rheological data for some of the materials we work with results in unphysical parameters. Furthermore, using it is detrimental for stability, especially for high Weissenberg numbers (for details see appendix \ref{app:FENE-P}). There also exist many other derived or extended FENE type models one could choose from. Oliveira showed, that many of them follow a common formalism\cite{oliveira2009} and can be brought to a common form despite looking quite different in their original formulation. Among this group of models is also the Phan-Thien Tanner (PTT) model\cite{phan-thien1977,phan-thien1978}. It was originally derived for polymer networks in solution, but also fits well with the fluids we use. As these models all have similar mathematical forms and produce similar shapes, the physical background likely does not matter much. There exists an exponential version and a more general form of the PTT model using the gamma function\cite{ferras2019}. As our simulations algorithm is GPU based, using the more general form would necessitate the implementation of the gamma function incurring segnificant computational cost for limited gain. Therefore, we opted for the exponential version. For this the constitutive equation for the stress reads as follows.
 	\begin{equation}
 		\overset{\nabla}{\ma{\tau}} = -\xi\left(\ma{\tau}\cdot\ma{D} + \ma{D}\cdot\ma{\tau}\right) - e^{\frac{\epsilon\lambda}{\eta_\text{p}}\Tr\ma{\tau}}\frac{\ma{\tau}}{\lambda} + 2\frac{\eta_\text{p}}{\lambda}\ma{D}
 	\end{equation}
-where $\ma{D}$ is the strain rate tensor. 
-The polymer viscosity is denoted $\eta_\text{p}$ and $\lambda$ is the corresponding relaxation time.  \SG{ are they actually independent? }
-$\epsilon$ is the so-called extensibility parameter which controls at which shear rates thinning takes place and $\xi$ describes the slip in the polymer network which we will set to zero in the following.
-The upper convected derivative is defined as follows:
+	Here, $\ma{\tau}$ is the polymer stress tensor and $\ma{D}$ is the strain rate tensor. $\eta_\text{p}$ is the polymer viscosity and $\lambda$ is the relaxation time. $\epsilon$ is the extensibility parameter and $\xi$ describes the slip in the polymer network. This model uses the upper convected derivative, which is defined as follows.
 	\begin{equation}
 		\overset{\nabla}{\ma{A}} = \frac{\Dif\ma{A}}{\Dif t} - \left(\left(\nabla\vec{u}\right)^\text{T}\cdot\ma{A} + \ma{A}\cdot\left(\nabla\vec{u}\right)\right)
 	\end{equation}
-where $\vec{u}$ is the fluid velocity and $\left(\nabla\vec{u}\right)_{ij} = \nabla_i\vec{u}_j$. 
-The material derivative is
+	Where $\vec{u}$ is the fluid velocity and $\left(\nabla\vec{u}\right)_{ij} = \nabla_i\vec{u}_j$. This equation contains the material derivative defined as follows.
 	\begin{equation}
-		\frac{\Dif\ma{A}}{\Dif t} = \frac{\partial\ma{A}}{\partial t} + \vec{u}\cdot\nabla\ma{A}.
-	\end{equation}	
-Finally, the total fluid stress is the sum of the polymer stress $ \tau $ and a solvent stress $ \tau _ \mathrm{s}$ due to the Newtonian solvent with viscosity $ \eta _ \mathrm{s}$.
+		\frac{\Dif\ma{A}}{\Dif t} = \frac{\partial\ma{A}}{\partial t} + \vec{u}\cdot\nabla\ma{A}
+	\end{equation}
+	The semi analytical solution reads as follows\cite{ferras2019}.
+	\begin{equation}
+		\exp\left[\frac{\epsilon\lambda}{\eta_\text{p}}\left(\frac{2-2\xi}{2-\xi}\right)\tau_{xx}\right]^2\tau_{xx}=\left(2-\xi\right)\left(\lambda\dot{\gamma}\right)^2\left(\frac{\eta_\text{p}}{\lambda} - \tau_{xx}\xi\right)
+	\end{equation}
+	\begin{equation}
+		\tau_{xy}\left(\dot{\gamma}\right) = \frac{\eta_\text{p}\dot{\gamma}-\tau_{xx}Wi\xi}{\exp\left[\frac{\epsilon\lambda}{\eta_\text{p}}\left(\frac{2-2\xi}{2-\xi}\right)\tau_{xx}\right]}
+	\end{equation}
+	\begin{equation}
+		\eta\left(\dot{\gamma}\right) = \frac{\tau_{xy}\left(\dot{\gamma}\right)}{\dot{\gamma}}
+	\end{equation}
+	\begin{equation}
+		N_1 = \frac{2\tau_{xx}}{2-\xi}
+	\end{equation}
+	Where $N_1$ is the first normal stress difference.
 
-For a simple shear flow in the $xy$-plane, an analytical expression for $ \eta $ and $N_1$ is given by \cite{ferras2019} which (with $\xi=0$) reads
+	The shear dependent viscosity in this model can be seen in figure \ref{fig:ptt_eta}. One can see a Newtonian plateau and a $Wi{-1}$ power law. Other constitutive equations lead to other power laws. Therefore, one can pick a model, that fits the data best. The parameter $\epsilon$ controls the $Wi$ at which thinning takes place. Compared to the phenomenological CY model, PTT does not have a minimum viscosity and keeps trending towards zero. This is unphysical and current lattice Boltzmann methods require a viscosity to be present. This is remedied by adding an offset $\eta_\text{s}$ to the viscosity. The resulting curve can be seen in figure \ref{fig:ptt_eta_s}. The resulting curve is very similar to the CY model and thus is also suited to describe many different viscoelastic liquids. Furthermore, this allows to see some similarities. The $\eta_\text{s}$ parameter is equivalent to $\eta_\infty$ and $\eta_\text{p} + \eta_\text{s} = \eta_0$. With this the viscosity ratio defined in equation \ref{eq:R_eta_CY} can be rewritten with these parameters as follows.
+	\begin{equation}\label{eq:R_eta_ptt}
+		R_\eta = \frac{\eta_\text{p}}{\eta_\text{s}}
+	\end{equation}
+	The index p expresses the viscosity from polymers, while the s means viscosity from solvent. This alleges, that the viscosity for infinite shear becomes the solvent viscosity. This however is not entirely accurate in general. That being said, the exact value of $\eta_\text{s}$ is not relevant given $Wi$ is low enough, which it often is. Given, that data is rarely available at shear rates high enough to determine $\eta_\text{s}$ reliably, due to technical difficulties, it can usually not be determined from data. Therefore, it is common to just use the solvent viscosity.
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/ptt_eta.eps}
+		\caption{Double logarithmic plot of the PTT model for $\xi=0$ and different $\epsilon$.}
+		\label{fig:ptt_eta}
+	\end{figure}
+		\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/ptt_eta_s.eps}
+		\caption{Double logarithmic plot of the PTT model for $\xi=0$ and different $\epsilon$ with an offset.}
+		\label{fig:ptt_eta_s}
+	\end{figure}
+	For the polymers solutions we work with, $\xi$ is effectively zero, as can be suspected from its physical interpretation. Therefore, we set it to zero for the rest of this work. This also simplifies the model significantly and allows it to be solved analytically using the Lambert $W$ function. In the following we show fits for several viscoelastic fluids, to show, that PTT does fit and to establish an expected range for the parameters.
+	\subsection{Fitting PTT to experimental data}
+	For $\xi = 0$ and using the Lambert $W$ function, the solutions for PTT are as follows.
 	\begin{equation}
-		\eta\left(\dot{\gamma}\right) = \frac{\eta_\text{p}}{\exp\left[0.5W_0\left(4\epsilon \mathrm{Wi}^2\right)\right]} + \eta _\mathrm{s} \ma{D}
+		\eta\left(\dot{\gamma}\right) = \frac{\eta_\text{p}}{\exp\left[0.5W_0\left(4\epsilon Wi^2\right)\right]}
 	\end{equation}
 	\begin{equation}
-		N_1 = \frac{\eta_\text{p}}{2\epsilon\lambda}W_0\left(4\epsilon \mathrm{Wi}^2\right)
+		N_1 = \frac{\eta_\text{p}}{2\epsilon\lambda}W_0\left(4\epsilon Wi^2\right)
 	\end{equation}
-where $ \mathrm{Wi} = \lambda \dot{ \gamma  }$ is the Weissenberg number and $W_0$ is the Lambert $W$-function. \SG{ check that $ \eta _ \mathrm{s}$ is correct }
-\SG{ I did not find these equations in \cite{ferras2019}? }
-Fitting these equations to the rheological data for alginate and methy cellulose leads to satisfactory agreement as shown in figures~\ref{fig:fit_alginate} and \ref{fig:fit_mc}.
-In the fit, the solvent viscosity was fixed at $ \eta _ \mathrm{s} = 1 \si{ mPa } \cdot \si{ s }$ as the viscosity of the PBS buffer. \SG{ give ref }
-At very high shear rates, the contained polymers are completely stretched and the viscosity asymptotically approaches the solvent values $ \eta _ \mathrm{s}$.
-The obtained parameters for alginate are
+	From this, one can see, that it is not sufficient to fit the viscosity as it could be formulated using two parameters ($\eta_\text{p}$ and $\epsilon\lambda^2$). Therefore, it has to many parameters and the fit has a one dimensional solution space.
+	The same holds for $N_1$ using $\eta_\text{p}\lambda$ and $\epsilon\lambda^2$. Therefore, it is necessary to fit both curves at the same time. This is not a unique feature of PTT, it is also the case for e.g. FENE-P (see appendix \ref{app:FENE-P}). In the following we show the fit results for an Alginate solution, for several concentrations of methyl cellulose solution and for a few other fluids.
+	\subsubsection{Alginate}
+	Alginate solutions are very important as bioinks or as scaffolding in the field of biofabrication. Alginate is also a common food additive. The solutions used here are 
+	%\SI{4}{\percent} 
+	4\%
+	by weight of DuPont VIVAPHARM Alginate PH176 in PBS (essentially water)\todo{cite email from Tomasz Jüngst from 23.03.2023?}. The solution were prepared and measured by the Group of Tomasz Jüngst\todo{cite properly}. The measurements were done using a plate-plate rheometer. The first normal stress difference $N_1$ is calculated from the measured normal force using the following equation\cite{kulicke1977}.
+	\begin{equation}
+		N_1 = \frac{2F}{\pi R^2} + \frac{3}{20}\rho\omega^2R^2
+	\end{equation}
+	Where $F$ is the measured normal force, $R$ is the radius of the rheometer, $\rho$ is the density of the fluid and $\omega$ is the angular velocity of the rheometer. The second term is usually omitted and as we found it to matter little, and as the quality of the data we have available is too limited to warrant such detailed corrections, we also choose to omit it. A cone-rheometer would be preferred here, but as $N_2 = 0$ for PTT with $\xi = 0$, the difference is negligible.
+	
+	The data for viscosity and first normal stress difference was fitted simultaneously for all 21 individual measurements in the dataset. The results can be seen in figures \ref{fig:fit_alginate_eta} and \ref{fig:fit_alginate_N}. The steps that can be seen in the plot of the first normal stress difference are due to the limited resolution of the rheometer used. It can be seen, that the data varies significantly, due to variations on preparation and/or measurement. The fit does not reproduce the shape perfectly but does always stay within the variation of the data. This is sufficient. While setting $\eta_\text{s} = \SI{1}{\milli\pascal\second}$, the parameters obtained are as follows.
 	\begin{align}
 		\eta_\text{p} &= \SI{48.2\pm0.4}{\pascal\second}\\
 		\lambda &= \SI{0.343 \pm 0.004}{\second}\\
-		\epsilon &= \num{0.545 \pm 0.010}.
+		\epsilon &= \num{0.545 \pm 0.010}
 	\end{align}
-while the parameters for the three concentrations of methyl cellulose are given in table~\ref{tab:MC_parameters}.
-	\begin{table}[H]
+	With this the viscosity ratio becomes $R_\eta = \num{48.2\pm0.4e3}$. However, this carries the assumption of $\eta_\text{s}$. Strictly from the data, we can only specify $R_\eta > 70$, using $\eta_\text{s} < \min\left(\eta\right)$. Given, the data shows no sign of flattening the actual value of $R_\eta$ is significantly higher than $70$.
+	
+	These parameters (predominately $\eta_\text{p}$) are dependent on concentration. This will be shown in the next section with the example of methyl cellulose.
+	\begin{figure}[H]
 		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/fit_alginate_eta.eps}
+		\caption{Double logarithmic plot of 21 measurements of the viscosity of an alginate solution and a PTT fit.}
+		\label{fig:fit_alginate_eta}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/fit_alginate_N.eps}
+		\caption{Double logarithmic plot of 21 measurements of the normal force (converted to stress) of an alginate solution and a PTT fit.}
+		\label{fig:fit_alginate_N}
+	\end{figure}
+	\subsubsection{Methyl cellulose}
+	Methyl cellulose is also used in research involving cells as a nontoxic thickening agent. It is also widely used in the food industry. The data used here\cite{buyukurganci2023}, was measured using plate-plate and cone-plate rheometer geometry. The three solutions measured are \SI{0.49}{\percent}, \SI{0.59}{\percent} and \SI{0.83}{\percent} methyl cellulose in PBS. The measured data as well as the fit results can be seen in figures \ref{fig:fit_mc_eta} and \ref{fig:fit_mc_N}. One can see, that while PTT is not the optimal model for this solution, the agreement is still acceptable. The fit gives the following parameters.
+	\begin{center}
 		\begin{tabular}{c|c|c|c}
 %			Concentration/\unit{\percent} & $\eta_\text{p}/\unit{\milli\pascal\second}$ & $\lambda/\unit{\milli\second}$ & $\epsilon$ \\
 			Concentration/ percent & $\eta_\text{p}/mPas$ & $\lambda/ms$ & $\epsilon$ \\
@@ -190,17 +208,23 @@ while the parameters for the three concentrations of methyl cellulose are given 
 			\num{0.59} & \num{32.5\pm0.7} & \num{0.433\pm0.004} & \num{0.365\pm0.004} \\
 			\num{0.83} & \num{81\pm2} & \num{0.714\pm0.009} & \num{0.496\pm0.006}
 		\end{tabular}
-		\caption{Parameters of the PTT modelobtained when fitting the methyl cellulose solutions.}
-		\label{tab:MC_parameters}
-	\end{table}
-
-We introduce the ratio between the zero-shear and the infinite-shear (i.e.\ solvent) viscosity as $R_ \eta  = \frac{ \eta _ \mathrm{p} } { \eta _ \mathrm{s} }$ which will turn out to be an important parameter to determine numerical stability of LB simulations. \SG{ do we actually need a ratio? Since $ \eta _\mathrm{s}$ is probably always water-like, would it not be enough to state whether $ \eta _ \mathrm{p}$ is high or low } \SG{ do we actually show that $R_ \eta  $ determines stability? }
-This ratio can in a similar fashion be defined for other models such as FENE-P or the inelastic, but shear-thinning Carreau-Yasuda model \cite{carreau1972, yasuda1979}.
-For our alginate solution we obtain $R _ \eta = \num{48.2\pm0.4e3}$, indicating that the solution viscosity at very low shear rates is more than four orders of magnitude larger than the solvent viscosity which represents a severe challenge to standard numerical algorithms.
-That this characteristic is not unique to alginate, but is in fact a generic feature of cell carrier fluids used in bioprinting is shown in table~\ref{tab:bioinks} where rheological from various literature sources have been compiled into a single format to determine $ R_ \eta $.
-The 0.49 \% methyl cellulose solution used in RT-DC measurements, in contrast, features a much lower value of $R_\eta = \num{18.7\pm0.4}$.
-\begin{table}
-	\centering
+	\end{center}
+	From the derivation of the model it would be expected, that only $\eta_\text{p}$ scales with the concentration. However, all the parameter show a significant dependency on concentration. $R_\eta$ can be approximated from the data as $R_\eta > 3$, $R_\eta > 4$ and $R_\eta > 9$ for \SI{0.49}{\percent}, \SI{0.59}{\percent} and \SI{0.83}{\percent} receptively. They again are likely much higher. The expected values based on the assumed $\eta_\text{s}$ are $R_\eta = \num{18.7\pm0.4}$, $R_\eta = \num{32.5\pm0.7}$ and $R_\eta = \num{81\pm2}$ respectively.
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/fit_mc_eta.eps}
+		\caption{Double logarithmic plot of measurements of the viscosity of three methyl cellulose solutions and a PTT fit.}
+		\label{fig:fit_mc_eta}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/fit_mc_N.eps}
+		\caption{Double logarithmic plot of measurements of the normal force (converted to stress) of three methyl cellulose solutions and a PTT fit.}
+		\label{fig:fit_mc_N}
+	\end{figure}
+	\subsubsection{Other fluids}
+	While the fluids mentioned above are of great importance, they are by no means the only ones used in such experiments. From these two examples alone, it can be seen, that the parameters of magnitude. As the viscosity can change be several orders of magnitude before the change in behavior of the fluid becomes noticeable to human perceptions, the fluids commonly referred to as shear thinning have a large viscosity ratio. In the following values from a few publications are listed to establish the typical values for the ratio. It is common (due to experimental limitations), that the shear rate is limited in the experiments in a way, that does not allow seeing both Newtonian plateaus. In these cases we provide an upper or lower bound.
+	\begin{center}
 		\begin{tabular}{l|p{3cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}|p{2cm}}
 %			Author & Material & $\eta_0/\unit{\pascal\second}$ & $\eta_\infty/\unit{\pascal\second}$ & $R_\eta$ & extracted from \\
 			Author & Material & $\eta_0/Pas$ & $\eta_\infty/Pas$ & $R_\eta$ & extracted from \\
@@ -212,19 +236,11 @@ The 0.49 \% methyl cellulose solution used in RT-DC measurements, in contrast, f
 			\rowcolor{secondaryBackground}
 			O'Connell\cite{oconnell2020} & pluronic F-127 & >1e6 & <8 & > 2e5 & Chapter 7 Fig. 13 \\
 		\end{tabular}
-	\caption{Compilation of literature data on typical bioinks showing that a very viscosity ratio $ R_ \eta $ is a generic feature of these liquids.}
-	\label{tab:bioinks}
-\end{table}
-
+	\end{center}
+	Many of these fractions are likely much larger than listed here. This is only a lower bound. There are many slightly shear thinning fluids, where this fraction is a lot smaller and it also decreases with concentration. However, such large values in the tens of thousands are typical for bio-inks and fluids used in adjacent fields. This is by design, as a very high zero shear viscosity is desirable to stabilize the construct after printing.
+	With the usual range of the parameters and $R_\eta$ established, we provide a quick overview about the current literature and capabilities in the following section.
 	
-%%
-%% LBM
-%%	
-	
-\section{Existing LBM methods}
-
-\SG{ For some linear viscoelastic liquids simulations without modeling the constitutive equation of this tensor are possible using a slightly modified lattice Boltzmann method\cite{giraud1998,lallemand2003}. }
-
+	\section{Existing LBM methods}
 	There are many existing LBM methods to simulate viscoelastic materials in three dimensions. Some simple linear viscoelastic effects can be described through multi-relaxation-time models \cite{lallemand2003}, but in general more complicated methods are required. For more general cases the solving of a second equation is required. There are several options for the equation describing the polymer. Among these are the constitutive equation\cite{gupta2015} and a Fokker-Planck equation\cite{onishi2005}. Solving these equations can be done through multiple ways. These include a finite volume solver, a finite difference solver\cite{gupta2015}, another LBM like solver\cite{ma2020} and an advection-diffusion scheme\cite{onishi2005}. These secondary solvers need to be coupled to the primary LBM solver. Options to do that include introducing an additional forcing term to the LBM and altering the LBM stress directly\cite{dzanic2022}.
 	
 	Among the publications implementing a constitutive equation most use Oldroyd-B or older models. Many also use FENE-P despite its shortcomings. The PTT model, which is currently the model used by us is rarely employed, though many authors do mention it.
@@ -362,30 +378,8 @@ The 0.49 \% methyl cellulose solution used in RT-DC measurements, in contrast, f
 	\newpage
 	\printbibliography[heading=bibintoc]
 	
-%%
-%% Appendix
-%%	
-	
 	\appendix
 	\appendixpage
-	
-%%
-%% Exp protocol
-%%	
-	
-\section{Rheology measurements of alginate solutions}	
-
-\SG{ Tomasz should extend this paragraph }
-The solutions used here are 4\% by weight of DuPont VIVAPHARM Alginate PH176 in PBS. 
-The measurements were done using a plate-plate rheometer. 
-Data is agglomerated from 21 independent measurements.
-The first normal stress difference $N_1$ is calculated from the measured normal force using the following equation\cite{kulicke1977}.
-	\begin{equation}
-		N_1 = \frac{2F}{\pi R^2} + \frac{3}{20}\rho\omega^2R^2
-	\end{equation}
-	Where $F$ is the measured normal force, $R$ is the radius of the rheometer, $\rho$ is the density of the fluid and $\omega$ is the angular velocity of the rheometer. The second term is usually omitted and as we found it to matter little, and as the quality of the data we have available is too limited to warrant such detailed corrections, we also choose to omit it. A cone-rheometer would be preferred here, but as $N_2 = 0$ for PTT with $\xi = 0$, the difference is negligible.
-	
-	
 	\section{Implementation of constitutive equations}\label{app:implementation}\todo{Note available analytical solutions}
 	There is a large amount of viscoelastic models. It is also common to extend these to create new models. As Oliveira shows\cite{oliveira2009} many of these can be expressed to a common form and thus actually are variants of a common idea. This allows both to easily find new models and implement them. In the following polymer contributions $\ma{\tau}$ of the models we have currently implemented are described. For notation, we mostly follow close to Oliveira\cite{oliveira2009}.
 	\parab{Implementation}

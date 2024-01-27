@@ -486,3 +486,8 @@ pyrightconfig.json
 
 # Data
 *.tar.gz
+
+
+.DS_Store
+*~
+NovelLBM.pdf
