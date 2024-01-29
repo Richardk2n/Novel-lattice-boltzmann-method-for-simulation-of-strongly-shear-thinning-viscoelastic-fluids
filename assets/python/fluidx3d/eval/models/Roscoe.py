@@ -10,16 +10,19 @@ Created on Thu Jan 25 15:23:55 2024
 import warnings
 from functools import wraps
 from multiprocessing import Pool
-from typing import Annotated, Optional, Tuple
+from typing import Annotated, Optional, Tuple, Union, overload
 
 import numpy as np
-from scipy.integrate import quad
-from scipy.optimize import root_scalar
+from numpy.typing import NDArray
+from scipy.integrate import quad  # type: ignore
+from scipy.optimize import root_scalar  # type: ignore
+
+floatN = Union[float, NDArray]
 
 
 def pooled(fun):
     @wraps(fun)
-    def decorated(*args):
+    def decorated(*args: Tuple[NDArray]) -> NDArray:
         with Pool() as p:
             res = np.asarray(p.starmap(fun, np.transpose(args)))
         return res
@@ -79,10 +82,10 @@ def eq21(alpha1s: float, alpha2s: float, alpha3s: float) -> float:
     return g3p
 
 
-def eq39(alpha1s: float, alpha2s: float, alpha3s: float) -> float:
+def eq39(alpha1s: NDArray, alpha2s: NDArray, alpha3s: NDArray) -> NDArray:
     g1pp, g2pp, g3pp = np.transpose(pooled(eq18)(alpha1s, alpha2s, alpha3s))
-    denominator: float = g2pp * g3pp + g3pp * g1pp + g1pp * g2pp
-    I: float = 0.4 * (g1pp + g2pp) / denominator
+    denominator: NDArray = g2pp * g3pp + g3pp * g1pp + g1pp * g2pp
+    I = 0.4 * (g1pp + g2pp) / denominator  # noqa: E4731
 
     return I
 
@@ -93,7 +96,21 @@ def eq39_40(alpha1s: float, alpha2s: float, alpha3s: float) -> float:
     return (g1pp - g2pp) / (g1pp + g2pp)
 
 
-def eq41(alpha1s: float, alpha2s: float, theta2: float, kappa: float) -> Annotated[float, "ttf"]:
+@overload
+def eq41(
+    alpha1s: float, alpha2s: float, theta2: float, kappa: float
+) -> Annotated[float, "ttf"]: ...
+
+
+@overload
+def eq41(
+    alpha1s: NDArray, alpha2s: NDArray, theta2: NDArray, kappa: NDArray
+) -> Annotated[NDArray, "ttf"]: ...
+
+
+def eq41(
+    alpha1s: floatN, alpha2s: floatN, theta2: floatN, kappa: floatN
+) -> Annotated[floatN, "ttf"]:
     return (
         -(alpha1s + alpha2s)
         / (2 * np.sqrt(alpha1s * alpha2s))
@@ -103,7 +120,7 @@ def eq41(alpha1s: float, alpha2s: float, theta2: float, kappa: float) -> Annotat
     )
 
 
-def eq43(alpha1s: float, alpha2s: float, alpha3s: float) -> Annotated[float, "K"]:
+def eq43(alpha1s: NDArray, alpha2s: NDArray, alpha3s: NDArray) -> Annotated[NDArray, "K"]:
     return (alpha1s + alpha2s) / (5 * pooled(eq21)(alpha1s, alpha2s, alpha3s) * alpha1s * alpha2s)
 
 
@@ -127,18 +144,57 @@ def solve_eq78(alpha1s: float) -> Annotated[float, "alpha2s"]:
     return sol.root
 
 
+@overload
 def eq79(
-    alpha1s: float, alpha2s: float, alpha3s: float, I: float, theta2: float, sigma: float
-) -> Annotated[float, "kappa"]:
+    alpha1s: float,
+    alpha2s: float,
+    alpha3s: float,
+    I: float,  # noqa: E4731
+    theta2: float,
+    sigma: float,
+) -> Annotated[float, "kappa"]: ...
+
+
+@overload
+def eq79(
+    alpha1s: NDArray,
+    alpha2s: NDArray,
+    alpha3s: NDArray,
+    I: NDArray,  # noqa: E4731
+    theta2: NDArray,
+    sigma: float,
+) -> Annotated[NDArray, "kappa"]: ...
+
+
+def eq79(
+    alpha1s: floatN,
+    alpha2s: floatN,
+    alpha3s: floatN,
+    I: floatN,  # noqa: E4731
+    theta2: floatN,
+    sigma: float,
+) -> Annotated[floatN, "kappa"]:
     # typo in Roscoe!
     numerator = alpha1s - alpha2s
     denominator = 2 * I * sigma * np.sin(theta2)
     return numerator / denominator
 
 
+@overload
 def eq80(
     alpha1s: float, alpha2s: float, alpha3s: float, K: float, contrast: float
-) -> Annotated[float, "2theta"]:
+) -> Annotated[float, "2theta"]: ...
+
+
+@overload
+def eq80(
+    alpha1s: NDArray, alpha2s: NDArray, alpha3s: NDArray, K: NDArray, contrast: float
+) -> Annotated[NDArray, "2theta"]: ...
+
+
+def eq80(
+    alpha1s: floatN, alpha2s: floatN, alpha3s: floatN, K: floatN, contrast: float
+) -> Annotated[floatN, "2theta"]:
     de = 2 * np.sqrt(alpha1s * alpha2s)
     a = (alpha1s - alpha2s) / de
     b = (alpha1s + alpha2s) / de
@@ -165,10 +221,12 @@ class Roscoe:
 
     def prepare(self, contrast: Optional[float] = None, numberDatapoints: int = 10000):
         if contrast and contrast > 2:  # There is a maximum deformation
-            l, m, u = self.estimateMaximumDeformation(contrast)
-            l = 1  # We want our intervall to start at 1
+            lo, m, u = self.estimateMaximumDeformation(contrast)
+            lo = 1  # We want our intervall to start at 1
             # Spend 90% of our resolution along the likely location of target alphas
-            lowerIntervall = l - 1 + np.logspace(0, np.log10(m - l + 1), 9 * numberDatapoints // 10)
+            lowerIntervall = (
+                lo - 1 + np.logspace(0, np.log10(m - lo + 1), 9 * numberDatapoints // 10)
+            )
             upperIntervall = m - 1 + np.logspace(0, np.log10(u - m + 1), numberDatapoints // 10)
             self.alpha1s = (
                 np.concatenate((lowerIntervall, upperIntervall[1:])) ** 2
@@ -180,7 +238,7 @@ class Roscoe:
         self.alpha2s = pooled(solve_eq78)(self.alpha1s)
         self.alpha3s = 1 / (self.alpha1s * self.alpha2s)
 
-        self.I = eq39(self.alpha1s, self.alpha2s, self.alpha3s)
+        self.I = eq39(self.alpha1s, self.alpha2s, self.alpha3s)  # noqa: E4731
         self.K = eq43(self.alpha1s, self.alpha2s, self.alpha3s)
         self.prepared = True
 
@@ -224,17 +282,17 @@ class Roscoe:
         a3s = self.alpha3s
 
         while err > maxRelativeError:  # Limit error
-            l = np.sqrt(a1s[lower])
+            lo = np.sqrt(a1s[lower])
             u = np.sqrt(a1s[upper])
             if contrast > 2:
-                a1s = (l - 1 + np.logspace(0, np.log10(u - l + 1), numberDatapoints)) ** 2
+                a1s = (lo - 1 + np.logspace(0, np.log10(u - lo + 1), numberDatapoints)) ** 2
             else:
-                d = (u - l) / numberDatapoints
-                a1s = np.arange(l, u * (1 + d), d) ** 2
+                d = (u - lo) / numberDatapoints
+                a1s = np.arange(lo, u * (1 + d), d) ** 2
             a2s = pooled(solve_eq78)(a1s)
             a3s = 1 / (a1s * a2s)
 
-            I = eq39(a1s, a2s, a3s)
+            I = eq39(a1s, a2s, a3s)  # noqa: E4731
             K = eq43(a1s, a2s, a3s)
             theta2 = eq80(a1s, a2s, a3s, K, contrast)
             kappa = eq79(a1s, a2s, a3s, I, theta2, sigma)
