@@ -209,10 +209,55 @@ def eq80(
 
 
 class Roscoe:
-    def __init__(self):
-        pass
+    """
+    Wrapper class to facilitate usage of the Roscoe theory without prior knowledge.
+
+    Attributes
+    ----------
+    alpha1s : float
+        Cached goemetry; square of alpha_1 guesses.
+    alpha2s : float
+        Cached goemetry; square of alpha_2 generated from alpha_1 guesses.
+    alpha3s : float
+        Cached goemetry; square of alpha_3 generated from alpha_1 guesses.
+    I : float
+        Cached goemetry; I (Roscoe eq. 39) calculated from alpha_1 guesses.
+    K : float
+        Cached goemetry; K (Roscoe eq. 43) calculated from alpha_1 guesses.
+    prepared : bool
+        Whether prepare was called.
+
+    Methods
+    -------
+    estimateMaximumDeformation(contrast)
+        Calculate maximum deformation for given contrast.
+    prepare(self, contrast = None, numberDatapoints = 10000)
+        Make initial guesses for alpha_1 and cache resulting geometry
+    calculate(contrast, sigma, shearRate, numberDatapoints = 10000, maxRelativeError = 1e-4)
+        Calculate the parameters returned by Roscoes theory.
+
+    """
 
     def estimateMaximumDeformation(self, contrast: float) -> Tuple[float, float, float]:
+        """
+        Calculate maximum deformation for given contrast.
+
+        For a given contrast > 2 there exists a maximum deformation (of alpha_1)
+        This gives a lower, middle and upper estimate
+        Lower and upper can be treated as bounds while middle is the best guess
+        Valid for alpha1 < 10**1.7
+
+        Parameters
+        ----------
+        contrast : float
+            The viscosity contrast for which to calculate the estimates.
+
+        Returns
+        -------
+        Tuple[float, float, float]
+            lower middle and upper estimate.
+
+        """
         lowerAlpha1 = np.sqrt(2 / (contrast - 1.997) + 1)
         middleAlpha1 = np.sqrt(5.1 / (2 * contrast - 3.997) + 1)
         upperAlpha1 = np.sqrt(3.1 / (contrast - 2) + 1)
@@ -220,6 +265,35 @@ class Roscoe:
         return lowerAlpha1, middleAlpha1, upperAlpha1
 
     def prepare(self, contrast: Optional[float] = None, numberDatapoints: int = 10000):
+        """
+        Prepare initial alpha_1 guesses and resulting geometry.
+
+        As the geometry is not related to the parameters of the system, this can be calculated in
+        advance. This can than be used for multiple lookups. One could consider turing this into a
+        lookup table.
+
+        The initial guesses are distributed linearly from alpha_1 = 1 to 10.
+        If a contrast is specidied that would cause a maximum deformation to exist, the initial
+        guesses are instead distributed up to the upper bound of the estimate for the maximum
+        deformation. They are distributed along a logarithmic distributing centered in the middle
+        estimate. This allows higher precission in this reagion. Do not set this if you plan to run
+        the calculation with different contrasts.
+
+        For the default number of datapoints this takes 2 s - 20 s depending on your computer.
+        For the maximum performance this should be set at least at ten times your core count.
+
+        Parameters
+        ----------
+        contrast : Optional[float], optional
+            A contrast to determine sensible initial guesses. The default is None.
+        numberDatapoints : int, optional
+            The number of initial guesses. The default is 10000.
+
+        Returns
+        -------
+        None.
+
+        """
         if contrast and contrast > 2:  # There is a maximum deformation
             lo, m, u = self.estimateMaximumDeformation(contrast)
             lo = 1  # We want our intervall to start at 1
@@ -244,12 +318,47 @@ class Roscoe:
 
     def calculate(
         self,
-        contrast,
-        sigma,
-        shearRate,
+        contrast: float,
+        sigma: float,
+        shearRate: float,
         numberDatapoints: int = 10000,
         maxRelativeError: float = 1e-4,
-    ):
+    ) -> Tuple[
+        Tuple[float, float, float, float, float, float],
+        Tuple[float, float, float, float, float, float],
+    ]:
+        """
+        Calculate the parameters returned by Roscoes theory.
+
+        This is run iteratively until the given error is reached. The resulting error might be
+        significantly better depending on the number of datapoints in each step. For the default
+        value a step takes 2 s - 20 s depending on your computer. For the maximum performance this
+        should be set at least at ten times your core count.
+
+        Parameters
+        ----------
+        contrast : float
+            The viscosity contrast.
+        sigma : float
+            2.5*eta_0/mu as specified by roscoe eq. 62.
+        shearRate : float
+            The shear rate applied to the cell.
+        numberDatapoints : int, optional
+            The number of new points if a more refined guess is required. The default is 10000.
+        maxRelativeError : float, optional
+            How far the solution may be from the exact given shear rate. The default is 1e-4.
+
+        Raises
+        ------
+        Exception
+            If you forgot to prepare or if the initial intervall is too short.
+
+        Returns
+        -------
+        Tuple[Tuple[float, float, float, float, float, float], Tuple[float, float, float, float, float, float]] # noqa: E501
+            alpha_1, alpha_2, alpha_3, theta, kappa, nu and their absolute errors.
+
+        """
         if not self.prepared:
             raise Exception("You need to prepare Roscoe before using it")
         theta2 = eq80(self.alpha1s, self.alpha2s, self.alpha3s, self.K, contrast)
@@ -333,4 +442,4 @@ class Roscoe:
         return (a1, a2, a3, t, k, ttf), (err1, err2, err3, errt, errk, errttf)
 
 
-__all__ = ["Roscoe"]
+__all__ = ["Roscoe"]  # Only Roscoe class is for public consumption
