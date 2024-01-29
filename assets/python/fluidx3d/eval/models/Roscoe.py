@@ -7,14 +7,14 @@ Created on Thu Jan 25 15:23:55 2024
 @author: Richard Kellnberger
 """
 
-from typing import Annotated, Tuple, Optional
+import warnings
 from functools import wraps
+from multiprocessing import Pool
+from typing import Annotated, Optional, Tuple
 
 import numpy as np
 from scipy.integrate import quad
 from scipy.optimize import root_scalar
-from multiprocessing import Pool
-import warnings
 
 
 def pooled(fun):
@@ -93,6 +93,16 @@ def eq39_40(alpha1s: float, alpha2s: float, alpha3s: float) -> float:
     return (g1pp - g2pp) / (g1pp + g2pp)
 
 
+def eq41(alpha1s: float, alpha2s: float, theta2: float, kappa: float) -> Annotated[float, "ttf"]:
+    return (
+        -(alpha1s + alpha2s)
+        / (2 * np.sqrt(alpha1s * alpha2s))
+        * (1 - (alpha1s - alpha2s) / (alpha1s + alpha2s) * np.cos(theta2))
+        * kappa
+        / 2
+    )
+
+
 def eq43(alpha1s: float, alpha2s: float, alpha3s: float) -> Annotated[float, "K"]:
     return (alpha1s + alpha2s) / (5 * pooled(eq21)(alpha1s, alpha2s, alpha3s) * alpha1s * alpha2s)
 
@@ -120,7 +130,7 @@ def solve_eq78(alpha1s: float) -> Annotated[float, "alpha2s"]:
 def eq79(
     alpha1s: float, alpha2s: float, alpha3s: float, I: float, theta2: float, sigma: float
 ) -> Annotated[float, "kappa"]:
-    # typo in Roscoe! # TODO CHECK
+    # typo in Roscoe!
     numerator = alpha1s - alpha2s
     denominator = 2 * I * sigma * np.sin(theta2)
     return numerator / denominator
@@ -174,7 +184,14 @@ class Roscoe:
         self.K = eq43(self.alpha1s, self.alpha2s, self.alpha3s)
         self.prepared = True
 
-    def calculate(self, contrast, sigma, shearRate, numberDatapoints: int = 10000):
+    def calculate(
+        self,
+        contrast,
+        sigma,
+        shearRate,
+        numberDatapoints: int = 10000,
+        maxRelativeError: float = 1e-4,
+    ):
         if not self.prepared:
             raise Exception("You need to prepare Roscoe before using it")
         theta2 = eq80(self.alpha1s, self.alpha2s, self.alpha3s, self.K, contrast)
@@ -197,34 +214,23 @@ class Roscoe:
             lower = closest
             upper = closest + 1
 
-        err = (kappa[upper] - kappa[lower]) / shearRate
+        # This error definition carries the assumption,
+        # that kappa is essentially linear between upper and lower
+        # This is wrong given large enough steps
+        err = np.abs((kappa[upper] + kappa[lower] - 2 * shearRate) / 2 / shearRate)
 
         a1s = self.alpha1s
         a2s = self.alpha2s
         a3s = self.alpha3s
 
-        while err > 1e-4:  # Limit error
+        while err > maxRelativeError:  # Limit error
             l = np.sqrt(a1s[lower])
             u = np.sqrt(a1s[upper])
             if contrast > 2:
-                a1s = (
-                    np.logspace(
-                        np.log10(l),
-                        np.log10(u),
-                        numberDatapoints,
-                    )
-                    ** 2
-                )
+                a1s = (l - 1 + np.logspace(0, np.log10(u - l + 1), numberDatapoints)) ** 2
             else:
                 d = (u - l) / numberDatapoints
-                a1s = (
-                    np.arange(
-                        l,
-                        u * (1 + d),
-                        d,
-                    )
-                    ** 2
-                )
+                a1s = np.arange(l, u * (1 + d), d) ** 2
             a2s = pooled(solve_eq78)(a1s)
             a3s = 1 / (a1s * a2s)
 
@@ -246,20 +252,27 @@ class Roscoe:
                 lower = closest
                 upper = closest + 1
 
-            err = (kappa[upper] - kappa[lower]) / shearRate
+            # This error definition carries the assumption,
+            # that kappa is essentially linear between upper and lower
+            # This is wrong given large enough steps
+            err = np.abs((kappa[upper] + kappa[lower] - 2 * shearRate) / 2 / shearRate)
+
+        nu = eq41(a1s, a2s, theta2, kappa)  # Calculating this for each point is unnecessary
 
         a1 = 0.5 * (np.sqrt(a1s[lower]) + np.sqrt(a1s[upper]))
-        err1 = -(np.sqrt(a1s[lower]) - np.sqrt(a1s[upper]))
-        a2 = 0.5 * (np.sqrt(a2s[lower]) + np.sqrt(a1s[upper]))
-        err2 = -(np.sqrt(a2s[lower]) - np.sqrt(a1s[upper]))
-        a3 = 0.5 * (np.sqrt(a3s[lower]) + np.sqrt(a1s[upper]))
-        err3 = -(np.sqrt(a3s[lower]) - np.sqrt(a1s[upper]))
+        err1 = np.abs(np.sqrt(a1s[lower]) - np.sqrt(a1s[upper])) / 2
+        a2 = 0.5 * (np.sqrt(a2s[lower]) + np.sqrt(a2s[upper]))
+        err2 = np.abs(np.sqrt(a2s[lower]) - np.sqrt(a2s[upper])) / 2
+        a3 = 0.5 * (np.sqrt(a3s[lower]) + np.sqrt(a3s[upper]))
+        err3 = np.abs(np.sqrt(a3s[lower]) - np.sqrt(a3s[upper])) / 2
         t = 0.5 * (theta2[lower] + theta2[upper]) / 2
-        errt = -(theta2[lower] - theta2[upper]) / 2
+        errt = np.abs(theta2[lower] - theta2[upper]) / 2 / 2
         k = 0.5 * (kappa[lower] + kappa[upper])
-        errk = -(kappa[lower] - kappa[upper])
+        errk = np.abs(kappa[lower] - kappa[upper]) / 2
+        ttf = 0.5 * (nu[lower] + nu[upper])
+        errttf = np.abs(nu[lower] - nu[upper]) / 2
 
-        return (a1, a2, a3, t, k), (err1, err2, err3, errt, errk)
+        return (a1, a2, a3, t, k, ttf), (err1, err2, err3, errt, errk, errttf)
 
 
 __all__ = ["Roscoe"]
