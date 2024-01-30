@@ -208,6 +208,23 @@ def eq80(
         return np.arccos(numerator / denominator)
 
 
+# TODO type and document models
+def modelRadiusSquared(t, alpha1s, alpha2s, nu, phase):
+    return (alpha1s - alpha2s) * np.cos(nu * t + phase) ** 2 + alpha2s
+
+
+def modelX1(t, alpha1, alpha2, theta, nu, phase):
+    return alpha1 * np.cos(nu * t + phase) * np.cos(theta) - alpha2 * np.sin(
+        nu * t + phase
+    ) * np.sin(theta)
+
+
+def modelY1(t, alpha1, alpha2, theta, nu, phase):
+    return alpha1 * np.cos(nu * t + phase) * np.sin(theta) + alpha2 * np.sin(
+        nu * t + phase
+    ) * np.cos(theta)
+
+
 class Roscoe:
     """
     Wrapper class to facilitate usage of the Roscoe theory without prior knowledge.
@@ -442,4 +459,5 @@ class Roscoe:
         return (a1, a2, a3, t, k, ttf), (err1, err2, err3, errt, errk, errttf)
 
 
-__all__ = ["Roscoe"]  # Only Roscoe class is for public consumption
+# Only Roscoe class and models are for public consumption
+__all__ = ["Roscoe", "modelRadiusSquared", "modelX1", "modelY1"]
