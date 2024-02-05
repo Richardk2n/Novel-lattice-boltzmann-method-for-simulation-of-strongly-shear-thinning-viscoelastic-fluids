@@ -133,7 +133,7 @@ def solve_eq78(alpha1s: float) -> Annotated[float, "alpha2s"]:
 
     sol = root_scalar(
         eq78,
-        method="bisect",
+        method="toms748",
         bracket=[1e-15, 1 / alpha1s],
     )
 
@@ -208,18 +208,100 @@ def eq80(
         return np.arccos(numerator / denominator)
 
 
-# TODO type and document models
-def modelRadiusSquared(t, alpha1s, alpha2s, nu, phase):
+def modelRadiusSquared(
+    t: NDArray, alpha1s: float, alpha2s: float, nu: float, phase: float
+) -> NDArray:
+    """
+    Model used to evaluate roscoe simulations.
+
+    This is equivalent to x**2 + y**2 for points at the surface at z = 0.
+    Noteably does not contain theta and such is easiert to fit.
+
+    Parameters
+    ----------
+    t : NDArray
+        Time.
+    alpha1s : float
+        Squared alpha_1.
+    alpha2s : float
+        Squared alpha_2.
+    nu : float
+        Tank-threading frequency.
+    phase : float
+        Irrelevant.
+
+    Returns
+    -------
+    NDArray
+        x**2 + y**2.
+
+    """
     return (alpha1s - alpha2s) * np.cos(nu * t + phase) ** 2 + alpha2s
 
 
-def modelX1(t, alpha1, alpha2, theta, nu, phase):
+def modelX1(
+    t: NDArray, alpha1: float, alpha2: float, theta: float, nu: float, phase: float
+) -> NDArray:
+    """
+    Model used to evaluete roscoe simulations.
+
+    This models the x-coordinate for points at the surface at z = 0.
+
+    Parameters
+    ----------
+    t : NDArray
+        Time.
+    alpha1 : float
+        Squared alpha_1.
+    alpha2 : float
+        Squared alpha_2.
+    theta : float
+        Angle of inclation of the cell.
+    nu : float
+        Tank-threading frequency.
+    phase : float
+        Irrelevant.
+
+    Returns
+    -------
+    NDArray
+        x.
+
+    """
     return alpha1 * np.cos(nu * t + phase) * np.cos(theta) - alpha2 * np.sin(
         nu * t + phase
     ) * np.sin(theta)
 
 
-def modelY1(t, alpha1, alpha2, theta, nu, phase):
+def modelY1(
+    t: NDArray, alpha1: float, alpha2: float, theta: float, nu: float, phase: float
+) -> NDArray:
+    """
+    Model used to evaluete roscoe simulations.
+
+    This models the y-coordinate for points at the surface at z = 0.
+
+    Parameters
+    ----------
+    t : NDArray
+        Time.
+    alpha1 : float
+        Squared alpha_1.
+    alpha2 : float
+        Squared alpha_2.
+    theta : float
+        Angle of inclation of the cell.
+    nu : float
+        Tank-threading frequency.
+    phase : float
+        Irrelevant.
+
+    Returns
+    -------
+    NDArray
+        y.
+
+    """
     return alpha1 * np.cos(nu * t + phase) * np.sin(theta) + alpha2 * np.sin(
         nu * t + phase
     ) * np.cos(theta)
@@ -352,6 +434,8 @@ class Roscoe:
         value a step takes 2 s - 20 s depending on your computer. For the maximum performance this
         should be set at least at ten times your core count.
 
+        The mu in sigma is the shear modulus.
+
         Parameters
         ----------
         contrast : float
@@ -443,12 +527,13 @@ class Roscoe:
 
         nu = eq41(a1s, a2s, theta2, kappa)  # Calculating this for each point is unnecessary
 
+        # Error propagation for the sequared alphas
         a1 = 0.5 * (np.sqrt(a1s[lower]) + np.sqrt(a1s[upper]))
-        err1 = np.abs(np.sqrt(a1s[lower]) - np.sqrt(a1s[upper])) / 2
+        err1 = np.abs(np.sqrt(a1s[lower]) - np.sqrt(a1s[upper])) / 2 / (2 * a1)
         a2 = 0.5 * (np.sqrt(a2s[lower]) + np.sqrt(a2s[upper]))
-        err2 = np.abs(np.sqrt(a2s[lower]) - np.sqrt(a2s[upper])) / 2
+        err2 = np.abs(np.sqrt(a2s[lower]) - np.sqrt(a2s[upper])) / 2 / (2 * a2)
         a3 = 0.5 * (np.sqrt(a3s[lower]) + np.sqrt(a3s[upper]))
-        err3 = np.abs(np.sqrt(a3s[lower]) - np.sqrt(a3s[upper])) / 2
+        err3 = np.abs(np.sqrt(a3s[lower]) - np.sqrt(a3s[upper])) / 2 / (2 * a3)
         t = 0.5 * (theta2[lower] + theta2[upper]) / 2
         errt = np.abs(theta2[lower] - theta2[upper]) / 2 / 2
         k = 0.5 * (kappa[lower] + kappa[upper])
@@ -457,6 +542,49 @@ class Roscoe:
         errttf = np.abs(nu[lower] - nu[upper]) / 2
 
         return (a1, a2, a3, t, k, ttf), (err1, err2, err3, errt, errk, errttf)
+
+    def getPreparedInternals(
+        self, contrast: float, sigma: float
+    ) -> Tuple[NDArray, NDArray, NDArray, NDArray, NDArray, NDArray]:
+        """
+        Return all values for the prepared points.
+
+        Usefull to evaluate the behavior of the underlying equations.
+        Can replace calculate in some usecases if high accuray is optional.
+
+        The mu in sigma is the shear modulus.
+
+        Parameters
+        ----------
+        contrast : float
+            The viscosity contrast..
+        sigma : float
+            2.5*eta_0/mu as specified by roscoe eq. 62.
+
+        Raises
+        ------
+        Exception
+            If you forgot to prepare or if the initial intervall is too short.
+
+        Returns
+        -------
+        Tuple[NDArray, NDArray, NDArray, NDArray, NDArray, NDArray]
+            alpha_1, alpha_2, alpha_3, theta, kappa, nu.
+
+        """
+        if not self.prepared:
+            raise Exception("You need to prepare Roscoe before using it")
+        theta2 = eq80(self.alpha1s, self.alpha2s, self.alpha3s, self.K, contrast)
+        kappa = eq79(self.alpha1s, self.alpha2s, self.alpha3s, self.I, theta2, sigma)
+        nu = eq41(self.alpha1s, self.alpha2s, theta2, kappa)
+        return (
+            np.sqrt(self.alpha1s),
+            np.sqrt(self.alpha2s),
+            np.sqrt(self.alpha3s),
+            theta2 / 2,
+            kappa,  # Shear rate
+            nu,  # Tank-treading frequency
+        )
 
 
 # Only Roscoe class and models are for public consumption
