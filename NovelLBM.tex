@@ -112,12 +112,12 @@ Carrier fluids in bioprinting, termed bioinks, are characterized in general by s
 On the other hand, during the actual printing process when the material is flowing, the viscosity should be as low as possible to avoid excessive mechanical stress on the embedded cells.
 	\begin{figure}[H]
 		\centering
-		\includegraphics[width=7cm]{assets/plots/fit_alginate_eta.eps}
-		\includegraphics[width=7cm]{assets/plots/fit_alginate_N.eps}
+		\includegraphics[width=7.8cm]{assets/plots/fit_alginate_eta.eps}
+		\includegraphics[width=7.8cm]{assets/plots/fit_alginate_N.eps}
 %		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/fit_alginate_eta.eps}
 %		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/fit_alginate_N.eps}
 		\caption{Rheology data for alginate solution from 21 measurements of the viscosity (a) and normal stress (b).
-				Orange lines show a fit of the PTT rheological model. \SG{ include second plateau }\SG{ larger font in figures }}
+				Orange lines show a fit of the PTT rheological model. \SG{ larger font in figures }}
 		\label{fig:fit_alginate}
 	\end{figure}
 
@@ -128,10 +128,10 @@ Three concentrations of \SI{0.49}{\percent}, \SI{0.59}{\percent} and \SI{0.83}{\
 Even at the highest concentration the zero-shear viscosity is two orders of magnitude lower than for the considered alginate solution.
 	\begin{figure}[H]
 		\centering
-		\includegraphics[width=7cm]{assets/plots/fit_mc_eta.eps}
-		\includegraphics[width=7cm]{assets/plots/fit_mc_N.eps}
+		\includegraphics[width=7.8cm]{assets/plots/fit_mc_eta.eps}
+		\includegraphics[width=7.8cm]{assets/plots/fit_mc_N.eps}
 		\caption{Rheology data of a methyl cellulose solution from \cite{buyukurganci2023}.
-				Orange lines show a fit of the PTT rheological model. \SG{ include second plateau }\SG{ larger font in figures }}
+				Orange lines show a fit of the PTT rheological model. \SG{ include legend into figure. Maybe give color coding only in caption? }\SG{ larger font in figures }}
 		\label{fig:fit_mc}
 	\end{figure}
 	
@@ -146,6 +146,7 @@ The best fit was obtained with the so-called PTT model due to Phan-Thien and Tan
 The PTT model is specified by a constitutive equation for the polymer stress $ \ma{\tau}$:
 	\begin{equation}
 		\overset{\nabla}{\ma{\tau}} = -\xi\left(\ma{\tau}\cdot\ma{D} + \ma{D}\cdot\ma{\tau}\right) - e^{\frac{\epsilon\lambda}{\eta_\text{p}}\Tr\ma{\tau}}\frac{\ma{\tau}}{\lambda} + 2\frac{\eta_\text{p}}{\lambda}\ma{D}
+		\label{eq:polymerStress}
 	\end{equation}
 where $\ma{D}$ is the strain rate tensor. 
 The polymer viscosity is denoted $\eta_\text{p}$ and $\lambda$ is the corresponding relaxation time.  \SG{ are they actually independent? }
@@ -194,7 +195,11 @@ while the parameters for the three concentrations of methyl cellulose are given 
 		\label{tab:MC_parameters}
 	\end{table}
 
-We introduce the ratio between the zero-shear and the infinite-shear (i.e.\ solvent) viscosity as $R_ \eta  = \frac{ \eta _ \mathrm{p} } { \eta _ \mathrm{s} }$ which will turn out to be an important parameter to determine numerical stability of LB simulations. \SG{ do we actually need a ratio? Since $ \eta _\mathrm{s}$ is probably always water-like, would it not be enough to state whether $ \eta _ \mathrm{p}$ is high or low } \SG{ do we actually show that $R_ \eta  $ determines stability? }
+We introduce the ratio between the zero-shear and the infinite-shear (i.e.\ solvent) viscosity as 
+\begin{align}
+	R_ \eta  = \frac{ \eta _ \mathrm{p} } { \eta _ \mathrm{s} }		\label{eq:R_eta}
+\end{align}
+which will turn out to be an important parameter to determine numerical stability of LB simulations. \SG{ do we actually need a ratio? Since $ \eta _\mathrm{s}$ is probably always water-like, would it not be enough to state whether $ \eta _ \mathrm{p}$ is high or low } \SG{ do we actually show that $R_ \eta  $ determines stability? }
 This ratio can in a similar fashion be defined for other models such as FENE-P or the inelastic, but shear-thinning Carreau-Yasuda model \cite{carreau1972, yasuda1979}.
 For our alginate solution we obtain $R _ \eta = \num{48.2\pm0.4e3}$, indicating that the solution viscosity at very low shear rates is more than four orders of magnitude larger than the solvent viscosity which represents a severe challenge to standard numerical algorithms.
 That this characteristic is not unique to alginate, but is in fact a generic feature of cell carrier fluids used in bioprinting is shown in table~\ref{tab:bioinks} where rheological from various literature sources have been compiled into a single format to determine $ R_ \eta $.
@@ -208,11 +213,12 @@ The 0.49 \% methyl cellulose solution used in RT-DC measurements, in contrast, f
 			Amorim\cite{amorim2021} & pre-crosslinked alginate &  >1e4 & <3e-1 & >3e4 & Fig. 3b \\
 			\rowcolor{secondaryBackground}
 			Pössl\cite{possl2021} & blend & 3e2 & 1e-4 & 3e6 & Table 4 \\
-			Paxton\cite{paxton2017} &Nivea Creme\n Alginate& 1e5\n5e4 & <1\n<5e1 & >1e5\n>1e3 & Fig. 4b \\
+%			Paxton\cite{paxton2017} &Nivea Creme\n Alginate& 1e5\n5e4 & <1\n<5e1 & >1e5\n>1e3 & Fig. 4b \\
+			Paxton\cite{paxton2017} & Alginate& 5e4 & <5e1 & >1e3 & Fig. 4b \\
 			\rowcolor{secondaryBackground}
 			O'Connell\cite{oconnell2020} & pluronic F-127 & >1e6 & <8 & > 2e5 & Chapter 7 Fig. 13 \\
 		\end{tabular}
-	\caption{Compilation of literature data on typical bioinks showing that a very viscosity ratio $ R_ \eta $ is a generic feature of these liquids.}
+	\caption{Compilation of literature data on typical bioinks showing that a very viscosity ratio $ R_ \eta $ is a generic feature of these liquids. }
 	\label{tab:bioinks}
 \end{table}
 
@@ -223,36 +229,127 @@ The 0.49 \% methyl cellulose solution used in RT-DC measurements, in contrast, f
 	
 \section{Existing LBM methods}
 
-\SG{ For some linear viscoelastic liquids simulations without modeling the constitutive equation of this tensor are possible using a slightly modified lattice Boltzmann method\cite{giraud1998,lallemand2003}. }
+Since the early days of LBM methods for viscoelastic fluids have been developed. 
+Keeping in mind our target geometries, we focus here on three dimensional formulations.
+The first approaches avoided an explicit modeling of a viscoelastic constitutive equation and simply modified the LB collision operator to obtain a fluid obeying Jeffery's viscoelastic model \cite{lallemand2003}. \SG{ can we say more about Jeffery? Why is it bad? Is it shear-thinning? }
+More advcanced approaches include the work of Onishi \textit{et al.} \cite{onishi2005, onishi2006} who considered a non-shear-thinning Oldroyd-B model using a microscopic Fokker-Planck equation for the polymer dumbbells. 
+The work of \cite{malaspinas2010} and \cite{ma2020} considered in addition the FENE-P model solving the advection part of the model using a second LBM running in parallel to the Navier-Stokes LBM while \cite{wang2020} used this approach for the Oldroyd-B model.
+Later, hybrid schemes coupling an LB solver for the solvent to a finite-difference \cite{gupta2015_2, gupta2015, gupta2016} or finite-volume \cite{kuron2021} scheme for the polymer stress (or, alternatively, the polymer conformation) tensor were introduced.
+To improve numerical stability, some authors propose the inclusion of an artificial diffusivity \SG{ cite }, which introduces a small error compared to the analytical solution of the constitutive equation. 
+Coupling of the resulting polymer stress to the Navier-Stokes LBM can be achieved via the inclusion of point forces or via a modification of the equilibrium populations.
+A recent comparison in 2D found that the former in general leads to higher stability \cite{dzanic2022}.
 
-	There are many existing LBM methods to simulate viscoelastic materials in three dimensions. Some simple linear viscoelastic effects can be described through multi-relaxation-time models \cite{lallemand2003}, but in general more complicated methods are required. For more general cases the solving of a second equation is required. There are several options for the equation describing the polymer. Among these are the constitutive equation\cite{gupta2015} and a Fokker-Planck equation\cite{onishi2005}. Solving these equations can be done through multiple ways. These include a finite volume solver, a finite difference solver\cite{gupta2015}, another LBM like solver\cite{ma2020} and an advection-diffusion scheme\cite{onishi2005}. These secondary solvers need to be coupled to the primary LBM solver. Options to do that include introducing an additional forcing term to the LBM and altering the LBM stress directly\cite{dzanic2022}.
+The stable range of Weissenberg numbers covered by existing methods is up to $ \mathrm{Wi}  \approx  10$ for the method of \cite{malaspinas2010} and up to $ \mathrm{Wi}  \approx 100$ in \cite{gupta2015,ma2020,gupta2016}.
+However, another stability criterion, which is often overlooked is the viscosity ratio $ R_ \eta $ as defined in XX. 
+Existing methods often stay at or below $R_\eta = 1$\cite{gupta2015,onishi2006,wang2020,su2013_2,gupta2015_2}, while the ones trying higher ratios report being limited below $R_\eta = 10$\cite{malaspinas2010,ma2020,kuron2021} due to stability issues. 
+The details are listed in table~\ref{tab:viscRatio}.
+Comparing to the rheological data presented in figures~\ref{fig:fit_alginate} and \ref{fig:fit_mc}, we conclude that existing LB methods appear to be appropriate only for relatively dilute solutions and in particular do not cover the viscosity ratio required by these technologically important cell carrier fluids.
+We therefore set out to develop a novel viscoelastic LB scheme which we will present in the next section. 
+
+\begin{table}
+\begin{center}
+			\begin{tabular}{l|r|r|l}
+				Author & max(Wi) & max($R_\eta$) & $R_\eta$ estimation \\
+				\hline
+				Malaspinas\cite{malaspinas2010} & 10 & 9 & In 4.3: $R_\nu = \num{0.1}$ \& equation (38) \\
+				\rowcolor{secondaryBackground}
+				Gupta\cite{gupta2015} & 100 & 0.7 & In IV.B: $\frac{\eta_\text{p}}{\eta_\text{A} + \eta_\text{p}} = \num{0.4}$ \\
+%				Dzanic\cite{dzanic2022} & 10 & 0.5 & In 4.1: $\beta = \frac{\nu_\text{p}}{\nu_\text{s}} = \num{0.5}$ \\
+				Ma\cite{ma2020} & 100 & 9 & In 4.1: $\beta = \frac{\mu_\text{s}}{\mu_\text{s} + \mu_\text{p}} = \num{0.1}$ \\
+				\rowcolor{secondaryBackground}
+				Onishi\cite{onishi2006} & ? & 1 & In 3.1: $\beta = \frac{\mu_\text{p}}{\mu_\text{s} + \mu_\text{p}}$ \& Table 1: $\beta=\num{0.5}$ \\
+				Wang\cite{wang2020} & \glqq up to O(1)\grqq & 5 & In II: $\eta_\text{p} = c\eta_\text{s}$ \& FIG. 9: $c = \num{5}$\\
+				\rowcolor{secondaryBackground}
+%				Dzanic\cite{dzanic2022_2} & 10 & 9 & In 5.1: $\beta = \frac{\nu_\text{s}}{\nu_\text{s} + \nu_\text{p}}$ \& In 5.1.2: $\beta = \num{0.1}$ \\
+				Su\cite{su2013_2} & 10 & 1  & In II: $\beta = \frac{\eta_\text{s}}{\eta_\text{s} + \eta_\text{p}}$ \& In IV.A: $\beta = \num{0.5}$ \\
+				Gupta\cite{gupta2015_2} & ? & 0.7 & In 2: $\frac{\eta_\text{p}}{\eta_\text{d}} = \num{0.4}$ \& $\eta_\text{d} = \eta_\text{A} + \eta_\text{p}$ \\
+				\rowcolor{secondaryBackground}
+				Kuron\cite{kuron2021} & 1 & 9 & In 4.1: $\beta = \num{0.9}$ \& equations (14) \& (15) \\
+				Gupta\cite{gupta2016} & 80 & 0.7 & In 3: $\frac{\eta_\text{p}}{\eta_\text{c,d} + \eta_\text{p}} = \num{0.4}$ \\
+				\rowcolor{secondaryBackground}
+				Onishi\cite{onishi2005} & 1000 & 1 & In 3.2: $\frac{\eta_\text{p}}{\eta_\text{s}} = \num{1}$ \\
+			\end{tabular}
+		\end{center}
+
+\caption{Covered ranges of $ \mathrm{Wi}$ and $ R_ \eta $ for existing 3D LB methods.}
+\end{table}
+
+
+
+%%
+%% Our method
+%%
 	
-	Among the publications implementing a constitutive equation most use Oldroyd-B or older models. Many also use FENE-P despite its shortcomings. The PTT model, which is currently the model used by us is rarely employed, though many authors do mention it.
-	
-	While these options lead to wide range of different coupled solvers, the results are similar. Some authors note, that the Weissenberg number could be extremely high using their scheme\cite{malaspinas2010}, the simulations actually presented in the publications usually only go up to $Wi = 10$\cite{malaspinas2010,su2013_2} or $Wi = 100$\cite{gupta2015,ma2020,gupta2016}. As can be seen in figure \ref{fig:ptt_eta_s} above, $Wi \leq 100$ covers most of the range already, and it seems plausible, that current capabilities cover most of not all experiments in this regard.
-	
-	However, another stability criterion, which only some others mention is the viscosity ratio. Its definition in literature varies significantly. We use equation \ref{eq:R_eta_ptt} whenever possible. For some publications we have to estimate it using data extracted from plots and equation \ref{eq:R_eta_CY}. The exact details can be found in section \ref{app:viscosityRatio}. Publications often stay at or below $R_\eta = 1$\cite{gupta2015,onishi2006,wang2020,su2013_2,gupta2015_2}, while the ones trying higher ratios report being limited below $R_\eta = 10$\cite{malaspinas2010,ma2020,kuron2021} due to stability issues. There are several options being explored in the literature to increase stability. The most prominent among them is the inclusion of an artificial diffusivity, which introduces a small error compared to the analytical solution of th constitutive equation. All of these ultimately fail to extend the range of stable viscosity ratios significantly. This means, that for the existing simulation approaches, the zero shear viscosity and the infinite shear viscosity are similar, which is only sufficient for very dilute solutions. The methods currently available do not allow the simulation of the real fluids mentioned before. Therefore, we developed a new method capable of much higher viscosity ratios. This novel approach will be discussed in the following section.
-	
-	\section{Numerical method}
-	Our numerical consists of several well known methods and our novel viscosity shuffling. In the following we provide a brief overview about the well known basics and an in depth explanation of our novel method.
-	\subsection{Basics}
-	To solve the fluid we use a lattice Boltzmann algorithm with a single relaxation time. One could also use multi relaxation time, but we found the benefit to be negligible. For the velocity set we use D3Q19 as D3Q27 did not provide significant benefit for us but increases computational cost significantly. We solve the constitutive equation with a finite volume solver. This simplifies the boundary conditions significantly as we set the stress flux through the walls to zero. The advection term in the constitutive equation is handled with the corner transport upwind scheme. The source terms are integrated using the Euler method. The exact implemented and its derivation can be found in appendix \ref{app:implementation}. The coupling to the main lattice Boltzmann solver happens using the stress directly according to Dzanic et al.\cite{dzanic2022_2}. However, we modify the coupled stress as is explained in the following.
-	\subsection{Novel viscosity shuffling}\label{sec:shuffling}
-	Performing Chapman-Enskog analysis on the LBM reveals the total stress experienced by the fluid ($\ma{\sigma}$) to be as follows\cite{onishi2006}.
+\section{Viscosity shuffling algorithm}
+
+Our algorithm contains a Lattice-Boltzmann solver for the Navier-Stokes equations of the solvent, a finite-volume solver for integrating the polymer stress and finally our newly developed viscosity shuffling method.
+
+\subsection{Lattice-Boltzmann for Navier-Stokes}
+
+The Lattice-Boltzmann method (LBM) has become a standard tool in numerical fluid mechanics \cite{Kruger_book} and we therefore describe it here only very briefly.
+We use a D3Q19 lattice in full three dimensions together with a single relaxation time collission operator.
+Our implementation is based on FluidX3D which has been extensively used and validated in earlier publications \cite{Lehmann.20229da}.
+The core of the algorithm is implemented in OpenCL and thus capable of running on GPUs from different vendors.
+Boundaries are modeled using the half-way bounce back algorithm.
+
+Physical units are mapped to lattice units to obtain a dimensionless relaxation time of 1.
+The employed lattice dimensions vary for the different applications and are specified below. \SG{ to do }
+To drive the flow, we use either a constant body force (modeling a physical pressure gradient) or inflow-outflow boundaries as specified in the different application scenarios below. \SG{ check, specify }
+
+\subsection{Finite-volume for polymer stress }
+
+The spatio-temporal dynamics of the polymer stress $ \ma{ \tau  }$ is given by equation~(\ref{eq:polymerStress}) in the form of an advection-reaction equation.
+We solve this equation with a finite-volume running in parallel (with identical time step) with the LBM solver.
+Advection is handled using the corner transport upwind scheme \cite{kuron2021}.
+At the walls, a zero-flux boundary condition for the stress is used.
+The source terms are integrated using the Euler method. 
+
+To include the polymer stress into the LBM, we use the stress coupling scheme according to Dzanic et al.\cite{dzanic2022_2, gupta2015, onishi2006}. 
+For this, ... \SG{ give some more details, especially since we do SRT }.
+The total stress experienced by the fluid ($\ma{\sigma}$) is then \cite{onishi2006}:
 	\begin{align}
-		\ma{\sigma} &= 2\eta_\text{s}\ma{D} + \ma{\tau}
-		\intertext{We now add a zero.}
-		&= 2\eta_\text{s}\ma{D} + \ma{\tau}_\text{shuffle} + \ma{\tau} - \ma{\tau}_\text{shuffle}
-		\intertext{With $\ma{\tau}_\text{shuffle} = 2\alpha_\text{s}\eta_\text{p}\ma{D}$}
-		&= 2\left(\eta_\text{s} + \alpha_\text{s}\eta_\text{p}\right)\ma{D} + \left(\ma{\tau} - 2\alpha_\text{s}\eta_\text{p}\ma{D}\right)
+		\ma{\sigma} &= 2\eta_\text{s}\ma{D} + \ma{\tau} 		\label{eq:totalStress}
 	\end{align}
-	With this new parameter $\alpha_\text{s}$ we can shuffle an arbitrary amount of viscosity around, as we use $\eta_\text{s} + \alpha_\text{s}\eta_\text{p}$ as the viscosity in the LBM algorithm, and the stress calculated via the constitutive equation gets a relatively simple offset applied to it before being included in the LBM. This allows for the first time to our knowledge to pick $\eta_\text{s} = 0$. This allows for accurate comparisons to the analytical solutions of the constitutive equation, as these usually do not include $\eta_\text{s}$. Furthermore, instead of using artificial diffusivity to stabilize the simulation or employing any other artificial remedy, this scheme allows to not modify the parameters and to simulate the exact physical system that is desired. The reason for the instability is, simply speaking, that the polymer contribution overpowers the LBM stress. This can be compared to the inclusion of very large forces, which cause some equilibrium populations to become negative resulting in the LBM become unstable. The viscosity shuffling allows us to increase the LBM stress while decreasing the polymer contribution. This shifts the balance towards stability. Crucially, this happens without altering the physical system simulated. In terms of stability, we could define an effective $R_\eta$, calculated from the stress contributions as follows.
-	\begin{equation}
-		R_{\eta\text{, eff}} = \frac{\eta_\text{p}-\alpha_\text{s}\eta_\text{p}}{\eta_\text{s} + \alpha_\text{s}\eta_\text{p}} = \frac{1-\alpha_\text{s}}{\frac{\eta_\text{s}}{\eta_\text{p}} + \alpha_\text{s}} = \frac{1-\alpha_\text{s}}{1 + \alpha_\text{s}R_{\eta}}R_{\eta} \overset{\alpha_\text{s}R_{\eta}\gg1}{=} \frac{1-\alpha_\text{s}}{\alpha_\text{s}}
-	\end{equation}
-	Given $\alpha_\text{s}$ is large enough, arbitrary $R_{\eta\text{, eff}}$ can be reached, bringing the simulation within the range, that is stable with current methods, and thus arbitrary $R_{\eta}$ become stable. A trade-off is, that $\alpha_\text{s}$ decreases the time-step. In the following section we validate this novel approach against analytical solutions for realistic parameters. Furthermore, we compare the accuracy of this scheme with literature.
+
+
+\subsection{Novel viscosity shuffling}\label{sec:shuffling}
+
+The key difficulty for simulating many realistic viscoelastic fluids is the unbalance between the viscous stress of the solvent and the polymer stress.
+While the former is handled efficiently and reliably by the LBM streaming-collision scheme, the latter enters the LB equations as an additional source term.
+The relative magnitude of the two terms is given by the viscosity ratio $R_ \eta $ as defined in equation~\ref{eq:R_eta} which for many situations is of the order of $10^2-10^4$ (see figure~\ref{fig:fit_alginate} and \ref{tab:bioinks}).
+The key idea of our scheme is to artificially increase the LBM viscous stress while at the same time reducing the polmer stress by the same amount.
+Starting from equation~\ref{eq:totalStress}, we write
+\begin{align}
+	\ma{\sigma} &= 2\eta_\text{s}\ma{D} + \ma{\tau}_\text{shuffle} + \ma{\tau} - \ma{\tau}_\text{shuffle}	
+\end{align}
+with the transfered (''shuffled'') stress
+\begin{align}
+	\ma{ \tau }_ \mathrm{shuffle} = 2 \alpha _ \mathrm{s} \eta _ \mathrm{p} \ma{D}
+\end{align}
+containing an arbitrary parameter $0 < \alpha _ \mathrm{s} < 1$.
+Finally, this results in
+\begin{align}
+	\ma{ \sigma } &=  2\left(\eta_\text{s} + \alpha_\text{s}\eta_\text{p}\right)\ma{D} + \left(\ma{\tau} - 2\alpha_\text{s}\eta_\text{p}\ma{D}\right).
+\end{align}
+In practice, the shuffling parameter $ \alpha _ \mathrm{s}$ is chosen before the start of the simulation.
+The LBM solver is run with $\eta_\text{s} + \alpha_\text{s}\eta_\text{p}$ as its viscosity while from the polymer stress determined by equation~\ref{eq:polymerStress} the amount $\alpha_\text{s}\eta_\text{p} \ma{D}$ is subtracted at every time step before it is coupled into the LBM.
+
+Using this procedure, we balance the stress contributions of the LB and the polymer components which vastly improves numerical stability.
+We emphasize that, in contrast to other remedies such as adding artificial diffusivity \SG{ refs }, our viscosity shuffling algorithm is mathematically exact and does not affect the physics of the simulated system.
+\SG{ re-include effective $R_ \eta $? }
+%	In terms of stability, we could define an effective $R_\eta$, calculated from the stress contributions as follows.
+%	\begin{equation}
+%		R_{\eta\text{, eff}} = \frac{\eta_\text{p}-\alpha_\text{s}\eta_\text{p}}{\eta_\text{s} + \alpha_\text{s}\eta_\text{p}} = \frac{1-\alpha_\text{s}}{\frac{\eta_\text{s}}{\eta_\text{p}} + \alpha_\text{s}} = \frac{1-\alpha_\text{s}}{1 + \alpha_\text{s}R_{\eta}}R_{\eta} \overset{\alpha_\text{s}R_{\eta}\gg1}{=} \frac{1-\alpha_\text{s}}{\alpha_\text{s}}
+%	\end{equation}
+	%Given $\alpha_\text{s}$ is large enough, arbitrary $R_{\eta\text{, eff}}$ can be reached, bringing the simulation within the range, that is stable with current methods, and thus arbitrary $R_{\eta}$ become stable. 
+The only trade-off of our viscosity shuffling scheme is that the increased LB viscosity decreases the LB time step if the lattice relaxation time is maintained at its optimal value of 1.
+In the following section we validate this novel approach against analytical solutions for realistic parameters and compare its accuracy to existing algorithms.
+
+%%
+%% Validation and accuracy
+%%
 	
-	\section{Validation and comparison}
+\section{Validation and accuracy}
 	To validate the simulations we compare the simulated velocity field of analytically solvable geometries to theory. For pressure gradient driven channel and pipe geometries, the analytical solution is as follows\cite{oliveira1999}.
 	\begin{equation}
 		u\left(r\right) = \frac{Gl^2}{2^{j+1}\eta_\text{p}}\left(e^\frac{R^2}{l^2}-e^\frac{r^2}{l^2}\right)
@@ -545,30 +642,7 @@ The first normal stress difference $N_1$ is calculated from the measured normal 
 	\end{figure}
 	\subsection{Validation summary}
 	The algorithm passes all typical test and behaves as expected. The error is very small for most problems. Only the pipe flow shows considerable error, however this is likely caused by the wall model and not by the viscosity shuffling method.
-	\section{Viscosity Ratio in literature}\label{app:viscosityRatio}
-		The viscosity ratios used in literature are limited. The following table contains overview of the maximum ratios typically used in literature. The last column shows how the ratio was calculated from the parameters given in the publications.
-		\begin{center}
-			\begin{tabular}{l|r|r|l}
-				Author & max(Wi) & max($R_\eta$) & $R_\eta$ estimation \\
-				\hline
-				Malaspinas\cite{malaspinas2010} & 10 & 9 & In 4.3: $R_\nu = \num{0.1}$ \& equation (38) \\
-				\rowcolor{secondaryBackground}
-				Gupta\cite{gupta2015} & 100 & 0.7 & In IV.B: $\frac{\eta_\text{p}}{\eta_\text{A} + \eta_\text{p}} = \num{0.4}$ \\
-				Dzanic\cite{dzanic2022} & 10 & 0.5 & In 4.1: $\beta = \frac{\nu_\text{p}}{\nu_\text{s}} = \num{0.5}$ \\
-				\rowcolor{secondaryBackground}
-				Ma\cite{ma2020} & 100 & 9 & In 4.1: $\beta = \frac{\mu_\text{s}}{\mu_\text{s} + \mu_\text{p}} = \num{0.1}$ \\
-				Onishi\cite{onishi2006} & ? & 1 & In 3.1: $\beta = \frac{\mu_\text{p}}{\mu_\text{s} + \mu_\text{p}}$ \& Table 1: $\beta=\num{0.5}$ \\
-				\rowcolor{secondaryBackground}
-				Wang\cite{wang2020} & \glqq up to O(1)\grqq & 5 & In II: $\eta_\text{p} = c\eta_\text{s}$ \& FIG. 9: $c = \num{5}$\\
-				Dzanic\cite{dzanic2022_2} & 10 & 9 & In 5.1: $\beta = \frac{\nu_\text{s}}{\nu_\text{s} + \nu_\text{p}}$ \& In 5.1.2: $\beta = \num{0.1}$ \\
-				\rowcolor{secondaryBackground}
-				Su\cite{su2013_2} & 10 & 1  & In II: $\beta = \frac{\eta_\text{s}}{\eta_\text{s} + \eta_\text{p}}$ \& In IV.A: $\beta = \num{0.5}$ \\
-				Gupta\cite{gupta2015_2} & ? & 0.7 & In 2: $\frac{\eta_\text{p}}{\eta_\text{d}} = \num{0.4}$ \& $\eta_\text{d} = \eta_\text{A} + \eta_\text{p}$ \\
-				\rowcolor{secondaryBackground}
-				Kuron\cite{kuron2021} & 1 & 9 & In 4.1: $\beta = \num{0.9}$ \& equations (14) \& (15) \\
-				Gupta\cite{gupta2016} & 80 & 0.7 & In 3: $\frac{\eta_\text{p}}{\eta_\text{c,d} + \eta_\text{p}} = \num{0.4}$ \\
-				\rowcolor{secondaryBackground}
-				Onishi\cite{onishi2005} & 1000 & 1 & In 3.2: $\frac{\eta_\text{p}}{\eta_\text{s}} = \num{1}$ \\
-			\end{tabular}
-		\end{center}
-\end{document}
+	
+	
+
+		\end{document}
