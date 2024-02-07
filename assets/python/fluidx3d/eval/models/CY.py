@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-File to house the   class.
+File to house the  class.
 
-Created on Fri Jan 12 19:03:29 2024
+Created on Wed Feb  7 14:25:38 2024
 
 @author: Richard Kellnberger
 """
+
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -18,17 +19,15 @@ channel = 0
 pipe = 1
 
 
-class PTT:
-    def __init__(self, eta_p, lambda_p, epsilon, eta_s, xi=0):
+class CY:
+    def __init__(self, eta_p, lambda_p, eta_s, a1, a2):
         self.eta_p = eta_p
         self.lambda_p = lambda_p
-        self.epsilon = epsilon
         self.eta_s = eta_s
-        self.xi = xi
-        if xi != 0:
-            print("xi != 0 is not implemented!")
+        self.a1 = a1
+        self.a2 = a2
 
-    def prepareVelocityProfile(self, R, G, j):
+    def prepareVelocityProfile(self, R, G, j):  # TODO
         c = 2**j * self.eta_s / (-G)
         d = 2 * np.sqrt(self.epsilon) * self.lambda_p
 
@@ -154,15 +153,7 @@ class PTT:
 
     def eta(self, gd):
         return (
-            self.eta_p / np.exp(0.5 * lambertw(4 * self.epsilon * (gd * self.lambda_p) ** 2).real)
-            + self.eta_s
-        )
-
-    def N_1(self, gd):
-        return (
-            self.eta_p
-            / (2 * self.epsilon * self.lambda_p)
-            * lambertw(4 * self.epsilon * (self.lambda_p * gd) ** 2).real
+            self.eta_p / (1 + (self.lambda_p * gd) ** self.a1) ** (self.a2 / self.a1) + self.eta_s
         )
 
     def u(self, _):
@@ -216,5 +207,5 @@ class PTT:
         plt.show()
 
 
-alginate = PTT(48.2, 0.343, 0.545, 1e-3)
-mc0_49 = PTT(18.7e-3, 0.344e-3, 0.27, 1e-3)
+# alginate = PTT(48.2, 0.343, 0.545, 1e-3)
+mc0_49 = CY(18.7e-3, 0.321e-3, 1e-3, 1.697, 0.773)

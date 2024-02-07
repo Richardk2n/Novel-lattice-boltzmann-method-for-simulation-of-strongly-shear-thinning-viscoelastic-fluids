@@ -14,7 +14,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy
 from scipy.special import lambertw
-from style import *
+
+from fluidx3d.eval.style import cm, color
 
 
 def CY(eta0, etaInf, Wi, a1, a2):
@@ -141,7 +142,7 @@ if __name__ == "__main__":
     print(f"fit:")
     print(params)
     print(err)
-    gd = np.logspace(np.log10(np.min(gdet)), np.log10(np.max(gdet)), 1000)
+    gd = np.logspace(np.log10(np.min(gdet)), np.log10(np.max(gdet)) + 5.5, 1000)
     plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
     plt.plot(gdet, et, "x", label="Data")
     plt.plot(gd, ptt_eta(gd, *params), label="PTT fit")

@@ -14,7 +14,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy
 from scipy.special import lambertw
-from style import *
+
+from fluidx3d.eval.style import cm, color
 
 
 def CY(eta0, etaInf, Wi, a1, a2):
@@ -97,7 +98,7 @@ if __name__ == "__main__":
         if i == 83:
             return 2
 
-    gd = np.logspace(np.log10(np.min(gde)), np.log10(np.max(gde)), 1000)
+    gd = np.logspace(np.log10(np.min(gde)), np.log10(np.max(gde)) + 4, 1000)
     plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
     for i in [49, 59, 83]:
         gde, e, gdn, n = readFile(i)
@@ -123,7 +124,7 @@ if __name__ == "__main__":
     plt.ylabel(r"$\eta/\unit{\pascal\second}$")
     plt.legend(loc="center left", bbox_to_anchor=(1, 0.5))
     plt.savefig("../plots/fit_mc_eta.eps")
-    gd = np.logspace(np.log10(np.min(gdn)), np.log10(np.max(gdn)), 1000)
+    gd = np.logspace(np.log10(np.min(gdn)), np.log10(np.max(gdn)) + 4, 1000)
     plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
     for i in [49, 59, 83]:
         gde, e, gdn, n = readFile(i)
