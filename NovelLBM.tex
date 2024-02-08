@@ -280,7 +280,8 @@ We therefore set out to develop a novel viscoelastic LB scheme which we will pre
 %% Our method
 %%
 	
-\section{Viscosity shuffling algorithm}
+\section{Numerical methods}
+\label{sec:Methods}
 
 Our algorithm contains a Lattice-Boltzmann solver for the Navier-Stokes equations of the solvent, a finite-volume solver for integrating the polymer stress and finally our newly developed viscosity shuffling method.
 
@@ -290,7 +291,8 @@ The Lattice-Boltzmann method (LBM) has become a standard tool in numerical fluid
 We use a D3Q19 lattice in full three dimensions together with a single relaxation time collission operator.
 Our implementation is based on FluidX3D which has been extensively used and validated in earlier publications \cite{Lehmann.20229da}.
 The core of the algorithm is implemented in OpenCL and thus capable of running on GPUs from different vendors.
-Boundaries are modeled using the half-way bounce back algorithm.
+Boundaries are modeled using the half-way bounce back algorithm. 
+\SG{ and inflow/outflow: give details }
 
 Physical units are mapped to lattice units to obtain a dimensionless relaxation time of 1.
 The employed lattice dimensions vary for the different applications and are specified below. \SG{ to do }
@@ -306,10 +308,14 @@ The source terms are integrated using the Euler method.
 
 To include the polymer stress into the LBM, we use the stress coupling scheme according to Dzanic et al.\cite{dzanic2022_2, gupta2015, onishi2006}. 
 For this, ... \SG{ give some more details, especially since we do SRT }.
+\SG{ also include inflow/outflow BCs }
+\SG{ do you advect polymer stress or polymer conformation? }
+
 The total stress experienced by the fluid ($\ma{\sigma}$) is then \cite{onishi2006}:
 	\begin{align}
 		\ma{\sigma} &= 2\eta_\text{s}\ma{D} + \ma{\tau} 		\label{eq:totalStress}
 	\end{align}
+	
 
 
 \subsection{Novel viscosity shuffling}\label{sec:shuffling}
@@ -350,60 +356,68 @@ In the following section we validate this novel approach against analytical solu
 %%
 	
 \section{Validation and accuracy}
-	To validate the simulations we compare the simulated velocity field of analytically solvable geometries to theory. For pressure gradient driven channel and pipe geometries, the analytical solution is as follows\cite{oliveira1999}.
-	\begin{equation}
-		u\left(r\right) = \frac{Gl^2}{2^{j+1}\eta_\text{p}}\left(e^\frac{R^2}{l^2}-e^\frac{r^2}{l^2}\right)
-	\end{equation}
-	Where $u\left(r\right)$ is the radius dependent velocity, $G = -\partial_xp$ is the pressure gradient in the direction of the pipe and $l$ is a constant defined as follows.
-	\begin{equation}
-	l^2 = \frac{2^{2j-1}\eta_\text{p}^2}{\epsilon\lambda^2G^2}
-	\end{equation}
-	The index $j$ gives the solution for the channel for $j=0$ and the pipe for $j=1$.
 	
-	We need this solution to compare to literature. However, this solution does not include $\eta_\text{s}$, which is required in general. With the inclusion of the solvent viscosity an analytical solution can no longer be found and the use of a semi-analytic solution is required (for details see appendix \ref{app:PTT}).
-	In the following we compare results for channel and pipe flow to these equations for realistic parameters. Afterward we compare the accuracy of our simulation algorithm against literature.
-	%We use richard/vtk 4dbc4d379842c538f084e68a5dcfe2555a674495 (2024-01-09)
-	\subsection{Channel flow vs theory}\label{sec:channelFlow}
-	Channel flow (also known as 2D Poiseuille) is one of the simplest flows and a very typical example. We pick a channel with a radius of \SI{10}{\micro\meter}, meaning the total width is \SI{20}{\micro\meter}. We pick periodic boundary conditions and drive the flow with a pressure gradient of \SI{-1e7}{\pascal\per\meter}. This simulation was done using the parameters obtained for the alginate based solution, as these represent the worst case scenario with respect to simulability among the fluids we work with. While our scheme is capable of simulating flows of to our knowledge arbitrary parameters, it increases runtime. For this parameter set the simulation time on our hardware becomes unreasonable. Therefore, for the simulations with the alginate based solutions we, contrary to all our other simulations, do not start from $0$ in all fields. We initialize the polymers in an extended state. This reduces the initial overshoot in the velocity by orders of magnitude allowing for larger time steps. Furthermore, the time to equilibrium of the polymer stretch is shortened considerably. This initialization leads to the simulation not accurately reproducing the time dependent behavior during startup, but leaves the steady state valid. The cross-section of the resulting flow field can be seen in figure \ref{fig:2DAlginateU}. Due to the long runtime, we stopped the simulation, early compared to the others. This means, that the simulation had not yet reached full equilibrium. Consequently, the error obtained here (see figure \ref{fig:2DAlginateErr}) is likely higher than what it would be after full relaxation. The average error as obtained by a typical L2 norm is \num{9e-4}.
+To validate our viscosity shuffling algorithm and to assess its accuracy, we compare the velocity fields to semi-analytical solutions in plane and cylindrical Poiseuille flow.
+For the PTT model given in equation~(\ref{eq:polymerStress}) with an additional solvent stress contribution as in equation~(\ref{eq:totalStress}) a full analytical solution is not known for the considered geometries.
+Based on the work of \cite{oliveira1999} we derive a semi-analytical solution in Appendix~\ref{app:PTT}.
+
+We start by simulating the alginate and 0.49\% methyl cellulose solutions with a viscosity ratio $R_ \eta = 48 \cdot 10 ^3$ and $R_ \eta = 18.7$, respectively, in 2D planar Poiseuille flow.
+In physical units the channel has a height of \SI{20}{\micro\meter} which are discretized with \SG{ XX } LBM nodes.
+For the viscosity shuffling, we set $ \alpha _ \mathrm{s} = XX$.
+Along the flow direction, the channel is periodic and the flow is driven by a pressure gradient of \SI{-1e7}{\pascal\per\meter}. \SG{ pressure for MC? }
+The velocity field is initialized with zero.
+For methyl cellulose, we simulate the full temporal evolution with the polymers starting in the unstretched configuration.
+In the case of alginate, we speed up the convergence and start from a situation in which the polymers are pre-stretched \SG{ give details }.
+After \SG{ XX } LBM time steps corresponding to \SG{ XX } of physical time, the simulation is stopped and the flow field $u(y)$ is compared to the semi-analytical solution.
+As shown in figure~\ref{fig:2DAlginateU}, very good agreement is found.
+For a quantitative assessment, we compute the L2 error as
+	\begin{equation}\label{eq:l2error}
+		E_\text{u} = \frac{1}{u_\text{max}}\sqrt{\frac{1}{N}\sum\abs{u_\text{simulation}-u_\text{theory}}^2}.
+	\end{equation}
+The spatially resolved errors are shown in figure~\ref{fig:2DAlginateErr} in the appendix.
+Averaging over the channel diameter, we obtain an L2 error of \num{9e-4} and \SG{ XX } for alginate and methyl cellulose, respectively..	
+
 	\begin{figure}[H]
 		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DAlginateU.eps}
-		\caption{Plot of the cross-section of the velocity of an alginate channel flow. Likely not fully in equilibrium.}
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=0.5]{assets/plots/2DAlginateU.eps}
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=0.5]{assets/plots/2DParameterStudyUWorst.eps}
+		\caption{(a) Velocity profile of alginate in planar channel flow. \SG{use $y$ instead of $r$ in 2D}. 
+		The time evolution of the center-line velocity when starting from a pre-stretched configuration (see main text) is shown in the inset.
+		(b) Velocity profile for methyl cellulose.}
 		\label{fig:2DAlginateU}
 	\end{figure}
+	
+We now proceed to evaluate the viscosity shuffling method for a cylindrical pipe flow.
+The semi-analytical solution for this situation can be derived in a similar fashion as for the planar case and is given in appendix ~\ref{app:semianalyticalPoiseuille}.
+Numerically, the cylindrical sitation is slightly more complex due to discretization errors (''staircase effect'') when mapping the rounded channel walls onto the rectilinear LBM grid \cite{Lehmann.20229da}.
+We use the same material parameter set as above, but double the pressure gradient to \SG{ XX }. \SG{ why? }
+The channel has a diameter of \SG{ XX } and is discretized with 41 lattice points.
+Again, we initialize the polymers in the unstretched state for methyl cellulose and in the stretched state for alginate.
+The resulting velocity profile can be seen in figure \ref{fig:3DAlginateU} and shows almost equally good agreement as for the planar case with an L2 error of \num{0.014}.
+The spatially resolved error shows that this larger average is indeed mainly attributable to the staircase effect as the error near the walls increases significantly.
+
+
+
 	\begin{figure}[H]
 		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DAlginateErr.eps}
-		\caption{Plot of error of the cross-section of the velocity of an alginate channel flow. Likely not fully in equilibrium.}
-		\label{fig:2DAlginateErr}
-	\end{figure}
-	The relative error is highest near the wall as the velocity is lowest there, but also because the simple half way bounce back boundaries used here allow some slip along the wall. The same simulation is done for the 3D case in the following.
-	
-	\subsection{Pipe flow vs theory}
-	For the 2D case above, the walls are smooth. For the 3D case the round pipe has to be approximated leading to a staircase pattern that is not accurate. The error introduced by this depends on the lattice resolution. We use a diameter of 41 lattice points here. We use the same parameter set as above, aside from doubling the pressure gradient and also initialize the polymers in a stressed state. The resulting cross-section can be seen in figure \ref{fig:3DAlginateU}.
-	
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DAlginateU.eps}
-		\caption{Plot of the cross-section of the velocity of an alginate pipe flow. Likely not fully in equilibrium.}
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=0.5]{assets/plots/3DAlginateU.eps}
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=0.5]{assets/plots/3DParameterStudyUWorst.eps}
+		\caption{(a) Velocity profile of alginate in cylindrical channel flow. 
+		The time evolution of the center-line velocity when starting from a pre-stretched configuration (see main text) is shown in the inset.
+		(b) Velocity profile for methyl cellulose.}
 		\label{fig:3DAlginateU}
 	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DAlginateErr.eps}
-		\caption{Plot of error of the cross-section of the velocity of an alginate pipe flow. Likely not fully in equilibrium.}
-		\label{fig:3DAlginateErr}
-	\end{figure}
-	As can easily be seen in figure \ref{fig:3DAlginateErr} in comparison to the 2D case, the approximation of the walls carries considerable error. The L2 error is \num{0.014}. Still the error is acceptable, particularly for this moderate lattice resolution. Further validation of our implementation (using the faster-to-simulate methyl cellulose parameters and initialization at $0$) ca be found in appendix \ref{app:validation}.
+
+
+
+
+
 
 	%We use richard/master fe0fc04115b9b6ea6628bcc6cb6593d3f72ac0ea (2023-11-05)
 	\subsection{Comparison with literature}
 	Malaspinas et al.\cite{ma2020} provide a detailed validation and claim very high accuracy. Therefore, we pick this as a comparison. We aim at the reproduction of figures 17 and 18 from said paper. We calculate this 2D flow in 3D as the viscoelastic algorithm has not been validated for 2D velocity sets. Otherwise, the geometry is identical. It is not entirely clear to us, how they define typical scales. We define the typical velocity as the maximum velocity, as is likely done in the paper. The typical length, we set as half of the channel width. We define the typical shear rate as typical velocity divided by typical length. We set $\eta_\text{s} = \SI{1}{\milli\pascal\second}$ as the paper only gives ratios, and it probably does not matter here. Nevertheless, our lattice units do not line up exactly with those from Malaspinas, as our viscosity is different due to the shuffling.
 	%Beware equation 61 in the paper is wrong. It should have an 8 instead of the 4.
-	The parameters from the paper ($R_\nu$, $Wi$ and $N$) are varied as in the paper. The error is calculated as follows.
-	\begin{equation}\label{eq:l2error}
-		E_\text{u} = \frac{1}{u_\text{max}}\sqrt{\frac{1}{N}\sum\abs{u_\text{simulation}-u_\text{theory}}^2}
-	\end{equation}
+	The parameters from the paper ($R_\nu$, $Wi$ and $N$) are varied as in the paper. 
 	\begin{figure}[H]
 		\centering
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/malaspinas2010.eps}
@@ -411,50 +425,117 @@ In the following section we validate this novel approach against analytical solu
 		\label{fig:malaspinas2010}
 	\end{figure}
 	As can be seen in figure \ref{fig:malaspinas2010}, our results notably do not depend on the Weissenberg Number. While our error decreases with N with a constant power, Malaspinas et al. see diminishing returns. While these results are excellent, the error in our implementation seemingly is still dependent on the viscosity ratio. As the error is still small using our alginate parameters (see section \ref{sec:channelFlow}), this effect is irrelevant. With this, one can see, that we are not only capable to simulate parameters not yet accessible, but our implementation is also better for the parameters used in literature. Knowing our simulations to be good we in the following show results for interesting systems, that are not analytically solvable.
-	\section{Results for non analytically solvable systems}
-	With the validity and accuracy of our scheme firmly established, we can demonstrate its results for some systems that cannot be solved analytically. In the following we will show the flow profiles for a conical nozzle, a cell in shear flow, and a chip for RT-DC measurements\todo{cite? spell out RT-DC?}. For all of these the methyl cellulose parameters found for a concentration of \SI{0.49}{\percent} have been used.
-	%We use richard/vtk 4dbc4d379842c538f084e68a5dcfe2555a674495 (2024-01-09)
-	\subsection{Conical nozzle}
-	Conical nozzles are used for example in bio printing. For this use case in particular the stresses experienced within the nozzle are of importance. We simulate a cell with an inflow radius of \SI{1.8}{\milli\meter} and an outflow radius of \SI{200}{\micro\meter}. It has a length of \SI{18}{\milli\meter}. The boundary conditions for inflow and outflow are given as the result of a simulation of pipes of the respective radius with a fixed volume flow of $\approx\SI{3}{\micro\liter\per\second}$. The resulting flow field can be seen in figure \ref{fig:Nozzle_v}. The von Mieses stress\todo{cite} can be seen in figure\ref{fig:Nozzle_sigma_vM}. It can be seen, that despite the high velocity in the center of the exit, the stress is actually smallest in the center. This means, that even for fast flows, given the bio ink and nozzle size is picked correctly, the cells flowing close to the center experience little stress.
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+%	For pressure gradient driven channel and pipe geometries, the analytical solution is as follows.
+%	\begin{equation}
+%		u\left(r\right) = \frac{Gl^2}{2^{j+1}\eta_\text{p}}\left(e^\frac{R^2}{l^2}-e^\frac{r^2}{l^2}\right)
+%	\end{equation}
+%	Where $u\left(r\right)$ is the radius dependent velocity, $G = -\partial_xp$ is the pressure gradient in the direction of the pipe and $l$ is a constant defined as follows.
+%	\begin{equation}
+%	l^2 = \frac{2^{2j-1}\eta_\text{p}^2}{\epsilon\lambda^2G^2}
+%	\end{equation}
+%	The index $j$ gives the solution for the channel for $j=0$ and the pipe for $j=1$.
+%	
+%	We need this solution to compare to literature. However, this solution does not include $\eta_\text{s}$, which is required in general. With the inclusion of the solvent viscosity an analytical solution can no longer be found and the use of a semi-analytic solution is required (for details see appendix \ref{app:PTT}).
+%	In the following we compare results for channel and pipe flow to these equations for realistic parameters. Afterward we compare the accuracy of our simulation algorithm against literature.
+	
+	
+
+
+	
+	
+%%
+%% Example applications
+%%	
+	
+\section{Example applications}
+
+To illustrate the use of viscosity shuffling in realistic applications, we study three typical experimentally relevant situations.
+For ease of comparison, we use the 0.49\% methyl cellulose in all three situations.
+
+The first application stems from bioprinting where the bioink is pushed through a conical nozzle \SG{ ref }.
+The nozzle radius is \SI{1.8}{\milli\meter} at the inlet and \SI{200}{\micro\meter} at the outlet. 
+The nozzle has a length of \SI{18}{\milli\meter}.
+Due to the difference in inlet/outlet radii, the system cannot be modeled with periodic boundary conditions and we use inflow-/outflow boundary conditions as described in section~\ref{sec:Methods} instead.
+The required values for velocity and polymer conformation are obtained from simulations of pipes of the respective radii and a fixed volume flow of $\approx\SI{3}{\micro\liter\per\second}$.
+The resulting flow field can be seen in figure \ref{fig:Nozzle_v}~(a). 
+To quantify the total stress as a single number, we use the von Mises stress which is defined as \cite{Mueller.2023}: 
+\begin{align}
+	\sigma _ \mathrm{vM} = \sqrt{ \frac{ 1 } { 2 } \left[ \left( \sigma _1 - \sigma _2 \right)^2 + \left( \sigma _2 - \sigma _3 \right)^2 + \left( \sigma _3 - \sigma _1 \right)^2 \right]}.
+\end{align}
+It can be seen that the highest stresses aries at the nozzle exit in direct vicinity to the wall.
+This means that even for fast flows,  cells flowing close to the center experience less stress than cells flowing near the walls in agreement with earlier results in Newtonian fluids \cite{Mueller.2023}.
 	\begin{figure}[H]
 		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/Nozzle_v.eps}
-		\caption{Plot of the velocity in a conical nozzle.}
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=0.5]{assets/plots/Nozzle_v.eps}
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=0.5]{assets/plots/Nozzle_sigma_vM.eps}
+		\caption{Velocity profile (a) and von Mises stress (b) for methyl cellulose in a conical nozzle as used for bioprinting. \SG{ draw nozzle contour with black lines }}
 		\label{fig:Nozzle_v}
 	\end{figure}
-	\begin{figure}[H]
+
+% nozzle: We use richard/vtk 4dbc4d379842c538f084e68a5dcfe2555a674495 (2024-01-09)
+% shear: 	We use richard/vtk 4dbc4d379842c538f084e68a5dcfe2555a674495 (2024-01-09)
+% RT-DC: We use richard/master fe0fc04115b9b6ea6628bcc6cb6593d3f72ac0ea (2023-11-05)
+	
+Our next example is the RT-DC geometry in which cells from a reservoir are squeezed through a narrow observation channel \cite{Toepfner.2018, Fregin:2019gx} with a square cross-section of 20x20 $\mu m$.
+For this simulation we use periodic boundary conditions and a constant body force corresponding to a pressure gradient of \SI{1e7}{\pascal}. 
+In figure~\ref{fig:RT-DC}, we show the velocity profile and the shear component of the stress which is the relevant component if a local shear viscosity is to be defined.
+There are three qualitative differences compared to a purely viscous fluid. 
+Directly after the inlet we find a region of low stress. 
+Due to the fast advection, the polymers, despite being inside the constriction, have not reacted to the increased fluid stress yet.
+Similarly, directly after the constriction, the high stress inside the observation channel persists over a certain distance that is needed for the polymer stress to decay.
+
+ 
+ 	\begin{figure}[H]
 		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/Nozzle_sigma_vM.eps}
-		\caption{Plot of the von Mises stress in a conical nozzle.}
-		\label{fig:Nozzle_sigma_vM}
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=0.5]{assets/plots/RT-DC_v.eps}
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=0.5]{assets/plots/RT-DC_tau.eps}
+		\caption{Velocity profile (a) and shear stress (b) for methyl cellulose in a typical RT-DC geometry. \SG{ draw channel contour with black lines }
+		\SG{ change to von Mises instead of $ \tau _{ 12 }$? }}
+		\label{fig:RT-DC}
 	\end{figure}
-	%We use richard/vtk 4dbc4d379842c538f084e68a5dcfe2555a674495 (2024-01-09)
-	\subsection{Cell in shear flow}
-	A cell with a radius of \SI{6}{\micro\meter} and Youngs Modulus of \SI{100}{\pascal} is placed in a shear flow with a shear rate of \SI{400}{\per\second}. The fluid is described by the parameters of \SI{0.49}{\percent} methyl cellulose solution mentioned above. The lattice with a resolution of \num{100} lattice points is chosen significantly bigger than the cell to assure negligible impact of the walls. The lattice is periodic in $x$ and $z$ direction. At the edges of the simulation box in $y$ direction Dirichlet boundary conditions are imposed. The influence of the cell placed in the center of the simulation volume can barely be seen in the velocity field. In the von Mieses stress seen in figure \ref{fig:cellInShear_vM} it is the dominant feature. One can clearly see the shape of the cell by the depression of the stress it causes. Notable from this shape outwards radiate section of high and low stress. These are particularly pronounced along the longest axis of the deformed cell. From these one can see that the cell disturbs the fluid far from itself.
+
+\SG{ decide whether we want to show a viscosity plot and remove or leave this part:
+If one would divide the stress in these two regions by the strain rate in an attempt to obtain a viscosity one would find an extremely low and an extremely high viscosity respectively. Depending on the exact parameters \glqq viscosities\grqq{ }can be reached that cannot be obtained through rheological measurements with the fluid. Meaning these viscosities are not valid. This is even clearer along the walls directly after the outlet. Here the viscosites obtained in this manner become negative. This shows the breakdown of the viscosity interpretation in viscoelastic cases and signifies the regions of interesting behavior. This also shows why viscoelastic simulations cannot always be replaced by shear thinning models and should be considered despite the high computational cost. }
+
+With the third example we demonstrate the versatility of our approach which allows easy coupling to other LBM extensions such as the immersed-boundary method.
+Here, we include a homogeneously elastic particle as a simple, yet reasonably accurate, model for the mechanics of a living, biological cell \cite{Wohlrab.2023}.
+Coupling to the LBM solver is achieved with the immersed-boundary method as described in earlier publications \cite{Mueller.2021}.
+For simplicity, we consider the viscoelastic fluid inside and outside of the cell to be identical.
+The cell is initially spherical with a radius of \SI{6}{\micro\meter} and possesses Youngs Modulus of \SI{100}{\pascal} and a Poisson ratio of \SG{ XX }.
+It is placed into a shear flow with a shear rate of \SI{400}{\per\second} where the cell quickly reaches a steady state in which it deforms into a tank-treading ellipsoid.
+For the discretization of the cell we use \SG{ xx } tetrahedrons and a radius of \SG{ xx } lattice units.
+The lattice with a resolution of \num{100} lattice points is chosen significantly bigger than the cell to assure negligible impact of the walls. 
+The lattice is periodic in $x$ and $z$ direction.
+At the edges of the simulation box in $y$ direction Dirichlet boundary conditions are imposed.
+	
+In the von Mises stress seen in figure \ref{fig:cellInShear_vM} the effect of the cell is clearly visible. 
+We observe four distinct regions of high stress radiating outwards from the cell body.
+These are particularly pronounced along the longest axis of the deformed cell. 
+\SG{ connect to the ''viscoelastic wings'' paper }
+
 	\begin{figure}[H]
 		\centering
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/cellInShear_sigma_vM.eps}
-		\caption{Plot of the von Mises stress around a cell in shear flow.}
+		\caption{The von Mises stress around a cell in shear flow.}
 		\label{fig:cellInShear_vM}
-	\end{figure}
-	%We use richard/master fe0fc04115b9b6ea6628bcc6cb6593d3f72ac0ea (2023-11-05)
-	\subsection{RT-DC}
-	Real-time deformability cytometry (RT-DC)\todo{cite} is a novel approach for single cell characterization. The cells are forced through a constriction. The observed deformation can be used to infer the mechanical properties of the cell. For this simulation we use periodic boundary conditions and a pressure gradient of \SI{1e7}{\pascal}. The resulting flow can be seen in figure \ref{fig:RT-DC_v}. The component typically associated with viscosity of the stress tensor can be seen in figure \ref{fig:RT-DC_tau}. There are three qualitative differences compared to a purely viscous fluid. Directly after the inlet is a region of low stress. Due to the advection of the stress, the fluid here despite being inside the constriction has not reacted to it yet. This region therefore could produce unexpected cell behavior if one passes through it. Similarly, directly after the constriction, the stress has not yet lowered. If one would divide the stress in these two regions by the strain rate in an attempt to obtain a viscosity one would find an extremely low and an extremely high viscosity respectively. Depending on the exact parameters \glqq viscosities\grqq{ }can be reached that cannot be obtained through rheological measurements with the fluid. Meaning these viscosities are not valid. This is even clearer along the walls directly after the outlet. Here the viscosites obtained in this manner become negative. This shows the breakdown of the viscosity interpretation in viscoelastic cases and signifies the regions of interesting behavior. This also shows why viscoelastic simulations cannot always be replaced by shear thinning models and should be considered despite the high computational cost.
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/RT-DC_v.eps}
-		\caption{Plot of the velocity in the RT-DC channel.}
-		\label{fig:RT-DC_v}
-	\end{figure}
-	\begin{figure}[H]
-	\centering
-	\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/RT-DC_tau.eps}
-	\caption{Plot of the polymer stress in the RT-DC channel.}
-	\label{fig:RT-DC_tau}
-	\end{figure}
+	\end{figure}	
 	
-	\section{Conclusion}
-	\todo{do}
+%%
+%% Conclusion
+%%	
+	
+\section{Conclusion}
+
 
 	\newpage
 	\printbibliography[heading=bibintoc]
@@ -541,8 +622,14 @@ The first normal stress difference $N_1$ is calculated from the measured normal 
 
 	\section{FENE-P}\label{app:FENE-P}
 	\todo{stability issue, fitting parameter, see fenep repo}
-	\section{Velocity profile for PTT}\label{app:PTT}
-	Our derivation is analogous to Oliveira\cite{oliveira1999}. To account for the added viscous stress due to $\eta_\text{s}$, equilibrium is reached at lower polymer stresses. Therefore, Oliveiras equation (7) needs to be modified as follows.
+	
+%%
+%% Semi-analytical
+%%	
+	
+\section{Semi-analytical solution for Poiseuille flows of PTT fluids with solvent viscosity}
+\label{app:semianalyticalPoiseuille}
+Our derivation is analogous to Oliveira\cite{oliveira1999}. To account for the added viscous stress due to $\eta_\text{s}$, equilibrium is reached at lower polymer stresses. Therefore, Oliveiras equation (7) needs to be modified as follows.
 	\begin{equation}
 		\tau_{xy} = \partial_xp\frac{r}{2^j} - \eta_\text{s}\dot{\gamma}
 	\end{equation}
@@ -603,18 +690,18 @@ The first normal stress difference $N_1$ is calculated from the measured normal 
 		\caption{Plot of the simulation error in a channel flow as a dependency of the pressure gradient.}
 		\label{fig:2DParameterStudyErr}
 	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyUWorst.eps}
-		\caption{Plot of the simulated velocity in a channel flow as a dependency of the radius. This is the same as figure \ref{fig:2DAlginateU} but for methyl cellulose.}
-		\label{fig:2DParameterStudyUWorst}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErrWorst.eps}
-		\caption{Plot of the error of the simulated velocity in a channel flow as a dependency of the radius. This is the same as figure \ref{fig:2DAlginateErr} but for methyl cellulose.}
-		\label{fig:2DParameterStudyErrWorst}
-	\end{figure}
+%	\begin{figure}[H]
+%		\centering
+%		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyUWorst.eps}
+%		\caption{Plot of the simulated velocity in a channel flow as a dependency of the radius. This is the same as figure \ref{fig:2DAlginateU} but for methyl cellulose.}
+%		\label{fig:2DParameterStudyUWorst}
+%	\end{figure}
+%	\begin{figure}[H]
+%		\centering
+%		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErrWorst.eps}
+%		\caption{Plot of the error of the simulated velocity in a channel flow as a dependency of the radius. This is the same as figure \ref{fig:2DAlginateErr} but for methyl cellulose.}
+%		\label{fig:2DParameterStudyErrWorst}
+%	\end{figure}
 	%Interestingly, the last one work besides Ma being approx 10.\n
 	%This error is not influenced by shuffling fraction or lattice resolution\n
 	%The shape the sim returns can be obtained by the theory by modifying px and or etap\n
@@ -628,20 +715,44 @@ The first normal stress difference $N_1$ is calculated from the measured normal 
 		\caption{Plot of the simulation error in a pipe flow as a dependency of the pressure gradient}
 		\label{fig:3DParameterStudyErr}
 	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyUWorst.eps}
-		\caption{Plot of the simulated velocity in a pipe flow as a dependency of the radius. This was evaluated along a coordinate axis. This is the same as figure \ref{fig:3DAlginateU} but for methyl cellulose.}
-		\label{fig:3DParameterStudyUWorst}
-	\end{figure}
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyErrWorst.eps}
-		\caption{Plot of the error of the simulated velocity in a pipe flow as a dependency of the radius. This was evaluated along a coordinate axis. This is the same as figure \ref{fig:3DAlginateErr} but for methyl cellulose.}
-		\label{fig:3DParameterStudyErrWorst}
-	\end{figure}
+%	\begin{figure}[H]
+%		\centering
+%		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyUWorst.eps}
+%		\caption{Plot of the simulated velocity in a pipe flow as a dependency of the radius. This was evaluated along a coordinate axis. This is the same as figure \ref{fig:3DAlginateU} but for methyl cellulose.}
+%		\label{fig:3DParameterStudyUWorst}
+%	\end{figure}
+%	\begin{figure}[H]
+%		\centering
+%		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyErrWorst.eps}
+%		\caption{Plot of the error of the simulated velocity in a pipe flow as a dependency of the radius. This was evaluated along a coordinate axis. This is the same as figure \ref{fig:3DAlginateErr} but for methyl cellulose.}
+%		\label{fig:3DParameterStudyErrWorst}
+%	\end{figure}
 	\subsection{Validation summary}
 	The algorithm passes all typical test and behaves as expected. The error is very small for most problems. Only the pipe flow shows considerable error, however this is likely caused by the wall model and not by the viscosity shuffling method.
+	
+	
+	
+	
+		\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=0.5]{assets/plots/2DAlginateErr.eps}
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=0.5]{assets/plots/2DParameterStudyErrWorst.eps}
+		\caption{(a) L2 error of the velocity profile in \ref{fig:2DAlginateU} with respect to the semi-analytical theory in a planar Poiseuille flow.  
+			The relative error is highest near the wall as the velocity is lowest there, but also because the simple half way bounce back boundaries used here allow some slip along the wall. 
+		(b) For methyl cellulose.}
+		\label{fig:2DAlginateErr}
+	\end{figure}
+	
+		\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=0.5]{assets/plots/3DAlginateErr.eps}
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=0.5]{assets/plots/3DParameterStudyErrWorst.eps}
+		\caption{(a) L2 error of the velocity profile in \ref{fig:2DAlginateU} with respect to the semi-analytical theory in a cylindrical Poiseuille flow.  
+			The relative error is highest near the wall as the velocity is lowest there, but also because the simple half way bounce back boundaries used here allow some slip along the wall. 
+		(b) For methyl cellulose.
+		\SG{ The error seems to reverse. For 2D alginate has the larger error, for cylinder MC has the larger error. Do we have an explanation why? }}
+		\label{fig:3DAlginateErr}
+	\end{figure}
 	
 	
 
