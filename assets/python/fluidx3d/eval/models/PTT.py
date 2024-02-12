@@ -83,7 +83,7 @@ class PTT:
                 idx = np.argmin(np.abs(rVelocity - r))
                 if idx == 0:
                     m = (velocity[idx + 1] - velocity[idx]) / (rVelocity[idx + 1] - rVelocity[idx])
-                    return velocity[idx] - m * (r - rVelocity[idx]) - offset
+                    return velocity[idx] + m * (r - rVelocity[idx]) - offset
                 if rVelocity[idx] > r:
                     idx -= 1
                 elif rVelocity[idx] == r:
