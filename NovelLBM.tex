@@ -86,14 +86,58 @@ sorting=none
 	
 	\newpage
 	
-	\section{Introduction}
-	For a solution to be well suited for usage as a bioink during bioprinting its rheology has to fulfill certain requirements. During the printing process it should flow easily through the nozzle, meaning the viscosity should be low. This is not only beneficial for ease of use, but is also crucial for survivability of the cells, as the stress they experience is dependent on the viscosity. However, after the printing process, it is desired, that the printed construct is stable. This can be temporarily archived by very high viscosities. Therefore, one approach to solve this is to use shear thinning fluids. Shear thinning fluids can easily be produced by dissolving polymers in water. This however, has the side effect of viscoelasticity. Due to the polymers the solution also exhibits elastic behavior. The influence of which on the printing process is not well understood yet. For realistic bioinks, the ratio of their zero shear viscosity and their infinite shear viscosity is large as is expected based on the desired attributes mentioned above. For such large viscosity ratios, simulating viscoelastic materials with Lattice Boltzmann methods was to our knowledge not yet possible.
+%%
+%% Abstract
+%%	
+
+\section*{Abstract}
+
+The simulation of viscoelastic liquids using the Lattice-Boltzmann method in full three dimensions remains a formidable numerical challenge.
+In particular the simulation of strongly shear-thinnig fluids, where the ratio between the high-shear and low-shear viscosities is large, is often prevented by stability problems.
+Here we present a novel approach to overcome these issues.
+The central idea is to artificially increase the solvent viscosity which allows the method to benefit from the very good stability properties of the LBM.
+To compensate for this additional viscous stress, we reduce the polymer stress by the same amount.
+We apply this novel method to simulate two realistic cell carrier liquids, methyl cellulose and alginate solutions, of which the latter exhibits a viscosity ratio of more than 10,000. 
+
+\clearpage
 	
-	Such simulations would however be very beneficial. They allow the \glqq measurement\grqq{ }of parameters that are otherwise hard or even impossible to access. They allow the prediction of the outcome of experiments without performing them, which is especially helpful if the experiment cannot be easily performed. An example would be the design of new and improved printing nozzles. With simulations, the geometry can be optimized to a degree, that would be near impossible using iterative experiments. The large amounts of data simulations can provide allow better understanding of the fundamental processes, that cause observed behavior. \todo{"List some simulations for bionprinting, bioinks that have been done (restrict to only viscoelastic sims)"}
+%%
+%% Introduction
+%%	
 	
-	Simulations using Lattice Boltzmann methods (LBM) are popular, as it has many advantages. It is very extensible and thus can deal with complex geometries, particles (e.g. cells) suspended in the fluid and many different interactions within and between those. Most importantly it is and easily parallelizable algorithm and thus can be run on GPUs or similar accelerators. This allows even large domains to be simulated in short amount of time with commodity GPUs and no need for any supercomputer. It is also easily possible to extend LBM to deal with viscoelastic fluids. This has been done before by multiple groups. There are many publications discussing such approaches in two dimensions\cite{ispolatov2002,wang2019,su2013,giraud1998,xie2018,dzanic2022,frank2006,zou2014,lee2017,dzanic2022_2,sedaghat2021,frantziskonis2011,qin2023,yoshino2008,papenkort2015,phillips2011,onishi2005}. Simulations in three dimensions have a higher computational cost and are not as abundant, but have also been performed by many\cite{malaspinas2010,gupta2015,lallemand2003,ma2020,onishi2006,wang2020,dellar2014,su2013_2,wang2021,kuron2021,gupta2016}. Among these many are concerned about stability. Some include diffusivity of the polymer stress in their model to increase stability\cite{malaspinas2010,ma2020,wang2020,wang2021}. Other remedies include special decompositions of the stress tensor\cite{dzanic2022} or optimization of the solvent contribution\cite{gupta2015}. However, none of these reach the relevant viscosity ratios for bioinks.
+\section{Introduction}
 	
-	Here we show our novel simulation approach for bioinks. It is specifically tailored to support arbitrary viscosity ratios and thus is able to simulate common bioinks or any other viscoelastic material with similar properties while providing high accuracy and stability. This is archived by subtracting a viscous stress from the polymer stress calculated from the PTT model. This offset is corrected by increasing the viscosity of the base LBM algorithm accordingly.
+Microfluidic technoglogies involving living cells are becoming increasingly popular. 
+Examples include medical diagnostics, where the pathological alteration of cell properties can serve as a marker for disease detection \cite{Toepfner.2018} or biofabrication where living cells are printed to create artificial tissues \cite{possl2021, Poologasundarampillai.2021, oconnell2022}. 
+In all these applications cells are suspended in a cell carrier fluid which typically contains dissolved polymers making the fluid highly viscoelastic. 
+The motivation behind using viscoelastic fluids differs between applications. 
+In medical diagnostics, the viscous stress must be large enough to achieve detectable cell deformation, while in biofabrication the printed construct must be stable enough to retain its shape after the printing process. 
+To satisfy the latter requirement, cell carriers used in biofabrication („bioinks“) typically exhibit a very high viscosity ratio with the zero-shear viscosity being many orders of magnitude larger than the pure solvent viscosity \cite{paxton2017}.
+
+To understand the rheology of such complex liquids in non-trivial geometries, computer simulations are an invaluable tool. 
+While a number of numerical techniques have been developed, the simulation of viscoelastic liquids remain an involved subject \cite{Alves.2020}, in particular for high viscosity ratios. 
+A very popular simulation technique for Newtonian fluids is the Lattice Boltzmann method \cite{Kruger_book} due to its simplicity and high parallelizability. 
+LBM has also been extended to viscoelastic situations, mainly in two \cite{ispolatov2002,wang2019,su2013,giraud1998,xie2018,dzanic2022,frank2006,zou2014,lee2017,dzanic2022_2,sedaghat2021,frantziskonis2011,qin2023,yoshino2008,papenkort2015,phillips2011,onishi2005} but occassionally also in three \cite{malaspinas2010,gupta2015,lallemand2003,ma2020,onishi2006,wang2020,dellar2014,su2013_2,wang2021,kuron2021,gupta2016} dimensions.
+To alleviate stability problems, some of these works include an artificial diffusivity of the polymer stress \cite{malaspinas2010,ma2020,wang2020,wang2021}. 
+Other remedies include special decompositions of the stress tensor\cite{dzanic2022} or optimization of the solvent contribution\cite{gupta2015}. 
+So far, however, none of these methods has been applied to very high viscosity ratio fluids which are often used as cell carrier fluids in lab experiments or technological applications. 
+
+To fill this gap, here we develop a new variant of viscoelastic LBM which allows the stable and accurate simulation of very high viscosity ratio fluids.
+Our technique is based on the insight that stability issues in tradtional viscoelastic LBMs arise dure to an unbalance between the very large polymer stress and the much smaller viscous stress of the solvent. 
+We overcome this issue by including („shuffling“) part of the polymer stress into the viscous part of the LBM algorithm.
+	
+	
+	
+	
+	
+	
+%	For a solution to be well suited for usage as a bioink during bioprinting its rheology has to fulfill certain requirements. During the printing process it should flow easily through the nozzle, meaning the viscosity should be low. This is not only beneficial for ease of use, but is also crucial for survivability of the cells, as the stress they experience is dependent on the viscosity. However, after the printing process, it is desired, that the printed construct is stable. This can be temporarily archived by very high viscosities. Therefore, one approach to solve this is to use shear thinning fluids. Shear thinning fluids can easily be produced by dissolving polymers in water. This however, has the side effect of viscoelasticity. Due to the polymers the solution also exhibits elastic behavior. The influence of which on the printing process is not well understood yet. For realistic bioinks, the ratio of their zero shear viscosity and their infinite shear viscosity is large as is expected based on the desired attributes mentioned above. For such large viscosity ratios, simulating viscoelastic materials with Lattice Boltzmann methods was to our knowledge not yet possible.
+	
+%	Such simulations would however be very beneficial. They allow the \glqq measurement\grqq{ }of parameters that are otherwise hard or even impossible to access. They allow the prediction of the outcome of experiments without performing them, which is especially helpful if the experiment cannot be easily performed. An example would be the design of new and improved printing nozzles. With simulations, the geometry can be optimized to a degree, that would be near impossible using iterative experiments. The large amounts of data simulations can provide allow better understanding of the fundamental processes, that cause observed behavior. \todo{"List some simulations for bionprinting, bioinks that have been done (restrict to only viscoelastic sims)"}
+	
+%	Simulations using Lattice Boltzmann methods (LBM) are popular, as it has many advantages. It is very extensible and thus can deal with complex geometries, particles (e.g. cells) suspended in the fluid and many different interactions within and between those. Most importantly it is and easily parallelizable algorithm and thus can be run on GPUs or similar accelerators. This allows even large domains to be simulated in short amount of time with commodity GPUs and no need for any supercomputer. It is also easily possible to extend LBM to deal with viscoelastic fluids. This has been done before by multiple groups. There are many publications discussing such approaches in two dimensions\cite{ispolatov2002,wang2019,su2013,giraud1998,xie2018,dzanic2022,frank2006,zou2014,lee2017,dzanic2022_2,sedaghat2021,frantziskonis2011,qin2023,yoshino2008,papenkort2015,phillips2011,onishi2005}. 		Simulations in three dimensions have a higher computational cost and are not as abundant, but have also been performed by many\cite{malaspinas2010,gupta2015,lallemand2003,ma2020,onishi2006,wang2020,dellar2014,su2013_2,wang2021,kuron2021,gupta2016}. Among these many are concerned about stability. Some include diffusivity of the polymer stress in their model to increase stability\cite{malaspinas2010,ma2020,wang2020,wang2021}. Other remedies include special decompositions of the stress tensor\cite{dzanic2022} or optimization of the solvent contribution\cite{gupta2015}. However, none of these reach the relevant viscosity ratios for bioinks.
+	
+%	Here we show our novel simulation approach for bioinks. It is specifically tailored to support arbitrary viscosity ratios and thus is able to simulate common bioinks or any other viscoelastic material with similar properties while providing high accuracy and stability. This is archived by subtracting a viscous stress from the polymer stress calculated from the PTT model. This offset is corrected by increasing the viscosity of the base LBM algorithm accordingly.
 	
 %%
 %%
@@ -141,7 +185,7 @@ Due to the complexity of viscoelastic fluids, there is an abundance of (semi-)em
 Common options include the Oldroyd-B \cite{oldroyd1958} and the FENE-P model \cite{bird1980,bird1987}.
 The Oldroyd-B model is not appropriate for most real complex fluids as it features a shear-independent viscosity in clear contradiction to the experimental data presented in figures~\ref{fig:fit_alginate} and \ref{fig:fit_mc}.
 Although the FENE-P does reproduce shear-thinning, we were not able to obtain a satisfactory fit to our data for alginate and methyl cellulose with physically reasonable values of the model parameters.
-The best fit was obtained with the so-called PTT model due to Phan-Thien and Tanner \cite{phan-thien1977,phan-thien1978} which was for explicitly derived for polymer networks in solution and thus appears to capture well the essential physics behind the alginate solution. \SG{ check that these papers have the exponentail version }.
+The best fit was obtained with the so-called PTT model due to Phan-Thien and Tanner \cite{phan-thien1977,phan-thien1978} which was for explicitly derived for polymer networks in solution and thus appears to capture well the essential physics behind the alginate solution. \SG{ check that these papers have the exponential version }.
 
 The PTT model is specified by a constitutive equation for the polymer stress $ \ma{\tau}$:
 	\begin{equation}
@@ -164,10 +208,10 @@ Finally, the total fluid stress is the sum of the polymer stress $ \tau $ and a 
 
 For a simple shear flow in the $xy$-plane, an analytical expression for $ \eta $ and $N_1$ is given by \cite{ferras2019} which (with $\xi=0$) reads
 	\begin{equation}
-		\eta\left(\dot{\gamma}\right) = \frac{\eta_\text{p}}{\exp\left[0.5W_0\left(4\epsilon \mathrm{Wi}^2\right)\right]} + \eta _\mathrm{s} \ma{D}
+		\eta\left(\dot{\gamma}\right) = \frac{\eta_\text{p}}{\exp\left[0.5W_0\left(4\epsilon \mathrm{Wi}^2\right)\right]} + \eta _\mathrm{s} \ma{D} \label{eq:shearEta}
 	\end{equation}
 	\begin{equation}
-		N_1 = \frac{\eta_\text{p}}{2\epsilon\lambda}W_0\left(4\epsilon \mathrm{Wi}^2\right)
+		N_1 = \frac{\eta_\text{p}}{2\epsilon\lambda}W_0\left(4\epsilon \mathrm{Wi}^2\right) \label{eq:shearN}
 	\end{equation}
 where $ \mathrm{Wi} = \lambda \dot{ \gamma  }$ is the Weissenberg number and $W_0$ is the Lambert $W$-function. \SG{ check that $ \eta _ \mathrm{s}$ is correct }
 \SG{ I did not find these equations in \cite{ferras2019}? }
@@ -229,6 +273,8 @@ The 0.49 \% methyl cellulose solution used in RT-DC measurements, in contrast, f
 	
 \section{Existing LBM methods}
 
+\SG{ make sure that all papers cited in the introduction as ''3D'' are discussed here as well }
+\SG{ and vice versa: make sure that all papers discussed here are also cited in the introduction }
 Since the early days of LBM methods for viscoelastic fluids have been developed. 
 Keeping in mind our target geometries, we focus here on three dimensional formulations.
 The first approaches avoided an explicit modeling of a viscoelastic constitutive equation and simply modified the LB collision operator to obtain a fluid obeying Jeffery's viscoelastic model \cite{lallemand2003}. \SG{ can we say more about Jeffery? Why is it bad? Is it shear-thinning? }
@@ -272,6 +318,7 @@ We therefore set out to develop a novel viscoelastic LB scheme which we will pre
 		\end{center}
 
 \caption{Covered ranges of $ \mathrm{Wi}$ and $ R_ \eta $ for existing 3D LB methods.}
+\label{tab:viscRatio}
 \end{table}
 
 
@@ -326,7 +373,7 @@ The relative magnitude of the two terms is given by the viscosity ratio $R_ \eta
 The key idea of our scheme is to artificially increase the LBM viscous stress while at the same time reducing the polmer stress by the same amount.
 Starting from equation~\ref{eq:totalStress}, we write
 \begin{align}
-	\ma{\sigma} &= 2\eta_\text{s}\ma{D} + \ma{\tau}_\text{shuffle} + \ma{\tau} - \ma{\tau}_\text{shuffle}	
+	\ma{\sigma} &= 2\eta_\text{s}\ma{D} + \ma{\tau}_\text{shuffle} + \ma{\tau} - \ma{\tau}_\text{shuffle}	 \label{eq:shuffleStress}
 \end{align}
 with the transfered (''shuffled'') stress
 \begin{align}
@@ -370,10 +417,8 @@ For methyl cellulose, we simulate the full temporal evolution with the polymers 
 In the case of alginate, we speed up the convergence and start from a situation in which the polymers are pre-stretched \SG{ give details }.
 After \SG{ XX } LBM time steps corresponding to \SG{ XX } of physical time, the simulation is stopped and the flow field $u(y)$ is compared to the semi-analytical solution.
 As shown in figure~\ref{fig:2DAlginateU}, very good agreement is found.
-For a quantitative assessment, we compute the L2 error as
-	\begin{equation}\label{eq:l2error}
-		E_\text{u} = \frac{1}{u_\text{max}}\sqrt{\frac{1}{N}\sum\abs{u_\text{simulation}-u_\text{theory}}^2}.
-	\end{equation}
+For a quantitative assessment, we compute the L2 error as \SG{ give correct equn. }
+
 The spatially resolved errors are shown in figure~\ref{fig:2DAlginateErr} in the appendix.
 Averaging over the channel diameter, we obtain an L2 error of \num{9e-4} and \SG{ XX } for alginate and methyl cellulose, respectively..	
 
@@ -383,7 +428,8 @@ Averaging over the channel diameter, we obtain an L2 error of \num{9e-4} and \SG
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=0.5]{assets/plots/2DParameterStudyUWorst.eps}
 		\caption{(a) Velocity profile of alginate in planar channel flow. \SG{use $y$ instead of $r$ in 2D}. 
 		The time evolution of the center-line velocity when starting from a pre-stretched configuration (see main text) is shown in the inset.
-		(b) Velocity profile for methyl cellulose.}
+		(b) Velocity profile for methyl cellulose.
+		\SG{ make these plots for different $ \alpha _ \mathrm{s}$, either include or put into Si }}
 		\label{fig:2DAlginateU}
 	\end{figure}
 	
@@ -395,6 +441,7 @@ The channel has a diameter of \SG{ XX } and is discretized with 41 lattice point
 Again, we initialize the polymers in the unstretched state for methyl cellulose and in the stretched state for alginate.
 The resulting velocity profile can be seen in figure \ref{fig:3DAlginateU} and shows almost equally good agreement as for the planar case with an L2 error of \num{0.014}.
 The spatially resolved error shows that this larger average is indeed mainly attributable to the staircase effect as the error near the walls increases significantly.
+These conclusions remain robust even when varying the pressure gradient, and thus the flow velocity, over many orders of magnitude as shown in figure~\ref{fig:2DParameterStudyErr} of the appendix.
 
 
 
@@ -404,27 +451,44 @@ The spatially resolved error shows that this larger average is indeed mainly att
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=0.5]{assets/plots/3DParameterStudyUWorst.eps}
 		\caption{(a) Velocity profile of alginate in cylindrical channel flow. 
 		The time evolution of the center-line velocity when starting from a pre-stretched configuration (see main text) is shown in the inset.
-		(b) Velocity profile for methyl cellulose.}
+		(b) Velocity profile for methyl cellulose.
+				\SG{ make these plots for different $ \alpha _ \mathrm{s}$, either include or put into Si }}
 		\label{fig:3DAlginateU}
 	\end{figure}
 
 
+%Malaspinas: We use richard/master fe0fc04115b9b6ea6628bcc6cb6593d3f72ac0ea (2023-11-05)
+Finally, we compare the quality of our algorithm by comparing to an existing study on viscoelastic LBM by Malapsinas \textit{et al.} \cite{malaspinas2010}.
+The authors studied an Oldroyd-B fluid in a planar Poiseuille flow and compared the error in the simulated velocity profile to an exact analytical solution.
+The Oldroyd-B model is a special case of the PTT model which is obtained by setting $ \xi  = \epsilon  = 0$ in eq.~(\ref{eq:polymerStress}) and is thus easily tractable with our code.
+In figure~\ref{fig:malaspinas2010} we show the L2 error as function of lattice resolution for different Weissenberg numbers $ \mathrm{Wi}$ and \SG{ XX } $R_ \nu $.
+To match with \cite{malaspinas2010}, we defined these as 
+\begin{align}
+	XX
+\end{align}
+with \SG{ ... }. \SG{ comment whether these definitions are identical or different than the definitions above. }
+Furthermore, in agreement with \cite{malaspinas2010}, also the L2 error is defined slightly differently than above, namely:
+	\begin{equation}\label{eq:l2error}
+		E_\text{u} = \frac{1}{u_\text{max}}\sqrt{\frac{1}{N}\sum\abs{u_\text{simulation}-u_\text{theory}}^2}.
+	\end{equation}
+\SG{ Beware equation 61 in the paper is wrong. It should have an 8 instead of the 4. Do you use equation 61? }
 
-
-
-
-	%We use richard/master fe0fc04115b9b6ea6628bcc6cb6593d3f72ac0ea (2023-11-05)
-	\subsection{Comparison with literature}
-	Malaspinas et al.\cite{ma2020} provide a detailed validation and claim very high accuracy. Therefore, we pick this as a comparison. We aim at the reproduction of figures 17 and 18 from said paper. We calculate this 2D flow in 3D as the viscoelastic algorithm has not been validated for 2D velocity sets. Otherwise, the geometry is identical. It is not entirely clear to us, how they define typical scales. We define the typical velocity as the maximum velocity, as is likely done in the paper. The typical length, we set as half of the channel width. We define the typical shear rate as typical velocity divided by typical length. We set $\eta_\text{s} = \SI{1}{\milli\pascal\second}$ as the paper only gives ratios, and it probably does not matter here. Nevertheless, our lattice units do not line up exactly with those from Malaspinas, as our viscosity is different due to the shuffling.
-	%Beware equation 61 in the paper is wrong. It should have an 8 instead of the 4.
-	The parameters from the paper ($R_\nu$, $Wi$ and $N$) are varied as in the paper. 
 	\begin{figure}[H]
 		\centering
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/malaspinas2010.eps}
-		\caption{Double logarithmic plot of the L2 error as defined in equation \ref{eq:l2error} from Malaspinas et al.\cite{malaspinas2010} (dots) compared to our algorithm (x) as a function of grid resolution.}
+		\caption{L2 error as defined in equation \ref{eq:l2error} from Malaspinas et al.\cite{malaspinas2010} (dots) compared to our algorithm (x) as a function of grid resolution.
+		Blue and green crosses are not visible as they overlap exactly with the orange and red crosses, respectively, showing that the accuracy of our method is. independent of $ \mathrm{Wi}$ in the studied parameter range.}
 		\label{fig:malaspinas2010}
 	\end{figure}
-	As can be seen in figure \ref{fig:malaspinas2010}, our results notably do not depend on the Weissenberg Number. While our error decreases with N with a constant power, Malaspinas et al. see diminishing returns. While these results are excellent, the error in our implementation seemingly is still dependent on the viscosity ratio. As the error is still small using our alginate parameters (see section \ref{sec:channelFlow}), this effect is irrelevant. With this, one can see, that we are not only capable to simulate parameters not yet accessible, but our implementation is also better for the parameters used in literature. Knowing our simulations to be good we in the following show results for interesting systems, that are not analytically solvable.
+
+As can be seen in figure~\ref{fig:malaspinas2010}, the accuracy of our method does not depend on the Weissenberg Number and is generally somewhat better than the method of \cite{malaspinas2010}.
+We note a certain dependence of the accuracy on $R_ \nu $ which we consider nevertheless acceptable given the overall smallness of the error.
+Finally, we find that the error of our method decreases with lattice resolution to the power of \SG{ give number, show dashed line in plot }.
+
+%e aim at the reproduction of figures 17 and 18 from said paper. We calculate this 2D flow in 3D as the viscoelastic algorithm has not been validated for 2D velocity sets. Otherwise, the geometry is identical. It is not entirely clear to us, how they define typical scales. We define the typical velocity as the maximum velocity, as is likely done in the paper. The typical length, we set as half of the channel width. We define the typical shear rate as typical velocity divided by typical length. We set $\eta_\text{s} = \SI{1}{\milli\pascal\second}$ as the paper only gives ratios, and it probably does not matter here. Nevertheless, our lattice units do not line up exactly with those from Malaspinas, as our viscosity is different due to the shuffling.
+%	The parameters from the paper ($R_\nu$, $Wi$ and $N$) are varied as in the paper. 
+
+
 	
 	
 	
@@ -462,7 +526,7 @@ The spatially resolved error shows that this larger average is indeed mainly att
 To illustrate the use of viscosity shuffling in realistic applications, we study three typical experimentally relevant situations.
 For ease of comparison, we use the 0.49\% methyl cellulose in all three situations.
 
-The first application stems from bioprinting where the bioink is pushed through a conical nozzle \SG{ ref }.
+The first application stems from bioprinting where the bioink is pushed through a conical nozzle \cite{possl2021, Poologasundarampillai.2021, oconnell2022}.
 The nozzle radius is \SI{1.8}{\milli\meter} at the inlet and \SI{200}{\micro\meter} at the outlet. 
 The nozzle has a length of \SI{18}{\milli\meter}.
 Due to the difference in inlet/outlet radii, the system cannot be modeled with periodic boundary conditions and we use inflow-/outflow boundary conditions as described in section~\ref{sec:Methods} instead.
@@ -534,7 +598,18 @@ These are particularly pronounced along the longest axis of the deformed cell.
 %% Conclusion
 %%	
 	
-\section{Conclusion}
+\section{Summary and conclusion}
+
+In this work, we developed a novel simulation algorithm for viscoelastic fluids.
+Our method is based on the LBM for the solvent combined with a finite-volume solver for the polymer dynamics.
+Its key novel ingredient is the introduction of a shuffling parameter $ \alpha _ \mathrm{s}$ which shifts a substantial part of the polymer stress into the solvent contribution by artificially increasing the solvent viscosity.
+The algorithm compensates for this extra solvent stress by lowering - by the same amount - the polymer stress thus leaving the total stress invariant.
+This procedure is mathematically exact and does not introduce any additional physical approximations, but significantly increases numerical stability.
+
+We applied the method to the simulation of two realistic cell carrier fluids: an alginate and a methyl cellulose suspension.
+For simple situations such as shear and Poiseuille flow, we found very good agreement with (semi-)analytical theories.
+Importantly, the outcome of the viscostiy shuffling simulations is independent of the shuffling parameter $ \alpha _ \mathrm{s}$.
+We finally demonstrated the usability of our approach in realistic geometries such as those constricting microchannels and conical bioprinting nozzles.
 
 
 	\newpage
@@ -548,7 +623,7 @@ These are particularly pronounced along the longest axis of the deformed cell.
 	\appendixpage
 	
 %%
-%% Exp protocol
+%% Appendix: Exp protocol
 %%	
 	
 \section{Rheology measurements of alginate solutions}	
@@ -564,71 +639,15 @@ The first normal stress difference $N_1$ is calculated from the measured normal 
 	Where $F$ is the measured normal force, $R$ is the radius of the rheometer, $\rho$ is the density of the fluid and $\omega$ is the angular velocity of the rheometer. The second term is usually omitted and as we found it to matter little, and as the quality of the data we have available is too limited to warrant such detailed corrections, we also choose to omit it. A cone-rheometer would be preferred here, but as $N_2 = 0$ for PTT with $\xi = 0$, the difference is negligible.
 	
 	
-	\section{Implementation of constitutive equations}\label{app:implementation}\todo{Note available analytical solutions}
-	There is a large amount of viscoelastic models. It is also common to extend these to create new models. As Oliveira shows\cite{oliveira2009} many of these can be expressed to a common form and thus actually are variants of a common idea. This allows both to easily find new models and implement them. In the following polymer contributions $\ma{\tau}$ of the models we have currently implemented are described. For notation, we mostly follow close to Oliveira\cite{oliveira2009}.
-	\parab{Implementation}
-	The actual implementation uses tensors related to $\tau$ to unify the calculations as much as possible. We denote these tensors as $\ma{A}$ and give the relation for each model. Whenever we explicitly need $\ma{\tau}$, we convert it. For Oldroyd-B this does not seem necessary and might even be slightly detrimental to performance. However, such a replacement simplifies the constitutive equation for FENE-P significantly and doing it for the other models as well allows a unified code with little adaptation for each model. It also makes the equations easier to understand and analyze. We stick with $\ma{A}$ as the Tensor containing the stress information, although its meaning is different for the different models listed here. This way, it can be seen, that all the models listed here can be brought to the common form listed below.
-	\begin{equation}
-		\frac{\partial\ma{A}}{\partial t} + \vec{u}\cdot\nabla\ma{A} = \left(\left(\nabla\vec{u}\right)^\text{T}\cdot\ma{A} + \ma{A}\cdot\left(\nabla\vec{u}\right)\right)+\ma{S}_\text{R} + 2\ma{D}
-	\end{equation}
-	Where $\ma{S}_\text{R}$ is a model-dependent term. In the following only this will be specified as all other terms are the same for all models. The second term on the left-hand side is handled via CTU, the rest is Euler-integrated.
-	
-	\subsection{Oldroyd-B}
-	This model was originally developed by Oldroyd\cite{oldroyd1958}. The constitutive equation reads as follows.
-	\begin{equation}
-		\overset{\nabla}{\ma{\tau}} = -\frac{\ma{\tau}}{\lambda} + 2\frac{\eta}{\lambda}\ma{D}
-	\end{equation}
-	$\lambda$ is the polymer relaxation time and $\eta$ is the polymer viscosity. This viscosity also defines the magnitude of the elastic forces. Both these parameters also appear in the other models. We usually do not use this model, as it is not shear thinning.
-	\parab{Implementation}
-	\begin{equation}
-		\ma{S}_\text{R} = -\frac{\ma{A}}{\lambda}
-	\end{equation}
-	\begin{equation}
-		\ma{\tau} = \frac{\eta}{\lambda}\ma{A}
-	\end{equation}
-	
-	\subsection{FENE-P}\todo{cite oliveira for theory}\todo{a lot more detail can be found in my dedicated FENE-P repo -> include derivation?}
-	This model was originally developed by Bird\cite{bird1980}\cite{bird1987}. It can be viewed as an Extension of the Oldroyd-B by limiting the polymers to finite extensibility. It has particularly many derivatives. Its constitutive equation reads as follows.
-	\begin{equation}
-		\overset{\nabla}{\ma{\tau}} = -Z\frac{\ma{\tau}}{\lambda} + \left(\ma{\tau}+(1-e b)\frac{\eta}{\lambda}\uT\right)\frac{\Dif\ln Z}{\Dif t} + 2(1-eb)\frac{\eta}{\lambda}\ma{D}
-	\end{equation}
-	With the extensibility parameter b, $e = \frac{2}{b\left(b + 2\right)}$ and
-	\begin{equation}
-		Z = 1 + \frac{3}{b}\left(\frac{b}{b + 2}+\frac{\Tr\ma{\tau}}{3\frac{\eta}{\lambda}}\right)
-	\end{equation}
-	Note, that the sign of $\ma{\tau}$ differs from Birds formulation. Also, the relation $nk_\text{B}\theta = \frac{\eta}{\lambda}$ has already been used to avoid introducing additional parameters. Particularly for large shear rates, it is numerically possible, that the polymer exceeds its maximal extensibility. If it is extended beyond the maximum the equations cause it to extend further, making this model unstable for high shear rates. Even with the decomposition proposed by Dzanic\cite{dzanic2022}, we were not yet able to get it stable. Thus, it is currently unused.
-	\parab{Implementation}
-	\begin{equation}
-		\ma{S}_\text{R} = \frac{\Tr\ma{A}\uT + \left(b + 2\right)\ma{A}}{\lambda\frac{b+2}{b+5}\left(\Tr\ma{A}-b-2\right)}
-	\end{equation}
-	\begin{equation}
-		\ma{\tau} = \frac{\eta}{\lambda}\frac{b}{b+2-\Tr\ma{A}}\left(\ma{A}+\frac{\Tr\ma{A}}{b+2}\uT\right)
-	\end{equation}
-	This seems complicated, but removes the highly problematic $\frac{\Dif\ln Z}{\Dif t}$ term, which causes issues in implementation details.
-	
-	\subsection{PTT}
-	Originating from Phan-Thien and Tanner\cite{phan-thien1977} it was soon after slightly extended by Phan-Thien\cite{phan-thien1978} to the exponential form we use. There is also an even more general form from Ferrás\cite{ferras2019}, which due to its use of the Gamma function is hard to implement on GPUs. The constitutive equation reads as follows.
-	\begin{equation}
-		\overset{\nabla}{\ma{\tau}} = -\xi\left(\ma{\tau}\cdot\ma{D} + \ma{D}\cdot\ma{\tau}\right) - e^{\frac{\epsilon\lambda}{\eta}\Tr\ma{\tau}}\frac{\ma{\tau}}{\lambda} + 2\frac{\eta}{\lambda}\ma{D}
-	\end{equation}
-	Where $\epsilon$ and $\xi$ are additional parameters related to the network this model is supposed to model. For our polymer solutions $\xi$ is always (effectively) zero.
-	\parab{Implementation}
-	\begin{equation}
-		\ma{S}_\text{R} = -\xi\left(\ma{A}\cdot\ma{D} + \ma{D}\cdot\ma{A}\right) - e^{\epsilon\Tr\ma{A}}\frac{\ma{A}}{\lambda}
-	\end{equation}
-	\begin{equation}
-		\ma{\tau} = \frac{\eta}{\lambda}\ma{A}
-	\end{equation}
-
-	\section{FENE-P}\label{app:FENE-P}
-	\todo{stability issue, fitting parameter, see fenep repo}
 	
 %%
-%% Semi-analytical
+%% Appendix: Semi-analytical
 %%	
 	
 \section{Semi-analytical solution for Poiseuille flows of PTT fluids with solvent viscosity}
 \label{app:semianalyticalPoiseuille}
+\SG{ make a self-contained derivation which is understandable even without reading Oliveira \\}
+\SG{ use Gl.~(\ref{eq:polymerStress}) as starting point and end with Poiseuille solution, but also shear solution Gl.~(\ref{eq:shearN}, \ref{eq:shearEta}) \\}
 Our derivation is analogous to Oliveira\cite{oliveira1999}. To account for the added viscous stress due to $\eta_\text{s}$, equilibrium is reached at lower polymer stresses. Therefore, Oliveiras equation (7) needs to be modified as follows.
 	\begin{equation}
 		\tau_{xy} = \partial_xp\frac{r}{2^j} - \eta_\text{s}\dot{\gamma}
@@ -663,77 +682,53 @@ Our derivation is analogous to Oliveira\cite{oliveira1999}. To account for the a
 		r = c\dot{\gamma} - R_\eta\frac{c}{d}\sqrt{W_0\left(d^2\dot{\gamma}^2\right)}
 	\end{equation}
 	Finally this function needs to be inverted. This needs to be done numerically. We calculate a range of $\dot{\gamma}$ from $0$ to $\frac{R}{c}$ with a small step interval. Here $R$ is the radius of the channel or pipe. This is guaranteed to contain all relevant radii. We flip the axis and integrate numerically using scipy.integrate.cumulative\_trapezoid\todo{cite}. This is very accurate as we conveniently picked the spacing of our now $x$-axis in a way, that the $y$-axis ($\dot{\gamma}$) varies little for each step. From the recovered curve $u$ is calculated at each required $r$ through linear interpolation.
+	
+%%
+%% Appendix: Shear flow
+%%
 
-	\section{Parameter studies and validation}\label{app:validation}
-	To validate, that our algorithm is indeed valid, we use it to simulate some typical system and determine the observed error. First we vary the shuffle fraction to assure that its value is irrelevant as its introduction in section \ref{sec:shuffling} predicts. Following that we calculate the shear flow for varying shear rates to reproduce the predicted shear thinning. Finally 2D and 3D poiseuille flows are simulated for different pressure gradients. A high degree of accuracy is observed in all these tests showing the validity of our algorithm.
-	\subsection{Viscosity shuffle fraction dependency}\label{app:viscSuffleDependency}
-	We use PTT with the methyl cellulose parameters. In a shear flow with the very small shearrate of $\dot{\gamma} = \SI{1}{\per\second}$, the viscosity shuffle fraction is varied. As can be seen in figure \ref{fig:suffleParameterStudy}, the observed viscosity does not depend on $\alpha_\text{s}$. The simulation gives $\eta = \SI{19.6999988048\pm0.0000000002}{\milli\pascal}$, while theory gives $\eta = \SI{19.699998805}{\milli\pascal}$. Therefore, the simulation is incredibly accurate.
+\section{Validation in pure shear flow}
+\label{sec:shearFlow}
+
+As additional quantitative validation, we simulate a pure shear flow driven by imposing a fixed velocity at the top and bottom of the computational box and using periodic boundary conditions in the other two directions.
+The box dimension is \SG{ xx }.
+We use PTT with the methyl cellulose parameters and vary the shear rate to cover the full range starting from the zero-shear all the way to the infinite-shear plateau displayed in figure~\ref{fig:fit_mc} of the main text.
+The shuffling is fixed at $ \alpha _ \mathrm{s} = 1$ and the viscosity as function of shear rate is computed by dividing the total fluid stress at the center of the box by the shear rate.
+Figure~\ref{fig:wiParameterStudy}~(a) shows that our simulations are in very good agreement with the semi-analytical solution as calculated in \SG{ XX } with a maximum error of \num{2e-11}.
+Importantly, we show in figure~\ref{fig:wiParameterStudy}~(b) that this very good agreement is independent of the shuffling parameter $ \alpha _ \mathrm{s}$.
 	\begin{figure}[H]
 		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/suffleParameterStudy.eps}
-		\caption{Plot of the simulated viscosity as a dependency of the viscosity shuffle fraction. The axis label does not have enough digits to reflect the precision archived.}
-		\label{fig:suffleParameterStudy}
-	\end{figure}
-	\subsection{Weissenberg number dependency}
-	We use the same setup as in section \ref{app:viscSuffleDependency}, but vary the shear rate instead of $\alpha_\text{s}$, which is equal to unity here. As can be seen in figure \ref{fig:wiParameterStudy}, the agreement is very good. The maximum relative error is \num{2e-11}. The simulation becomes asymptotic. For higher shear, it equilibrates faster. Those data points have significantly smaller errors (\num{7e-16}) suggesting, that the simulation was not fully equilibrated for the smaller shear rates. Also, this suggests, that when the simulation has fully equilibrated the error is smaller than can be captured in a 32-bit float.
-	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/wiParameterStudy.eps}
-		\caption{Plot of the simulated viscosity as a dependency of the Weissenber number.}
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=0.5]{assets/plots/wiParameterStudy.eps}
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=0.5]{assets/plots/suffleParameterStudy.eps}
+		\caption{(a) The local viscosity determined by a shear flow simulation is in very good agreement with the semi-analytical theory.
+		(b) The error is negligibly small independent of the shuffling parameter $ \alpha _ \mathrm{s}$.}
 		\label{fig:wiParameterStudy}
 	\end{figure}
-	\subsection{2D Poiseuille vs theory}
-	The setup remains as above, but the imposed shear flow is replaced by a pressure gradient. The radius of the channel flow is set as \SI{10}{\micro\meter}. The simulations were run for multiple values for the pressure gradient spaced in a way to approximately cover the range of the Weissenberg number seen in the section before. The resulting errors can be seen in figure \ref{fig:2DParameterStudyErr}. Due to the shear thinning behavior the shear rate is not constant for the whole channel, therefore the direct relation of the pressure gradient to the Weissenberg number is not possible. Averaging the shear rate it becomes clear that the error maximum here corresponds to the maximum slope seen in figure \ref{fig:wiParameterStudy}. The plots for the velocity profile and its error of this worst case parameter can be seen in figure \ref{fig:2DParameterStudyUWorst} and figure \ref{fig:2DParameterStudyErrWorst} respectively. It is clear, that the simple bounce back boundaries employed on the wall are a major cause of the observed error. The error in total is insignificant.
+
+
+
+
+
+
+
+%%
+%% Appendix: Supplementary figures
+%%	
+\section{Supplementary figures}
+\label{sec:supplementaryFigures}
+
 	\begin{figure}[H]
 		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErr.eps}
-		\caption{Plot of the simulation error in a channel flow as a dependency of the pressure gradient.}
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=0.5]{assets/plots/2DParameterStudyErr.eps}
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=0.5]{assets/plots/3DParameterStudyErr.eps}
+		\caption{Average error of the velocity for a planar (a) and a cylindrical (b) Poiseuille flow  of methyl cellulose at different pressure gradients. 
+		All other parameters are as in figure~\ref{fig:2DAlginateU}~(b) of the main text.
+		The peak in the error profile appears when the average shear rate across the channel corresponds to the maximum slope in the viscosity profile of figure~\ref{fig:wiParameterStudy}. }
 		\label{fig:2DParameterStudyErr}
 	\end{figure}
-%	\begin{figure}[H]
-%		\centering
-%		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyUWorst.eps}
-%		\caption{Plot of the simulated velocity in a channel flow as a dependency of the radius. This is the same as figure \ref{fig:2DAlginateU} but for methyl cellulose.}
-%		\label{fig:2DParameterStudyUWorst}
-%	\end{figure}
-%	\begin{figure}[H]
-%		\centering
-%		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErrWorst.eps}
-%		\caption{Plot of the error of the simulated velocity in a channel flow as a dependency of the radius. This is the same as figure \ref{fig:2DAlginateErr} but for methyl cellulose.}
-%		\label{fig:2DParameterStudyErrWorst}
-%	\end{figure}
-	%Interestingly, the last one work besides Ma being approx 10.\n
-	%This error is not influenced by shuffling fraction or lattice resolution\n
-	%The shape the sim returns can be obtained by the theory by modifying px and or etap\n
-	%The resulting error is (approx) centered around Wi of max viscosity gradient.
-	This is now repeated for a three-dimensional flow.
-	\subsection{3D Poiseuille vs theory}
-	The simulation was run as described in the section above, but the 2D channel geometry was changed into a 3D pipe flow. The errors show a similar behavior (see figure \ref{fig:3DParameterStudyErr}), but are considerably larger. The maximum pressure gradient is smaller for this series is smaller than the 2D series as those simulations exceeded the stability criterion for the Mach number. The worst result was obtained using the same pressure gradient as in the 2D case and can be seen in figure \ref{fig:3DParameterStudyUWorst} and figure \ref{fig:3DParameterStudyErrWorst}. Notably the error here, while still tolerable is a lot worse than the 2D case. With the error being particularly high around the wall it is likely that the wall approximation, which is significantly worse in the 3D case due to the required stair stepping, is the main reason for the 3D case exhibiting larger errors. 
+
+
 	\begin{figure}[H]
-		\centering
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyErr.eps}
-		\caption{Plot of the simulation error in a pipe flow as a dependency of the pressure gradient}
-		\label{fig:3DParameterStudyErr}
-	\end{figure}
-%	\begin{figure}[H]
-%		\centering
-%		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyUWorst.eps}
-%		\caption{Plot of the simulated velocity in a pipe flow as a dependency of the radius. This was evaluated along a coordinate axis. This is the same as figure \ref{fig:3DAlginateU} but for methyl cellulose.}
-%		\label{fig:3DParameterStudyUWorst}
-%	\end{figure}
-%	\begin{figure}[H]
-%		\centering
-%		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyErrWorst.eps}
-%		\caption{Plot of the error of the simulated velocity in a pipe flow as a dependency of the radius. This was evaluated along a coordinate axis. This is the same as figure \ref{fig:3DAlginateErr} but for methyl cellulose.}
-%		\label{fig:3DParameterStudyErrWorst}
-%	\end{figure}
-	\subsection{Validation summary}
-	The algorithm passes all typical test and behaves as expected. The error is very small for most problems. Only the pipe flow shows considerable error, however this is likely caused by the wall model and not by the viscosity shuffling method.
-	
-	
-	
-	
-		\begin{figure}[H]
 		\centering
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=0.5]{assets/plots/2DAlginateErr.eps}
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=0.5]{assets/plots/2DParameterStudyErrWorst.eps}
@@ -743,7 +738,7 @@ Our derivation is analogous to Oliveira\cite{oliveira1999}. To account for the a
 		\label{fig:2DAlginateErr}
 	\end{figure}
 	
-		\begin{figure}[H]
+	\begin{figure}[H]
 		\centering
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=0.5]{assets/plots/3DAlginateErr.eps}
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=0.5]{assets/plots/3DParameterStudyErrWorst.eps}
@@ -754,6 +749,6 @@ Our derivation is analogous to Oliveira\cite{oliveira1999}. To account for the a
 		\label{fig:3DAlginateErr}
 	\end{figure}
 	
-	
 
-		\end{document}
+
+\end{document}
