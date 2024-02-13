@@ -81,10 +81,7 @@ class PTT:
         def getInterpol(offset=0):
             def interpol(r):  # Can only handle scalar r
                 idx = np.argmin(np.abs(rVelocity - r))
-                if idx == 0:
-                    m = (velocity[idx + 1] - velocity[idx]) / (rVelocity[idx + 1] - rVelocity[idx])
-                    return velocity[idx] + m * (r - rVelocity[idx]) - offset
-                if rVelocity[idx] > r:
+                if rVelocity[idx] > r and idx != 0:
                     idx -= 1
                 elif rVelocity[idx] == r:
                     return velocity[idx] - offset
