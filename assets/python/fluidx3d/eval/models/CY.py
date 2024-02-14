@@ -36,7 +36,7 @@ class CY:
         sol = root_scalar(
             stressBalance,
             method="toms748",
-            bracket=[-G / 2**j * R / self.eta_s, -G / 2**j * R / self.eta_p],
+            bracket=[-G / 2**j * R / self.eta_s, -G / 2**j * R / (self.eta_p + self.eta_s)],
         )
 
         if not sol.converged:
