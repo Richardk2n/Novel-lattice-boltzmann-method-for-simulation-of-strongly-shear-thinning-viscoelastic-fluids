@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import numpy.ma as ma
 import pyvista as pv
+
 from fluidx3d.eval.models import PTT
 from fluidx3d.eval.style import cm
 
@@ -50,7 +51,7 @@ def process():
     vField = dataV.get_array("data") * V0
     vField = np.reshape(vField, (Lx, Ly, Lz, 3), "F")
 
-    if False:
+    if True:
         mask = np.zeros(vField.shape)
 
         for x in range(Lx):
@@ -77,6 +78,18 @@ def process():
 
             vonMieses += 3 / 2 * deviator[i][j] * deviator[i][j]
     vonMieses = np.sqrt(vonMieses)
+    if True:
+        mask = np.zeros(vonMieses.shape)
+
+        for x in range(Lx):
+            localR = (10.5 - 94.5) / (Lx - 3) * (x - 1) + 94.5
+            for y in range(Ly):
+                for z in range(Lz):
+                    if np.hypot(y - (Ly / 2.0) + 0.5, z - (Lz / 2.0) + 0.5) >= localR + 0.5:
+                        mask[x, y, z] = 1
+
+        vonMieses = ma.masked_array(vonMieses, mask=mask)
+
     vonMiesesSlice = vonMieses[..., Lz // 2]
 
     # tau12 = tauField[..., Lz // 2, 3]
@@ -88,52 +101,58 @@ def process():
     print(inflow)
     print(outflow)
 
-    x = np.arange(0, Lx) - 0.5  # Offset?
+    x = np.arange(0, Lx + 1) - 0.5  # Offset?
     localR = (10.5 - 94.5) / (Lx - 3) * (x - 1) + 94.5
     # lower = 94.58898305084746 - localR
     # upper = 94.58898305084746 + localR
-    upper = 95 + localR
+    upper = 95 + localR + 0.5 - (Ly / 2 - 0.5)  # Actual radius simulated is off by 0.5?
     # print(upper)
-    lower = 95 - localR + 1  # Something is wrong here
+    lower = 95 - localR - 0.5 - (Ly / 2 - 0.5)
     # print(lower)
 
     plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
-    # plt.plot(x * L0 * 1e3, upper * L0 * 1e3, "k")
-    # plt.plot(x * L0 * 1e3, lower * L0 * 1e3, "k")
+    plt.title("(a)", loc="left", pad=45, x=-0.1)
+    plt.plot(x * L0 * 1e3, upper * L0 * 1e3, "k", linewidth=0.5)
+    plt.plot(x * L0 * 1e3, lower * L0 * 1e3, "k", linewidth=0.5)
     plt.imshow(
         vSlice.T,
         cmap="coolwarm",
         extent=[
             -0.5 * L0 * 1e3,
             (Lx - 1 + 0.5) * L0 * 1e3,
-            -0.5 * L0 * 1e3,
-            (Ly - 1 + 0.5) * L0 * 1e3,
+            -Ly / 2 * L0 * 1e3,
+            Ly / 2 * L0 * 1e3,
         ],
     )
     plt.xlabel(r"$x/\unit{\milli\meter}$")
     plt.ylabel(r"$y/\unit{\milli\meter}$")
     plt.colorbar(location="top", label=r"$v_x/\unit{\meter\per\second}$")
-    # plt.gca().spines["top"].set_visible(False)
-    # plt.gca().spines["right"].set_visible(False)
-    plt.savefig("../plots/Nozzle_v.eps")
+    plt.gca().spines["top"].set_visible(False)
+    plt.gca().spines["right"].set_visible(False)
+    plt.savefig("../plots/Nozzle_v.pdf", dpi=1200, bbox_inches="tight", pad_inches=0)
     plt.show()
 
     plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
+    plt.title("(b)", loc="left", pad=45, x=-0.1)
+    plt.plot(x * L0 * 1e3, upper * L0 * 1e3, "k", linewidth=0.5)
+    plt.plot(x * L0 * 1e3, lower * L0 * 1e3, "k", linewidth=0.5)
     plt.imshow(
         vonMiesesSlice.T,
         cmap="coolwarm",
         extent=[
             -0.5 * L0 * 1e3,
             (Lx - 1 + 0.5) * L0 * 1e3,
-            -0.5 * L0 * 1e3,
-            (Ly - 1 + 0.5) * L0 * 1e3,
+            -Ly / 2 * L0 * 1e3,
+            Ly / 2 * L0 * 1e3,
         ],
         # interpolation="none",
     )
     plt.xlabel(r"$x/\unit{\milli\meter}$")
     plt.ylabel(r"$y/\unit{\milli\meter}$")
     plt.colorbar(location="top", label=r"$\sigma_\text{vM}/\unit{\pascal}$")
-    plt.savefig("../plots/Nozzle_sigma_vM.eps")
+    plt.gca().spines["top"].set_visible(False)
+    plt.gca().spines["right"].set_visible(False)
+    plt.savefig("../plots/Nozzle_sigma_vM.pdf", dpi=1200, bbox_inches="tight", pad_inches=0)
     plt.show()
 
     r"""

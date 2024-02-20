@@ -100,6 +100,7 @@ if __name__ == "__main__":
 
     gd = np.logspace(np.log10(np.min(gde)), np.log10(np.max(gde)) + 4, 1000)
     plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
+    plt.title("(a)", loc="left")
     for i in [49, 59, 83]:
         gde, e, gdn, n = readFile(i)
         plt.plot(gde, e, "x", color=color(f(i)), label=f"Data $\\SI{{0.{i}}}{{\\percent}}$")
@@ -122,10 +123,11 @@ if __name__ == "__main__":
     plt.yscale("log")
     plt.xlabel(r"$\dot{\gamma}/\unit{\per\second}$")
     plt.ylabel(r"$\eta/\unit{\pascal\second}$")
-    plt.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-    plt.savefig("../plots/fit_mc_eta.eps")
+    plt.legend()
+    plt.savefig("../plots/fit_mc_eta.pdf", bbox_inches="tight", pad_inches=0)
     gd = np.logspace(np.log10(np.min(gdn)), np.log10(np.max(gdn)) + 4, 1000)
     plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
+    plt.title("(b)", loc="left")
     for i in [49, 59, 83]:
         gde, e, gdn, n = readFile(i)
         x, y, fun = merge(ptt_eta, gde, e, ptt_N, gdn, n)
@@ -140,5 +142,5 @@ if __name__ == "__main__":
     plt.yscale("log")
     plt.xlabel(r"$\dot{\gamma}/\unit{\per\second}$")
     plt.ylabel(r"$N_1/\unit{\pascal}$")
-    plt.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-    plt.savefig("../plots/fit_mc_N.eps")
+    plt.legend()
+    plt.savefig("../plots/fit_mc_N.pdf", bbox_inches="tight", pad_inches=0)

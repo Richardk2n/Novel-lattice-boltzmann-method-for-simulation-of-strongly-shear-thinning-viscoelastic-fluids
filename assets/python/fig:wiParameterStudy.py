@@ -8,20 +8,14 @@ Created on Tue Sep  5 10:51:20 2023
 """
 
 import json
-import sys
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pyvista as pv
-from scipy.special import lambertw
-from style import *
 
-eta_s = 1e-3
-
-
-def ptt_eta(gd, eta_p, lam, epsilon):
-    return eta_p / np.exp(0.5 * lambertw(4 * epsilon * (gd * lam) ** 2)) + eta_s
+from fluidx3d.eval.models import PTT
+from fluidx3d.eval.style import cm
 
 
 def process(index):
@@ -40,12 +34,10 @@ def process(index):
 
     cFile = cDir / "C_5000000.vtk"
     sFile = sDir / "S_5000000.vtk"
-    eta_p_SI = 18.7e-3
-    lambda_SI = 0.344e-3
     data = pv.read(cFile)
     dataS = pv.read(sFile)
     Lx, Ly, Lz = data.dimensions
-    tauField = data.get_array("data") * eta_p_SI / lambda_SI
+    tauField = data.get_array("data") * PTT.mc0_49.eta_p / PTT.mc0_49.lambda_p
     tauField = np.reshape(tauField, (Lx, Ly, Lz, 6), "F")
     sField = dataS.get_array("data") / T0
     sField = np.reshape(sField, (Lx, Ly, Lz, 6), "F")
@@ -69,21 +61,21 @@ gds = np.logspace(0, 7, 151)
 etas = np.asarray(etas) * 1e3
 
 plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
-plt.plot(gds * 0.344e-3, ptt_eta(gds, 18.7e-3, 0.344e-3, 0.27) * 1e3, "k", label="Theory")
-plt.plot(gd * 0.344e-3, etas, "rx", label="Simulation")
+plt.title("(a)", loc="left")
+plt.plot(gds, PTT.mc0_49.eta(gds) * 1e3, "k", label="Theory")
+plt.plot(gd, etas, "rx", label="Simulation")
 plt.xscale("log")
 plt.yscale("log")
-plt.xlabel(r"$Wi$")
-plt.ylabel(r"$\eta/\unit{\milli\pascal}$")
+plt.xlabel(r"$\dot{\gamma}/\unit{\per\second}$")
+plt.ylabel(r"$\eta/\unit{\milli\pascal\second}$")
 plt.legend()
 # plt.legend(loc="center left", bbox_to_anchor=(1, 0.5))
 # plt.ylim(19.699998804, 19.699998806)
-plt.savefig("../plots/wiParameterStudy.eps")
+plt.savefig("../plots/wiParameterStudy.pdf", bbox_inches="tight", pad_inches=0)
 plt.show()
 plt.plot(
     gd,
-    np.abs(ptt_eta(gd, 18.7e-3, 0.344e-3, 0.27) * 1e3 - etas)
-    / (ptt_eta(gd, 18.7e-3, 0.344e-3, 0.27) * 1e3),
+    np.abs(PTT.mc0_49.eta(gd) * 1e3 - etas) / (PTT.mc0_49.eta(gd) * 1e3),
     "rx",
 )
 plt.xscale("log")

@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pyvista as pv
 
-from style import *
+from fluidx3d.eval.style import cm, color
 
 R = 10e-6
 
@@ -61,6 +61,12 @@ def process(index):
 
 N = [25, 50, 100, 200]  # It is clear, that these are the exact values
 plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
+Ns = np.logspace(np.log10(24), np.log10(210), 100)
+N2 = (1.0 * np.asarray(Ns)) ** -2
+N20 = (1.0 * np.asarray(25)) ** -2
+plt.plot(Ns, N2 / N20 * 0.0014831067649990915, "k--")
+plt.plot(Ns, N2 / N20 * 0.0008435723395897114, "k--")
+plt.plot(Ns, N2 / N20 * 2.09733499e-03, "k--")
 i = 0
 for fig, R_nu in zip([17, 18], [0.1, 0.7]):
     for Wi in [0.1, 1]:
@@ -101,5 +107,5 @@ plt.xticks(
 plt.xlabel("N")
 plt.ylabel("L2 error")
 plt.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-plt.savefig("../plots/malaspinas2010.eps")
+plt.savefig("../plots/malaspinas2010.pdf", bbox_inches="tight", pad_inches=0)
 plt.show()

@@ -14,6 +14,7 @@ from time import time
 import matplotlib.pyplot as plt
 import numpy as np
 import pyvista as pv
+
 from fluidx3d.eval.models import PTT
 from fluidx3d.eval.style import cm
 
@@ -79,7 +80,7 @@ def process(index):
     plt.xlabel(r"$r/\unit{\micro\meter}$")
     plt.ylabel(r"$u_\text{x}/\unit{\meter\per\second}$")
     plt.legend()
-    plt.savefig(f"../plots/2DParameterStudyU{i}.eps")
+    plt.savefig(f"../plots/2DParameterStudyU{i}.pdf", bbox_inches="tight", pad_inches=0)
     plt.show()
 
     plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
@@ -92,7 +93,7 @@ def process(index):
     plt.xlabel(r"$r/\unit{\micro\meter}$")
     plt.ylabel(r"$error$")
     plt.legend()
-    plt.savefig(f"../plots/2DParameterStudyErr{i}.eps")
+    plt.savefig(f"../plots/2DParameterStudyErr{i}.pdf", bbox_inches="tight", pad_inches=0)
     plt.show()
 
     err = np.sqrt(np.sum((vSlice[1:-1] - uErr[1:-1]) ** 2) / np.sum(uErr[1:-1] ** 2))
@@ -156,25 +157,27 @@ def plotWorst(index=7):
     u = PTT.mc0_49.u(np.abs(rTheory))
 
     plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
+    plt.title("(b)", loc="left")
     plt.plot(rTheory * 1e6, u, "k", label="Semi-analytical solution")
     plt.plot(r * 1e6, vSlice, "rx", label="Simulation result")
-    plt.xlabel(r"$r/\unit{\micro\meter}$")
+    plt.xlabel(r"$y/\unit{\micro\meter}$")
     plt.ylabel(r"$u_\text{x}/\unit{\meter\per\second}$")
     plt.legend()
-    plt.savefig("../plots/2DParameterStudyUWorst.eps")
+    plt.savefig("../plots/2DParameterStudyUWorst.pdf", bbox_inches="tight", pad_inches=0)
     plt.show()
 
     plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
+    plt.title("(b)", loc="left")
     plt.plot(
         r[1:-1] * 1e6,
         vSlice[1:-1] / uErr[1:-1] - 1,
         "rx",
         # label=f"{i}",
     )
-    plt.xlabel(r"$r/\unit{\micro\meter}$")
+    plt.xlabel(r"$y/\unit{\micro\meter}$")
     plt.ylabel(r"$error$")
     # plt.legend()
-    plt.savefig("../plots/2DParameterStudyErrWorst.eps")
+    plt.savefig("../plots/2DParameterStudyErrWorst.pdf", bbox_inches="tight", pad_inches=0)
     plt.show()
 
     err = np.sqrt(np.sum((vSlice[1:-1] - uErr[1:-1]) ** 2) / np.sum(uErr[1:-1] ** 2))
@@ -208,11 +211,12 @@ if __name__ == "__main__":
         plt.show()
 
     plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
+    plt.title("(a)", loc="left")
     plt.plot(Gs, errs, "rx")
     plt.xscale("log")
     plt.xlabel(r"$-\frac{\partial p}{\partial x}/\unit{\pascal\per\meter}$")
     plt.ylabel(r"$error$")
-    plt.savefig("../plots/2DParameterStudyErr.eps")
+    plt.savefig("../plots/2DParameterStudyErr.pdf", bbox_inches="tight", pad_inches=0)
     plt.show()
 
     plotWorst()

@@ -14,6 +14,7 @@ from time import time
 import matplotlib.pyplot as plt
 import numpy as np
 import pyvista as pv
+
 from fluidx3d.eval.models import PTT
 from fluidx3d.eval.style import cm
 
@@ -90,7 +91,7 @@ def process():
     plt.colorbar(location="right", label=r"$v_x/\unit{\meter\per\second}$")
     # plt.gca().spines["top"].set_visible(False)
     # plt.gca().spines["right"].set_visible(False)
-    plt.savefig("../plots/cellInShear_v.eps")
+    plt.savefig("../plots/cellInShear_v.pdf", dpi=1200, bbox_inches="tight", pad_inches=0)
     plt.show()
 
     plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
@@ -108,7 +109,7 @@ def process():
     plt.xlabel(r"$x/\unit{\milli\meter}$")
     plt.ylabel(r"$y/\unit{\milli\meter}$")
     plt.colorbar(location="right", label=r"$\sigma_\text{vM}/\unit{\pascal}$")
-    plt.savefig("../plots/cellInShear_sigma_vM.eps")
+    plt.savefig("../plots/cellInShear_sigma_vM.pdf", dpi=1200, bbox_inches="tight", pad_inches=0)
     plt.show()
 
     r"""

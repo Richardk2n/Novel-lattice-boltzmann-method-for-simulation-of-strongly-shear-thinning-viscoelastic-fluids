@@ -8,19 +8,15 @@ Created on Tue Sep  5 10:51:20 2023
 """
 
 import json
-import sys
-from multiprocessing import Pool
 from pathlib import Path
 from time import time
 
 import matplotlib.pyplot as plt
 import numpy as np
+import numpy.ma as ma
 import pyvista as pv
-import scipy
-from scipy.special import lambertw
-from style import *
 
-eta_s = 1e-3
+from fluidx3d.eval.style import cm
 
 
 def process():
@@ -63,25 +59,93 @@ def process():
     vField = dataV.get_array("data") * V0
     vField = np.reshape(vField, (Lx, Ly, Lz, 3), "F")
 
+    if True:
+        mask = np.zeros(vField.shape)
+        mask2 = np.zeros(tauField.shape)
+        width = 30
+        length = 225
+        padding = 60
+
+        for x in range(Lx):
+            for y in range(Ly):
+                for z in range(Lz):
+                    if x < padding:
+                        if y == 0 or y == Ly - 1 or z == 0 or z == Lz - 1:
+                            for i in range(3):
+                                mask[x, y, z, i] = 1
+                                mask2[x, y, z, 2 * i] = 1
+                                mask2[x, y, z, 2 * i + 1] = 1
+                    elif x < padding + width:
+                        if (
+                            y < x - (padding - 2)
+                            or y >= Ly - x + (padding - 2)
+                            or z == 0
+                            or z == Lz - 1
+                        ):
+                            for i in range(3):
+                                mask[x, y, z, i] = 1
+                                mask2[x, y, z, 2 * i] = 1
+                                mask2[x, y, z, 2 * i + 1] = 1
+                    elif x < padding + width + length:
+                        if y < width + 1 or y >= 2 * width + 1 or z == 0 or z == Lz - 1:
+                            for i in range(3):
+                                mask[x, y, z, i] = 1
+                                mask2[x, y, z, 2 * i] = 1
+                                mask2[x, y, z, 2 * i + 1] = 1
+                    elif x < padding + 2 * width + length:
+                        if (
+                            y < (padding + width + length) - x + (width + 1)
+                            or y >= x - (padding + width + length) + (2 * width + 1)
+                            or z == 0
+                            or z == Lz - 1
+                        ):
+                            for i in range(3):
+                                mask[x, y, z, i] = 1
+                                mask2[x, y, z, 2 * i] = 1
+                                mask2[x, y, z, 2 * i + 1] = 1
+                    else:
+                        if y == 0 or y == Ly - 1 or z == 0 or z == Lz - 1:
+                            for i in range(3):
+                                mask[x, y, z, i] = 1
+                                mask2[x, y, z, 2 * i] = 1
+                                mask2[x, y, z, 2 * i + 1] = 1
+
+        vField = ma.masked_array(vField, mask=mask)
+        tauField = ma.masked_array(tauField, mask=mask2)
+
     vSlice = vField[..., Lz // 2, 0]
     tau12 = tauField[..., Lz // 2, 3]
     D12 = sField[..., Lz // 2, 3]
     eta = tau12 / D12 / 2 + 1e-3
 
     plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
-    plt.imshow(vSlice.T, cmap="coolwarm", extent=[0, (Lx - 1) * L0 * 1e6, 0, (Ly - 1) * L0 * 1e6])
+    plt.title("(a)", loc="left", pad=45, x=-0.11)
+    plt.imshow(
+        vSlice.T,
+        cmap="coolwarm",
+        extent=[0, (Lx - 1) * L0 * 1e6, -Ly / 2 * L0 * 1e6, Ly / 2 * L0 * 1e6],
+    )
     plt.xlabel(r"$x/\unit{\micro\meter}$")
     plt.ylabel(r"$y/\unit{\micro\meter}$")
     plt.colorbar(location="top", label=r"$v_x/\unit{\meter\per\second}$")
-    plt.savefig(f"../plots/RT-DC_v.eps")
+    plt.gca().spines["top"].set_visible(False)
+    plt.gca().spines["right"].set_visible(False)
+    plt.savefig("../plots/RT-DC_v.pdf", dpi=1200, bbox_inches="tight", pad_inches=0)
     plt.show()
 
     plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
-    plt.imshow(tau12.T, cmap="coolwarm", extent=[0, (Lx - 1) * L0 * 1e6, 0, (Ly - 1) * L0 * 1e6])
+    plt.title("(b)", loc="left", pad=45, x=-0.11)
+    plt.imshow(
+        tau12.T,
+        cmap="coolwarm",
+        extent=[0, (Lx - 1) * L0 * 1e6, -Ly / 2 * L0 * 1e6, Ly / 2 * L0 * 1e6],
+    )
     plt.xlabel(r"$x/\unit{\micro\meter}$")
     plt.ylabel(r"$y/\unit{\micro\meter}$")
     plt.colorbar(location="top", label=r"$\tau_{12}/\unit{\pascal}$")
-    plt.savefig(f"../plots/RT-DC_tau.eps")
+    plt.gca().spines["top"].set_visible(False)
+    plt.gca().spines["right"].set_visible(False)
+    plt.savefig("../plots/RT-DC_tau.pdf", dpi=1200, bbox_inches="tight", pad_inches=0)
     plt.show()
 
     r"""

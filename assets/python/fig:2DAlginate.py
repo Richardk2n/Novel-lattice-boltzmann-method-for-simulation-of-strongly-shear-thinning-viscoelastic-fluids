@@ -13,8 +13,8 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import pyvista as pv
+
 from fluidx3d.eval.models import PTT
-from style import *
 from style import cm
 
 
@@ -59,25 +59,27 @@ def process(i):
     u = PTT.alginate.u(np.abs(rTheory))
 
     plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
-    plt.plot(rTheory * 1e6, u, "k", label="Semi-analytical solution")
-    plt.plot(r * 1e6, vSlice, "rx", label="Simulation result")
-    plt.xlabel(r"$r/\unit{\micro\meter}$")
-    plt.ylabel(r"$u_\text{x}/\unit{\meter\per\second}$")
+    plt.title("(a)", loc="left")
+    plt.plot(rTheory * 1e6, u * 1e6, "k", label="Semi-analytical solution")
+    plt.plot(r * 1e6, vSlice * 1e6, "rx", label="Simulation result")
+    plt.xlabel(r"$y/\unit{\micro\meter}$")
+    plt.ylabel(r"$u_\text{x}/\unit{\micro\meter\per\second}$")
     plt.legend()
-    plt.savefig("../plots/2DAlginateU.eps")
+    plt.savefig("../plots/2DAlginateU.pdf", bbox_inches="tight", pad_inches=0)
     plt.show()
 
     plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
+    plt.title("(a)", loc="left")
     plt.plot(
         r[1:-1] * 1e6,
         vSlice[1:-1] / uErr[1:-1] - 1,
         "rx",
         # label=f"{i}",
     )
-    plt.xlabel(r"$r/\unit{\micro\meter}$")
+    plt.xlabel(r"$y/\unit{\micro\meter}$")
     plt.ylabel(r"$error$")
     # plt.legend()
-    plt.savefig("../plots/2DAlginateErr.eps")
+    plt.savefig("../plots/2DAlginateErr.pdf", bbox_inches="tight", pad_inches=0)
     plt.show()
 
     err = np.sqrt(np.sum((vSlice[1:-1] - uErr[1:-1]) ** 2) / np.sum(uErr[1:-1] ** 2))
