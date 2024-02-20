@@ -663,31 +663,49 @@ For both Poiseuille flow and shear flow the following holds.
 \end{equation}
 With this the constitutive equation\todo{link} fo $\xi=0$ in steady state reduces to the following.
 \begin{align}
-	\exp\left(\frac{\epsilon\lambda}{\eta_\text{p}}\Tr\ma{\tau}\right)\tau_{xx} &= 2\lambda\dot{\gamma}\tau_{xy} \\
-	\exp\left(\frac{\epsilon\lambda}{\eta_\text{p}}\Tr\ma{\tau}\right)\tau_{xy} &= \eta_\text{p}\dot{\gamma}
+	\exp\left(\frac{\epsilon\lambda}{\eta_\text{p}}\Tr\ma{\tau}\right)\tau_{xx} &= 2\lambda\dot{\gamma}\tau_{xy} \label{eq:PTTDerivation1}\\
+	\exp\left(\frac{\epsilon\lambda}{\eta_\text{p}}\Tr\ma{\tau}\right)\tau_{xy} &= \eta_\text{p}\dot{\gamma} \label{eq:PTTDerivation2}
 \end{align}
 With $\Tr\ma{\tau} = \tau_{xy}$. In the three-dimensional case $y$ refers to the radial coordinate.
-
-
-
-
-
-To account for the added viscous stress due to $\eta_\text{s}$, equilibrium is reached at lower polymer stresses. Therefore, Oliveiras equation (7) needs to be modified as follows.
-	\begin{equation}
-		\tau_{xy} = \partial_xp\frac{r}{2^j} - \eta_\text{s}\dot{\gamma}
-	\end{equation}
-	Where the second term is added due to the presence of the solvent viscosity. This term also propagates to Oliveiras equation (9) as follows.
+Eliminating $\tau_{xy}$ yields the following.
+\begin{equation}
+	\exp\left(2\frac{\epsilon\lambda}{\eta_\text{p}}\Tr\ma{\tau}\right)\tau_{xx} = 2\lambda\dot{\gamma}^2\eta_\text{p}
+\end{equation}
+This is solved by the Lambert $W$ function as follows.
+\begin{equation}
+	\tau_{xx} = \frac{\eta_\text{p}}{2\epsilon\lambda}W_0\left(4\epsilon\lambda^2\dot{\gamma}^2\right)
+\end{equation}
+With $\tau_{yy} = 0$ this yields the following.
+\begin{equation}
+	N_1 = \sigma_{xx} - \sigma_{yy} = \tau_{xx} = \frac{\eta_\text{p}}{2\epsilon\lambda}W_0\left(4\epsilon \mathrm{Wi}^2\right) %\label{eq:shearN}
+\end{equation}
+For the viscosity, we insert this into equation~(\ref{eq:PTTDerivation2}) and retrieve the following.
+\begin{align}
+	\eta &= \frac{\sigma_{xy}}{\dot{\gamma}} \\
+	&= \frac{\tau_{xy} + \eta_\text{s}\dot{\gamma}}{\dot{\gamma}} \\
+	&= \eta\left(\dot{\gamma}\right) = \frac{\eta_\text{p}}{\exp\left[0.5W_0\left(4\epsilon \mathrm{Wi}^2\right)\right]} + \eta_\text{s} %\label{eq:shearEta}
+\end{align}
+This gives the relevant solutions for the shear flow. For Poiseuille flow, we start with the Cauchy momentum equation (neglecting gravity), which reads as follows.
+\begin{equation}
+	\rho\frac{\Dif\vec{u}}{\Dif t} = -\nabla p + \nabla\cdot\sigma
+\end{equation}
+In steady state for this geometry, once integrated along $y$, this reduces to the following.
+\begin{equation}
+	\sigma_{xy} = \frac{\partial p}{\partial x}\frac{y}{2^j}
+\end{equation}
+Here $j$ is $0$ for the two-dimensional case and $1$ in the three-dimensional flow. The total stress experienced by the fluid is the one described by the constitutive equation plus the solvent contribution and thus the following holds.
+\begin{equation}
+	\tau_{xy} = \partial_xp\frac{r}{2^j} - \eta_\text{s}\dot{\gamma}
+\end{equation}
+Here we switched from y to writing $y$ to $r$ in order to clarify, that this is a radial coordinate being $0$ in the center of the channel for both cases.
+Dividing equation~(\ref{eq:PTTDerivation1}) by equation~(\ref{eq:PTTDerivation2}) leads to the following relation.
+\begin{equation}
+	\tau_{xx} = \frac{2\lambda}{\eta_\text{p}}\tau_{xy}^2 =  \frac{2\lambda}{\eta_\text{p}}\left(\partial_xp\frac{r}{2^j} - \eta_\text{s}\dot{\gamma}\right)^2
+\end{equation}
+Inserting this back into equation~(\ref{eq:PTTDerivation2}) yields the following.
 	\begin{align}
-		\dot{\gamma} &= f\left(\frac{2\lambda}{\eta_\text{p}}\left[\partial_xp\frac{r}{2^j} - \eta_\text{s}\dot{\gamma}\right]^2\right)\frac{1}{\eta_\text{p}}\left(\partial_xp\frac{r}{2^j}-\eta_\text{s}\dot{\gamma}\right)
+		\dot{\gamma} &= \exp\left(\frac{2\epsilon\lambda^2}{\eta_\text{p}^2}\left[\partial_xp\frac{r}{2^j} - \eta_\text{s}\dot{\gamma}\right]^2\right)\frac{1}{\eta_\text{p}}\left(\partial_xp\frac{r}{2^j}-\eta_\text{s}\dot{\gamma}\right)
 		\intertext{This cannot be integrated as easily as without $\eta_\text{s}$, and is only solvable semi-analytically.}
-		1 &= f\left(\frac{2\lambda}{\eta_\text{p}}\left[\partial_xp\frac{r}{2^j} - \eta_\text{s}\dot{\gamma}\right]^2\right)\frac{1}{\eta_\text{p}}\left(\partial_xp\frac{r}{2^j\dot{\gamma}}-\eta_\text{s}\right)
-	\end{align}
-	For the exponential version of PTT $f$ is defined as follows.
-	\begin{equation}
-		f\left(\Tr\ma{\tau}\right) = \exp\left(\frac{\epsilon\lambda}{\eta_\text{p}}\Tr\ma{\tau}\right)
-	\end{equation}
-	This can be inserted in the above equation.
-	\begin{align}
 		1 &= \exp\left(\frac{2\epsilon\lambda^2}{\eta_\text{p}^2}\left[\partial_xp\frac{r}{2^j} - \eta_\text{s}\dot{\gamma}\right]^2\right)\frac{1}{\eta_\text{p}}\left(\partial_xp\frac{r}{2^j\dot{\gamma}}-\eta_\text{s}\right) \\
 		0 &= \frac{2\epsilon\lambda^2}{\eta_\text{p}^2}\left[\partial_xp\frac{r}{2^j} - \eta_\text{s}\dot{\gamma}\right]^2 - \ln\eta_\text{p} + \ln\left(\partial_xp\frac{r}{2^j\dot{\gamma}}-\eta_\text{s}\right) \\
 		0 &= 2\epsilon\lambda^2\dot{\gamma}^2\left[\partial_xp\frac{r}{2^j\dot{\gamma}\eta_\text{p}} - \frac{\eta_\text{s}}{\eta_\text{p}}\right]^2 + \ln\left(\partial_xp\frac{r}{2^j\dot{\gamma}\eta_\text{p}}-\frac{\eta_\text{s}}{\eta_\text{p}}\right) \\
@@ -695,7 +713,7 @@ To account for the added viscous stress due to $\eta_\text{s}$, equilibrium is r
 		\intertext{This has the following form}
 		0 &= ab^2 + \ln b
 	\end{align}
-	This can be solved using the Lambert W function as follows.
+	This can be solved using the Lambert $W$ function as follows.
 	\begin{align}
 		b &= -\sqrt{\frac{W_0\left(2a\right)}{2a}}
 		\intertext{Resolving for $r$ yields the following.}
