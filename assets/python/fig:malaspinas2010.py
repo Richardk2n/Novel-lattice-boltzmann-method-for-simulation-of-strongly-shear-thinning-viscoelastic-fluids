@@ -104,8 +104,8 @@ plt.xticks(
     ],
     minor=True,
 )
-plt.xlabel("N")
-plt.ylabel("L2 error")
+plt.xlabel(r"$N$")
+plt.ylabel(r"$E_u$")
 plt.legend(loc="center left", bbox_to_anchor=(1, 0.5))
 plt.savefig("../plots/malaspinas2010.pdf", bbox_inches="tight", pad_inches=0)
 plt.show()
