@@ -37,17 +37,17 @@ def process():
     p0 = rho0 * V0**2
 
     cFile = cDir / "CT_5000000.vtk"
-    # sFile = sDir / "S_500000.vtk"
+    sFile = sDir / "S_500000.vtk"
     vFile = vDir / "u_5000000.vtk"
 
     data = pv.read(cFile)
-    # dataS = pv.read(sFile)
+    dataS = pv.read(sFile)
     dataV = pv.read(vFile)
     Lx, Ly, Lz = dataV.dimensions
     tauField = data.get_array("data") * PTT.mc0_49.eta_p / PTT.mc0_49.lambda_p
     tauField = np.reshape(tauField, (Lx, Ly, Lz, 6), "F")
-    # sField = dataS.get_array("data") / T0
-    # sField = np.reshape(sField, (Lx, Ly, Lz, 6), "F")
+    sField = dataS.get_array("data") / T0
+    sField = np.reshape(sField, (Lx, Ly, Lz, 6), "F")
     vField = dataV.get_array("data") * V0
     vField = np.reshape(vField, (Lx, Ly, Lz, 3), "F")
 
@@ -90,11 +90,28 @@ def process():
 
         vonMieses = ma.masked_array(vonMieses, mask=mask)
 
+    if True:
+        mask = np.zeros(tauField.shape)
+
+        for x in range(Lx):
+            localR = (10.5 - 94.5) / (Lx - 3) * (x - 1) + 94.5
+            for y in range(Ly):
+                for z in range(Lz):
+                    if np.hypot(y - (Ly / 2.0) + 0.5, z - (Lz / 2.0) + 0.5) >= localR + 0.5:
+                        for i in range(6):
+                            mask[x, y, z, i] = 1
+
+        tauField = ma.masked_array(tauField, mask=mask)
+
     vonMiesesSlice = vonMieses[..., Lz // 2]
 
-    # tau12 = tauField[..., Lz // 2, 3]
-    # D12 = sField[..., Lz // 2, 3]
-    # eta = tau12 / D12 / 2 + 1e-3
+    tau12 = tauField[..., Lz // 2, 3]
+    D12 = sField[..., Lz // 2, 3]
+    eta = tau12 / D12 / 2 + PTT.mc0_49.eta_s
+
+    mask = np.zeros(eta.shape)
+    mask[..., Ly // 2] = 1
+    eta = ma.masked_array(eta, mask=mask)
 
     inflow = np.sum(vField[0, ..., 0])
     outflow = np.sum(vField[Lx - 1, ..., 0])
@@ -155,15 +172,27 @@ def process():
     plt.savefig("../plots/Nozzle_sigma_vM.pdf", dpi=1200, bbox_inches="tight", pad_inches=0)
     plt.show()
 
-    r"""
     plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
-    plt.imshow(tau12.T, cmap="coolwarm", extent=[0, (Lx - 1) * L0 * 1e6, 0, (Ly - 1) * L0 * 1e6])
-    plt.xlabel(r"$x/\unit{\micro\meter}$")
-    plt.ylabel(r"$y/\unit{\micro\meter}$")
+    # plt.title("(b)", loc="left", pad=45, x=-0.1)
+    plt.plot(x * L0 * 1e3, upper * L0 * 1e3, "k", linewidth=0.5)
+    plt.plot(x * L0 * 1e3, lower * L0 * 1e3, "k", linewidth=0.5)
+    plt.imshow(
+        tau12.T,
+        cmap="coolwarm",
+        extent=[
+            -0.5 * L0 * 1e3,
+            (Lx - 1 + 0.5) * L0 * 1e3,
+            -Ly / 2 * L0 * 1e3,
+            Ly / 2 * L0 * 1e3,
+        ],
+    )
+    plt.xlabel(r"$x/\unit{\milli\meter}$")
+    plt.ylabel(r"$y/\unit{\milli\meter}$")
     plt.colorbar(location="top", label=r"$\tau_{12}/\unit{\pascal}$")
-    # plt.savefig(f"../plots/Nozzle_tau.eps")
+    plt.gca().spines["top"].set_visible(False)
+    plt.gca().spines["right"].set_visible(False)
+    plt.savefig("../plots/Nozzle_tau_12.pdf", dpi=1200, bbox_inches="tight", pad_inches=0)
     plt.show()
-    """
 
     r"""
     plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
@@ -173,21 +202,29 @@ def process():
     plt.colorbar(location="top", label=r"$D_{12}/\unit{\per\second}$")
     # plt.savefig(f"../plots/Nozzle.eps")
     plt.show()
+    """
 
     plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
+    plt.title("(c)", loc="left", pad=45, x=-0.1)
+    plt.plot(x * L0 * 1e3, upper * L0 * 1e3, "k", linewidth=0.5)
+    plt.plot(x * L0 * 1e3, lower * L0 * 1e3, "k", linewidth=0.5)
     plt.imshow(
         eta.T * 1e3,
         cmap="coolwarm",
-        extent=[0, (Lx - 1) * L0 * 1e6, 0, (Ly - 1) * L0 * 1e6],
-        vmin=0,
-        vmax=40,
+        extent=[
+            -0.5 * L0 * 1e3,
+            (Lx - 1 + 0.5) * L0 * 1e3,
+            -Ly / 2 * L0 * 1e3,
+            Ly / 2 * L0 * 1e3,
+        ],
     )
-    plt.xlabel(r"$x/\unit{\micro\meter}$")
-    plt.ylabel(r"$y/\unit{\micro\meter}$")
-    plt.colorbar(location="top", label=r"$\eta/\unit{\pascal\second}$")
-    # plt.savefig(f"../plots/Nozzle.eps")
+    plt.xlabel(r"$x/\unit{\milli\meter}$")
+    plt.ylabel(r"$y/\unit{\milli\meter}$")
+    plt.colorbar(location="top", label=r"$\eta/\unit{\milli\pascal\second}$")
+    plt.gca().spines["top"].set_visible(False)
+    plt.gca().spines["right"].set_visible(False)
+    plt.savefig("../plots/Nozzle_eta.pdf", dpi=1200, bbox_inches="tight", pad_inches=0)
     plt.show()
-    """
 
 
 if __name__ == "__main__":
