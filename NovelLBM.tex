@@ -63,6 +63,24 @@ sorting=none
 	\definecolor{secondaryBackground}{RGB}{195,195,195} % Because i can lol
 \fi
 
+% Workaround we have to use because some people cannot be expected to update their packages more often than once a decade
+% https://tex.stackexchange.com/a/612592
+% This is technically licenced under CC BY-SA 4.0
+\ifdefined\qty\else
+\ifdefined\NewCommandCopy
+\NewCommandCopy\qty\SI
+\else
+\NewDocumentCommand\qty{O{}mm}{\SI[#1]{#2}{#3}}
+\fi
+\fi
+\ifdefined\unit\else
+\ifdefined\NewCommandCopy
+\NewCommandCopy\unit\si
+\else
+\NewDocumentCommand\unit{O{}m}{\si[#1]{#2}}
+\fi
+\fi
+
 \title{Novel lattice Boltzmann method for simulation of strongly shear thinning viscoelastic fluids}
 \author{Richard Kellnberger$^1$}
 \date{January, 2024}
@@ -416,7 +434,7 @@ In the case of alginate, we speed up the convergence and start from a situation 
 After \num{2e9} LBM time steps for alginate and \num{5e6} LBM time steps for methyl cellulose \SG{ XX }\RK{done} corresponding to approximately \SI{1.6}{\milli\second} and \SI{2.4}{\second} \SG{ XX }\RK{done} of physical time respectively, the simulation is stopped and the flow field $u(y)$ is compared to the semi-analytical solution.
 \RK{
 	Alg 2e9 1.6455647956111251 ms (reveals the sim to be a scam)
-	MC 5e6 2.439024390243903 s
+	MC 5e6 10.065719379854297 ms
 }
 As shown in figure~\ref{fig:2Dvel}, very good agreement is found.
 For a quantitative assessment, we compute the L2 error as follows.
