@@ -52,7 +52,7 @@ sorting=none
 \DeclareMathOperator{\dif}{d}
 \DeclareMathOperator{\Dif}{D}
 
-\def\dark{}
+%\def\dark{}
 
 \ifdefined\dark
 	\definecolor{background}{RGB}{51,51,51} % Because i can lol
@@ -82,13 +82,14 @@ sorting=none
 \fi
 
 \title{Novel lattice Boltzmann method for simulation of strongly shear thinning viscoelastic fluids}
-\author{Richard Kellnberger$^1$}
+\author{Richard Kellnberger$^1$, Tomasz Jüngst$^2$, Stephan Gekle$^1$}
 \date{January, 2024}
 \begin{document}
 	\maketitle
 
 	\begin{center}
 		$^1$ Biofluid Simulation and Modeling – Theoretische Physik VI, University of Bayreuth, Bayreuth, Germany
+		$^2$ FMZ
 	\end{center}
 	\vspace{\fill}
 	\begin{center}
@@ -142,7 +143,7 @@ Despite these improvements, however, none of these methods has been applied to v
 
 To fill this gap, here we develop a new variant of viscoelastic LBM which allows the stable and accurate simulation of very high viscosity ratio fluids.
 Our technique is based on the insight that stability issues in traditional viscoelastic LBMs arise due to an imbalance between the very large polymer stress and the much smaller viscous stress of the solvent.
-We overcome this issue by including ("shuffling") part of the polymer stress into the viscous part of the LBM algorithm.\RK{moving instead of including?}
+We overcome this issue by moving ("shuffling") part of the polymer stress into the viscous part of the LBM algorithm.
 
 
 
@@ -167,7 +168,7 @@ This motivates the use of highly shear-thinning viscoelastic fluids in biofabric
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/fit_alginate_eta.pdf}
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/fit_alginate_N.pdf}
 		\caption{Rheology data for alginate solution from 21 measurements of the viscosity (a) and normal stress (b).
-				Orange lines show a fit of the PTT rheological model. \SG{ larger font in figures }\RK{done}}
+				Orange lines show a fit of the PTT rheological model. }
 		\label{fig:fit_alginate}
 	\end{figure}
 
@@ -181,7 +182,7 @@ Even at the highest concentration the zero-shear viscosity is two orders of magn
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/fit_mc_eta.pdf}
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/fit_mc_N.pdf}
 		\caption{The viscosity (a) and normal stress (b) of a methyl cellulose solution from \cite{buyukurganci2023}.
-				Lines show a fit of the PTT rheological model. \SG{ include legend into figure. Maybe give color coding only in caption? }\RK{Done}\SG{ larger font in figures }\RK{done}}
+				Lines show a fit of the PTT rheological model. }
 		\label{fig:fit_mc}
 	\end{figure}
 
@@ -191,7 +192,7 @@ Due to the complexity of viscoelastic fluids, there is an abundance of (semi-)em
 Common options include the Oldroyd-B \cite{oldroyd1958} and the FENE-P model \cite{bird1980,bird1987}.
 The Oldroyd-B model is not appropriate for most real complex fluids as it features a shear-independent viscosity in clear contradiction to the experimental data presented in figures~\ref{fig:fit_alginate} and \ref{fig:fit_mc}.
 %Although the FENE-P does reproduce shear-thinning, we were not able to obtain a satisfactory fit to our data for alginate and methyl cellulose with physically reasonable values of the model parameters.
-A good fit to our data was obtained with the so-called PTT model due to Phan-Thien and Tanner \cite{phan-thien1977,phan-thien1978} which has been developed explicitly for polymer networks in solution and thus appears to capture well the essential physics behind the alginate and methyl cellulose solutions.\RK{due to sounds bad}
+A good fit to our data was obtained with the so-called PTT model by Phan-Thien and Tanner \cite{phan-thien1977,phan-thien1978} which has been developed explicitly for polymer networks in solution and thus appears to capture well the essential physics behind the alginate and methyl cellulose solutions.
 
 The PTT model is specified by a differential equation for the polymer stress $\ma{\tau}$:
 	\begin{equation}
@@ -199,7 +200,7 @@ The PTT model is specified by a differential equation for the polymer stress $\m
 		\label{eq:polymerStress}
 	\end{equation}
 where $\ma{D}$ is the strain rate tensor.
-\SG{ check that PTT is given in this form in \cite{phan-thien1977,phan-thien1978} or cite other source }\RK{The given form is most similar to \cite{ferras2019}, which you removed?}
+We note that extended forms of the PTT model with a Mittag-Leffler instead of an exponential function have been studied as well \cite{ferras2019}.
 The polymer viscosity is denoted $\eta_\text{p}$ and $\lambda$ is the corresponding relaxation time.
 $\epsilon$ is the so-called extensibility parameter which controls at what shear rates thinning takes place and $\xi$ describes the slip in the polymer network which we will set to zero in the following.
 The upper convected derivative of an arbitrary tensor $\ma{A}$ is defined as follows:
@@ -223,32 +224,33 @@ For a simple shear flow in the $xy$-plane of a PTT fluid with $ \xi =0$, an anal
 	\begin{equation}
 		N_1 = \frac{\eta_\text{p}}{2\epsilon\lambda}W_0\left(4\epsilon \mathrm{Wi}^2\right) \label{eq:shearN}
 	\end{equation}
-where $\mathrm{Wi} = \lambda\dot{\gamma}$ is the Weissenberg number and $W_0$ is the Lambert $W$-function. \SG{ check that $ \eta _ \mathrm{s}$ is correct }\RK{what do you mean by correct?}
+where $\mathrm{Wi} = \lambda\dot{\gamma}$ is the Weissenberg number and $W_0$ is the Lambert $W$-function. \SG{ check that $ \eta _ \mathrm{s}$ is correct }\RK{what do you mean by correct?} 
 Fitting these equations to the rheological data for alginate and methyl cellulose leads to satisfactory agreement as shown in figures~\ref{fig:fit_alginate} and \ref{fig:fit_mc}.
-In the fit, the solvent viscosity was fixed at $\eta_\text{s} = \SI{1}{\milli\pascal\second}$ as the viscosity of the PBS buffer. \SG{ give ref }\RK{PBS is 99\% water. If you really want a citation tho we could use doi: 10.1063/1.4823586}
+In the fit, the solvent viscosity was fixed at $\eta_\text{s} = \SI{1}{\milli\pascal\second}$ as the viscosity of the PBS buffer. 
+%\SG{ give ref }\RK{PBS is 99\% water. If you really want a citation tho we could use doi: 10.1063/1.4823586} \SG{ ok, let's leave it out. }
 %At very high shear rates, the contained polymers are completely stretched and the viscosity asymptotically approaches the solvent value $ \eta _ \mathrm{s}$.
 The obtained parameters are given in table~\ref{tab:PTTparameters}.
 	\begin{table}[H]
 		\centering
-		\begin{tabular}{c|c|c|c}
-			Fluid & $\eta_\text{p}/\unit{\milli\pascal\second}$ & $\lambda/\unit{\milli\second}$ & $\epsilon$ \\
+		\begin{tabular}{c|c|c|c|c}
+			Fluid & $\eta_\text{p}/\unit{\milli\pascal\second}$ & $\lambda/\unit{\milli\second}$ & $\epsilon$ & $R_ \eta $\\
 			\hline
-			alginate \num{4} & \num{48.2\pm0.4e3} & \num{343 \pm 4} & \num{0.545 \pm 0.010} \\
-			methyl c. \num{0.49} & \num{18.7\pm0.4} & \num{0.344\pm0.003} & \num{0.270\pm0.003} \\
-			methyl c. \num{0.59} & \num{32.5\pm0.7} & \num{0.433\pm0.004} & \num{0.365\pm0.004} \\
-			methyl c. \num{0.83} & \num{81\pm2} & \num{0.714\pm0.009} & \num{0.496\pm0.006}
+			alginate \num{4}\% & \num{48.2\pm0.4e3} & \num{343 \pm 4} & \num{0.545 \pm 0.010} & $4.8 \times 10 ^{ 4 }$\\
+			methyl c. \num{0.49}\% & \num{18.7\pm0.4} & \num{0.344\pm0.003} & \num{0.270\pm0.003} & 18.7\\
+			methyl c. \num{0.59}\% & \num{32.5\pm0.7} & \num{0.433\pm0.004} & \num{0.365\pm0.004} & 32.5\\
+			methyl c. \num{0.83}\% & \num{81\pm2} & \num{0.714\pm0.009} & \num{0.496\pm0.006} & 81
 		\end{tabular}
 		\caption{Parameters of the PTT model obtained by fitting to the rheological measurements in figures~\ref{fig:fit_alginate} and \ref{fig:fit_mc}.
-		\SG{ add a column with $R_ \eta $ }}\RK{would be identical to the content of the $\eta_p$ column, also would be used before introduced}\RK{names are not clear}
+		\SG{ add a column with $R_ \eta $ }}\RK{would be identical to the content of the $\eta_p$ column, also would be used before introduced} \SG{ Stimmt, aber ich will es auf einen Blick sichtbar machen }
 		\label{tab:PTTparameters}
 	\end{table}
 
-We introduce the ratio between the zero-shear and the infinite-shear (i.e.\ solvent) viscosity as\RK{nope $\eta_p$ is not zero shear viscosity!}
+We introduce the ratio between the polymer and the solvent viscosity as
 \begin{align}
 	R_\eta = \frac{\eta_\text{p}}{\eta_\text{s}}		\label{eq:R_eta}
 \end{align}
 which will turn out to be an important parameter to determine numerical stability of LB simulations.
-\SG{ wo don't actually show that $R_ \eta  $ determines stability? }\RK{we do not. We could do a few simulations with $\alpha_s = 0$ and increasing $R_\eta$ until the sim breaks if you want}
+\SG{ wo don't actually show that $R_ \eta  $ determines stability? }\RK{we do not. We could do a few simulations with $\alpha_s = 0$ and increasing $R_\eta$ until the sim breaks if you want} \SG{ wie besprochen, bau einfach die Zitate ein, das reicht dann. }
 This ratio can similarly be defined for other models such as FENE-P or the inelastic, but shear-thinning Carreau-Yasuda model \cite{carreau1972, yasuda1979}.
 For our alginate solution we obtain $R_\eta = \num{48.2\pm0.4e3}$, indicating that the solution viscosity at very low shear rates is more than four orders of magnitude larger than the solvent viscosity which represents a severe challenge to standard numerical algorithms.
 That this characteristic is not unique to alginate, but is in fact a generic feature of cell carrier fluids used in bioprinting is shown in table~\ref{tab:bioinks} where rheological data from various literature sources have been compiled into a single format to determine $R_\eta$.
@@ -282,10 +284,10 @@ The \SI{0.49}{\percent} methyl cellulose solution used in RT-DC measurements, in
 \section{Existing LBM methods}
 
 \SG{ make sure that all papers cited in the introduction as ''3D'' are discussed here as well }\RK{dellar is missing}
-\SG{ and vice versa: make sure that all papers discussed here are also cited in the introduction }\RK{gupta2015\_2 not in intro}
+\SG{ and vice versa: make sure that all papers discussed here are also cited in the introduction }\RK{gupta2015\_2 not in intro} \SG{ dann setz einfach die Zitate so rein, wie du sie fuer passend haeltst. }
 Since the early days of LBM, variants for viscoelastic fluids have been developed.
 Keeping in mind our target geometries, we focus here on three-dimensional formulations.
-The first approaches avoided an explicit modeling of a viscoelastic constitutive equation and simply modified the LB collision operator to obtain a fluid obeying Jeffery's viscoelastic model \cite{lallemand2003}. \SG{ can we say more about Jeffery? Why is it bad? Is it shear-thinning? }\RK{not shear thinning in steady state as far as i know}
+The first approaches avoided an explicit modeling of a viscoelastic constitutive equation and simply modified the LB collision operator to obtain a basic viscoelastic fluid obeying Jeffery's model \cite{lallemand2003}.
 More advanced approaches include the work of Onishi \textit{et al.} \cite{onishi2005, onishi2006} who considered a non-shear-thinning Oldroyd-B model using a microscopic Fokker-Planck equation for the polymer dumbbells.
 The work of \cite{wang2020} solved the advection part of the model using a second LBM running in parallel to the Navier-Stokes LBM.
 The same technique was used by \cite{malaspinas2010} and \cite{ma2020} for the Oldroyd-B and FENE-P models.
@@ -293,7 +295,7 @@ Later, hybrid schemes coupling an LB solver for the solvent to a finite-differen
 To improve numerical stability, some authors propose the inclusion of an artificial diffusivity \cite{malaspinas2010,ma2020,wang2020,wang2021}, which introduces a small error compared to the analytical solution of the constitutive equation.
 Other remedies include special decompositions of the stress tensor\cite{dzanic2022} or optimization of the solvent contribution\cite{gupta2015} \SG{ rephrase and give some more details }\RK{I have not the slightest clue what gupta is doing. I assume optimize is code for increase until stable but I do not know.}.
 Coupling of the resulting polymer stress to the Navier-Stokes LBM can be achieved via the inclusion of point forces or via a modification of the equilibrium populations.
-A recent comparison in 2D found that the former in general leads to better stability \cite{dzanic2022}.\RK{No in fact, it uses the latter and found to be more accurate than a paper using the former, stability was entirely attributed to the decomposition and artificial diffusivity.}
+A recent comparison in 2D found that the former in general leads to better stability \cite{dzanic2022_2}.\RK{No in fact, it uses the latter and found to be more accurate than a paper using the former, stability was entirely attributed to the decomposition and artificial diffusivity.} \SG{ die Referenz war falsch, es war der andere Dzanic. Aber da steht eigentlich schon, dass forcing besser sei, oder? }
 
 The stable range of Weissenberg numbers covered by existing methods is up to $\mathrm{Wi}\approx\num{10}$ for the method of \cite{malaspinas2010} and up to $\mathrm{Wi}\approx\num{100}$ in \cite{gupta2015,ma2020,gupta2016}.
 However, another stability criterion, which is often overlooked is the viscosity ratio $R_\eta$ as defined in eq.~(\ref{eq:R_eta}).
@@ -349,7 +351,6 @@ We use a D3Q19 lattice in full three dimensions together with a single relaxatio
 Our implementation is based on FluidX3D which has been extensively used and validated in earlier publications \cite{Lehmann.20229da}.
 The core of the algorithm is implemented in OpenCL and thus capable of running on GPUs from different vendors.
 Non-periodic boundaries are modeled using the half-way bounce back algorithm. To model fixed inflow/outflow, bounce back boundaries using a Dirichlet boundary condition as described by Krüger \textit{et al.} \cite{Kruger_book} are used.
-\SG{ and inflow/outflow: give details }\RK{done}
 
 Physical units are mapped to lattice units to obtain a dimensionless relaxation time of 1.
 The employed lattice dimensions vary for the different applications and are specified below.
@@ -419,39 +420,32 @@ Based on the work of \cite{oliveira1999} we can nevertheless derive a semi-analy
 A validation in simple shear flow can be found in appendix~\ref{sec:shearFlow}.
 
 We start by simulating the alginate and \SI{0.49}{\percent} methyl cellulose solutions with a viscosity ratio $R_\eta = \num{48.2e3}$ and $R_\eta = \num{18.7}$, respectively, in 2D planar Poiseuille flow.
-In physical units the channel has a height of \SI{20}{\micro\meter} which are discretized with 41 \SG{ XX }\RK{pipe is 41 box is 43} LBM nodes.
+In physical units the channel has a height of \SI{20}{\micro\meter} which are discretized with 41 LBM nodes.
 For the viscosity shuffling, we set $\alpha_\text{s} = 1$.
-Along the flow direction, the channel is periodic, and the flow is driven by a pressure gradient of \SI{-1e7}{\pascal\per\meter} for alginate and  approximately \SI{-1.2e7}{\pascal\per\meter} for methyl cellulose. \SG{ pressure for MC? }\RK{done}
-\RK{
-	2D Param (MC) -12459373.981063413
-	3D Param (MC) -24918747.962126825
-	2D Alg -1e7
-	3D Alg -2e7
-}
+Along the flow direction, the channel is periodic, and the flow is driven by a pressure gradient of \SI{-1e7}{\pascal\per\meter} for alginate and  approximately \SI{-1.2e7}{\pascal\per\meter} for methyl cellulose. 
 The velocity field is initialized with zero.
 For methyl cellulose, we simulate the full temporal evolution with the polymers starting in the unstretched configuration.
-In the case of alginate, we speed up the convergence and start from a situation in which the polymers are pre-stretched \SG{ give details }\RK{initialized to the semianalytical solution}.
-After \num{2e9} LBM time steps for alginate and \num{5e6} LBM time steps for methyl cellulose \SG{ XX }\RK{done} corresponding to approximately \SI{1.6}{\milli\second} and \SI{2.4}{\second} \SG{ XX }\RK{done} of physical time respectively, the simulation is stopped and the flow field $u(y)$ is compared to the semi-analytical solution.
-\RK{
-	Alg 2e9 1.6455647956111251 ms (reveals the sim to be a scam)
-	MC 5e6 10.065719379854297 ms
-}
+In the case of alginate, we speed up the convergence and start from a situation in which the polymers are pre-stretched \SG{ give details }\RK{initialized to the semianalytical solution} \SG{ schreib am besten eine Referenz auf die Gleichung hin, muesste ja im Appendix stehen. }.
+After \num{2e9} LBM time steps for alginate and \num{5e6} LBM time steps for methyl cellulose corresponding to approximately \SI{1.6}{\milli\second} and \SI{2.4}{\second} of physical time, respectively, the simulation is stopped and the flow field $u(y)$ is compared to the semi-analytical solution.
+%\RK{
+%	Alg 2e9 1.6455647956111251 ms (reveals the sim to be a scam)
+%	MC 5e6 10.065719379854297 ms
+%}
 As shown in figure~\ref{fig:2Dvel}, very good agreement is found.
 For a quantitative assessment, we compute the L2 error as follows.
 \begin{equation}
 	e_\text{L2} = \sqrt{\frac{\sum_i\left[\vec{u_i} - \vec{u}\left(y_i\right)\right]^2}{\sum_i\vec{u}\left(y_i\right)^2}}
 \end{equation}
-\SG{ give correct equn. }\RK{done}
 
 The spatially resolved errors are shown in figure~\ref{fig:2DvelErr} in the appendix.
-Averaging over the channel diameter, we obtain an L2 error of \num{9e-4} and \num{1e-3}\SG{ XX }\RK{done}\RK{we do not "average" over the diameter, we calculate the L2 error along the diameter} for alginate and methyl cellulose, respectively.
+Averaging over the channel diameter, we obtain an L2 error of \num{9e-4} and \num{1e-3}\RK{we do not "average" over the diameter, we calculate the L2 error along the diameter} for alginate and methyl cellulose, respectively.
 These conclusions remain robust even when varying the pressure gradient, and thus the flow velocity, over many orders of magnitude as shown in figure~\ref{fig:pressureErr}~(a) of the appendix.\RK{This is the worst case error for MC and it is tiny "remain robust" is too weak here}
 
 	\begin{figure}[H]
 		\centering
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DAlginateU.pdf}
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyUWorst.pdf}
-		\caption{(a) Velocity profile of alginate in planar channel flow. \SG{use $y$ instead of $r$ in 2D}\RK{done}.
+		\caption{(a) Velocity profile of alginate in planar channel flow. 
 		The time evolution of the center-line velocity is shown in the inset \SG{ to do }\RK{you really want this?}.
 		(b) Velocity profile for methyl cellulose.
 		\SG{ make these plots for different $ \alpha _ \mathrm{s}$, either include here or put into appendix }\RK{Why? Is likely identical down to fp32 precision (see appendix C)}}
@@ -461,10 +455,10 @@ These conclusions remain robust even when varying the pressure gradient, and thu
 We proceed to evaluate the viscosity shuffling method for a cylindrical Poiseuille flow.
 The semi-analytical solution for this situation can be derived similarly as for the planar case and is given in appendix~\ref{app:semianalyticalPoiseuille}.
 Numerically, the cylindrical situation is slightly more complex due to discretization errors ("staircase effect") when mapping the rounded channel walls onto the rectilinear LBM grid \cite{Lehmann.20229da}.
-We use the same material parameters as above, but double the pressure gradient to \SI{-2e7}{\pascal\per\meter} and approximately \SI{-2.5e7}{\pascal\per\meter} respectively\SG{ XX }\RK{done}. \SG{ why? } \RK{where analytical solutions exist in Poiseuille geometry the 3D solution differs from the 2D solution by a factor 2 (Due to the gradient of the stress in the derivation having a form in cylinder coordinates that can be solved by a factor 2). See the velocities in our sims being the same with this scaling}
-The channel has a diameter of \SI{20}{\micro\meter}\SG{ XX }\RK{done} and is discretized with 41 lattice points.
+We use the same material parameters as above, but double the pressure gradient to \SI{-2e7}{\pascal\per\meter} and approximately \SI{-2.5e7}{\pascal\per\meter} respectively. \SG{ why? } \RK{where analytical solutions exist in Poiseuille geometry the 3D solution differs from the 2D solution by a factor 2 (Due to the gradient of the stress in the derivation having a form in cylinder coordinates that can be solved by a factor 2). See the velocities in our sims being the same with this scaling}
+The channel has a diameter of \SI{20}{\micro\meter} and is discretized with 41 lattice points.
 Again, we initialize the polymers in the unstretched state for methyl cellulose and in the stretched state for alginate.
-The resulting velocity profile can be seen in figure~\ref{fig:3Dvel} and shows almost equally good agreement as for the planar case with an L2 error of \num{0.014} and \num{0.06}\SG{ XX }\RK{done}, respectively.
+The resulting velocity profile can be seen in figure~\ref{fig:3Dvel} and shows almost equally good agreement as for the planar case with an L2 error of \num{0.014} and \num{0.06}, respectively.
 The spatially resolved error in figure~\ref{fig:3DvelErr} of the appendix shows that this larger average is indeed mainly attributable to the staircase effect as the error near the walls increases significantly.
 The robustness against pressure gradient changes is shown in figure~\ref{fig:pressureErr}~(b) of the appendix.
 
@@ -483,18 +477,17 @@ The robustness against pressure gradient changes is shown in figure~\ref{fig:pre
 %Malaspinas: We use richard/master fe0fc04115b9b6ea6628bcc6cb6593d3f72ac0ea (2023-11-05)
 Finally, we assess the quality of our algorithm by comparing to an existing study on viscoelastic LBM by Malapsinas \textit{et al.} \cite{malaspinas2010}.
 The authors studied an Oldroyd-B fluid in a planar Poiseuille flow and compared the error in the simulated velocity profile to an exact analytical solution.
-The Oldroyd-B model is a special case of the PTT model which is obtained by setting $\xi = \epsilon = 0$ in eq.~(\ref{eq:polymerStress}) and is thus easily tractable with our code.\RK{was simulated with a direct Oldroyd-B implementation, which I now see was unnecessary...}
-In figure~\ref{fig:malaspinas2010}, we show the L2 error as function of lattice resolution for different Weissenberg numbers $\mathrm{Wi}$ and \SG{ XX }\RK{It is a viscosity ratio, but I cannot name it like that for obvious reasons.} $R_ \nu $.
-To match with \cite{malaspinas2010}, we defined these as
+The Oldroyd-B model is a special case of the PTT model which is obtained by setting $\xi = \epsilon = 0$ in eq.~(\ref{eq:polymerStress}) and is thus easily tractable with our code.\RK{was simulated with a direct Oldroyd-B implementation, which I now see was unnecessary...} \SG{ hast du mal kurz geprueft, ob dasselbe rauskommt? }
+In figure~\ref{fig:malaspinas2010}, we show the L2 error as function of lattice resolution for different values of $\mathrm{Wi}$ and $R_ \nu $ which is defined as \cite{malaspinas2010}
 \begin{align}
 	R_\nu = \frac{\nu_\text{s}}{\nu_\text{p}+\nu_\text{s}}
 \end{align}
-with the kinematic solvent and the polymer viscosity $\nu_\text{s}$ and $\nu_\text{p}$ \SG{ ... }\RK{done}. \SG{ comment whether these definitions are identical or different than the definitions above. }\RK{different but can be transformed into each other $\frac{1}{R_\nu}-1=R_\eta$}
-Furthermore, in agreement with \cite{malaspinas2010}, also the L2 error is defined slightly differently than above, namely:\RK{slightly?}
+with the kinematic solvent and the polymer viscosity $\nu_\text{s}$ and $\nu_\text{p}$. \SG{ comment whether these definitions are identical or different than the definitions above. }\RK{different but can be transformed into each other $\frac{1}{R_\nu}-1=R_\eta$}
+Furthermore, in agreement with \cite{malaspinas2010}, also the L2 error is defined differently than above, namely:
 	\begin{equation}\label{eq:l2error}
 		E_\text{u} = \frac{1}{u_\text{max}}\sqrt{\frac{1}{N}\sum\abs{u_\text{simulation}-u_\text{theory}}^2}.
 	\end{equation}
-\SG{ Beware equation 61 in the paper is wrong. It should have an 8 instead of the 4. Do you use equation 61? }\RK{was used for reproduction}
+At this point, we mention that there is a typographic mistake in eq.~(61) of \cite{malaspinas2010} where the prefactor should 8 instead of 4. \SG{ stimmt das so? }
 
 	\begin{figure}[H]
 		\centering
@@ -565,7 +558,7 @@ This means that even for fast flows, cells flowing close to the center experienc
 		\centering
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/Nozzle_v.pdf}
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/Nozzle_sigma_vM.pdf}
-		\caption{Velocity profile (a) and von Mises stress (b) for methyl cellulose in a conical nozzle as used for bioprinting. \SG{ draw nozzle contour with black lines }}\RK{Done}
+		\caption{Velocity profile (a) and von Mises stress (b) for methyl cellulose in a conical nozzle as used for bioprinting.}
 		\label{fig:Nozzle_v}
 	\end{figure}
 
@@ -599,10 +592,10 @@ With the third example we demonstrate the versatility of our approach which allo
 Here, we include a homogeneously elastic particle as a simple, yet reasonably accurate, model for the mechanics of a living, biological cell \cite{Wohlrab.2023}.
 Coupling to the LBM solver is achieved with the immersed-boundary method as described in earlier publications \cite{Mueller.2021}.
 For simplicity, we consider the viscoelastic fluid inside and outside the cell to be identical.
-The cell is initially spherical with a radius of \SI{6}{\micro\meter} and possesses a Youngs modulus of \SI{100}{\pascal} and a Poisson ratio of \num{0.48}\SG{ XX }\RK{done}.
+The cell is initially spherical with a radius of \SI{6}{\micro\meter} and possesses a Youngs modulus of \SI{100}{\pascal} and a Poisson ratio of \num{0.48}.
 It is placed into a shear flow with a shear rate of \SI{400}{\per\second} where the cell quickly reaches a steady state in which it deforms into a tank-treading ellipsoid.
 This is in qualitative agreement with simulations \cite{Mueller.2021} and classical theories \cite{Roscoe.1967}.
-For the discretization of the cell we use \num{5179}\SG{ xx }\RK{done} tetrahedrons and a radius of 6\SG{ xx }\RK{done} lattice units.
+For the discretization of the cell we use \num{5179} tetrahedrons and a radius of 6 lattice units.
 The lattice with a resolution of \num{100} lattice points is chosen significantly larger than the cell to assure negligible impact of the walls.
 The lattice is periodic in $x$ and $z$ direction.
 At the edges of the simulation box in $y$ direction Dirichlet boundary conditions are imposed.
@@ -750,7 +743,7 @@ Inserting this back into equation~(\ref{eq:PTTDerivation2}) yields the following
 \label{sec:shearFlow}
 
 As additional quantitative validation, we simulate a pure shear flow driven by imposing a fixed velocity at the top and bottom of the computational box and using periodic boundary conditions in the other two directions.
-The box dimension is 2x43x2\SG{ xx }\RK{done}.
+The box dimension is 2x43x2.
 We use PTT with the methyl cellulose parameters and vary the shear rate to cover the full range starting from the zero-shear all the way to the infinite-shear plateau displayed in figure~\ref{fig:fit_mc} of the main text.
 The shuffling is fixed at $\alpha_\text{s} = 1$ and the viscosity as function of shear rate is computed by dividing the total fluid stress at the center of the box by the shear rate.
 Figure~\ref{fig:wiParameterStudy}~(a) shows that our simulations are in very good agreement with the semi-analytical solution with a maximum error of \num{2e-11}.
