@@ -172,7 +172,7 @@ def process():
     plt.show()
 
     plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
-    # plt.title("(b)", loc="left", pad=45, x=-0.11)
+    plt.title("(c)", loc="left", pad=45, x=-0.11)
     plt.imshow(
         tau12.T,
         cmap="coolwarm",
@@ -197,7 +197,7 @@ def process():
     """
 
     plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
-    plt.title("(c)", loc="left", pad=45, x=-0.1)
+    plt.title("(b)", loc="left", pad=45, x=-0.1)
     plt.imshow(
         eta.T * 1e3,
         cmap="coolwarm",

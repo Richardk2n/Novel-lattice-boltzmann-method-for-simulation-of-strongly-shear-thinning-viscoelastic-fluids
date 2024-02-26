@@ -445,7 +445,7 @@ These conclusions remain robust even when varying the pressure gradient, and thu
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DAlginateU.pdf}
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyUWorst.pdf}
 		\caption{(a) Velocity profile of alginate in planar channel flow.
-		The time evolution of the center-line velocity is shown in the inset \SG{ to do }\RK{you really want this?}.
+		The time evolution of the center-line velocity is shown in the inset \ref{fig:2DTimeEvolution}\SG{ to do }\RK{Not an inset but plotted. Has to be inset?}.
 		(b) Velocity profile for methyl cellulose.
 		\SG{ make these plots for different $ \alpha _ \mathrm{s}$, either include here or put into appendix }\RK{Why? Is likely identical down to fp32 precision (see appendix C)}}
 		\label{fig:2Dvel}
@@ -466,7 +466,7 @@ The robustness against pressure gradient changes is shown in figure~\ref{fig:pre
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DAlginateU.pdf}
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyUWorst.pdf}
 		\caption{(a) Velocity profile of alginate in cylindrical channel flow.
-		The time evolution of the center-line velocity when starting from a pre-stretched configuration (see main text) is shown in the inset.
+		The time evolution of the center-line velocity when starting from a pre-stretched configuration (see main text) is shown in the inset \ref{fig:3DTimeEvolution}.\RK{currently not an inset}
 		(b) Velocity profile for methyl cellulose.
 				\SG{ make these plots for different $ \alpha _ \mathrm{s}$, either include or put into Si }\RK{Why? Is likely identical down to fp32 precision (see appendix C)}}
 		\label{fig:3Dvel}
@@ -546,7 +546,7 @@ The nozzle radius is \SI{1.8}{\milli\meter} at the inlet and \SI{200}{\micro\met
 The nozzle has a length of \SI{18}{\milli\meter}.
 Due to the difference in inlet/outlet radii, the system cannot be modeled with periodic boundary conditions, and we use inflow/outflow boundary conditions as described in section~\ref{sec:Methods} instead.
 The required values for velocity and polymer conformation are obtained from simulations of pipes of the respective radii and a fixed volume flow of $\approx\SI{3}{\micro\liter\per\second}$.
-The resulting flow field can be seen in figure \ref{fig:Nozzle_v}~(a).
+The resulting flow field can be seen in figure \ref{fig:Nozzle}~(a).
 To quantify the total stress as a single number, we use the von Mises stress which is defined as \cite{Mueller.2023}:
 \begin{align}
 	\sigma_\text{vM} = \sqrt{\frac{1}{2}\left[\left(\sigma_1 - \sigma_2\right)^2 + \left(\sigma_2 - \sigma_3\right)^2 + \left(\sigma_3 - \sigma_1\right)^2\right]}.
@@ -557,8 +557,9 @@ This means that even for fast flows, cells flowing close to the center experienc
 		\centering
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/Nozzle_v.pdf}
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/Nozzle_sigma_vM.pdf}
-		\caption{Velocity profile (a) and von Mises stress (b) for methyl cellulose in a conical nozzle as used for bioprinting.}
-		\label{fig:Nozzle_v}
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/Nozzle_tau_12.pdf}
+		\caption{Velocity profile (a), von Mises stress (b) and shear stress (c) for methyl cellulose in a conical nozzle as used for bioprinting. For the calculated viscosity see figure~\ref{fig:Nozzle/RT-DC_eta}.}
+		\label{fig:Nozzle}
 	\end{figure}
 
 % nozzle: We use richard/vtk 4dbc4d379842c538f084e68a5dcfe2555a674495 (2024-01-09)
@@ -578,14 +579,15 @@ Similarly, directly after the constriction, the high stress inside the observati
  	\begin{figure}[H]
 		\centering
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/RT-DC_v.pdf}
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/RT-DC_sigma_vM.pdf}
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/RT-DC_tau.pdf}
-		\caption{Velocity profile (a) and shear stress (b) for methyl cellulose in a typical RT-DC geometry. \SG{ draw channel contour with black lines }\RK{done something else instead. Better?}
-		\SG{ change to von Mises instead of $ \tau _{ 12 }$? }}\RK{what plots do we want v, $\tau$, vM and $\eta$?; For nozzle as well?}
+		\caption{Velocity profile (a), von Mises stress (b) and shear stress (c) for methyl cellulose in a typical RT-DC geometry. For the calculated viscosity see figure~\ref{fig:Nozzle/RT-DC_eta}.\SG{ draw channel contour with black lines }\RK{done something else instead. Better?}
+		\SG{ change to von Mises instead of $ \tau _{ 12 }$? }\RK{done something}}
 		\label{fig:RT-DC}
 	\end{figure}
 
 \SG{ decide whether we want to show a viscosity plot and remove or leave this part:
-If one would divide the stress in these two regions by the strain rate in an attempt to obtain a viscosity one would find an extremely low and an extremely high viscosity respectively. Depending on the exact parameters "viscosities" can be reached that cannot be obtained through rheological measurements with the fluid. Meaning these viscosities are not valid. This is even clearer along the walls directly after the outlet. Here the viscosites obtained in this manner become negative. This shows the breakdown of the viscosity interpretation in viscoelastic cases and signifies the regions of interesting behavior. This also shows why viscoelastic simulations cannot always be replaced by shear thinning models and should be considered despite the high computational cost. }\RK{plot would probably be better}
+If one would divide the stress in these two regions by the strain rate in an attempt to obtain a viscosity one would find an extremely low and an extremely high viscosity respectively. Depending on the exact parameters "viscosities" can be reached that cannot be obtained through rheological measurements with the fluid. Meaning these viscosities are not valid. This is even clearer along the walls directly after the outlet. Here the viscosites obtained in this manner become negative. This shows the breakdown of the viscosity interpretation in viscoelastic cases and signifies the regions of interesting behavior. This also shows why viscoelastic simulations cannot always be replaced by shear thinning models and should be considered despite the high computational cost. }\RK{plot would probably be better}\todo{describe and reference plot as it looks terrible}
 
 With the third example we demonstrate the versatility of our approach which allows easy coupling to other LBM extensions such as the immersed-boundary method.
 Here, we include a homogeneously elastic particle as a simple, yet reasonably accurate, model for the mechanics of a living, biological cell \cite{Wohlrab.2023}.
@@ -788,13 +790,37 @@ Importantly, we show in figure~\ref{fig:wiParameterStudy}~(b) that this very goo
 		\label{fig:3DvelErr}
 	\end{figure}
 
-		\begin{figure}[H]
+	\begin{figure}[H]
 		\centering
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErr.pdf}
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyErr.pdf}
 		\caption{Average error of the velocity for a planar (a) and a cylindrical (b) Poiseuille flow of methyl cellulose at different pressure gradients.
-		The peak in the error profile appears when the average shear rate across the channel corresponds to the maximum slope in the viscosity profile of figure~\ref{fig:wiParameterStudy}. }\RK{this is L2 error norm not "average"}
+		The peak in the error profile appears when the average shear rate across the channel corresponds to the maximum slope in the viscosity profile of figure~\ref{fig:wiParameterStudy}.}\RK{this is L2 error norm not "average"}
 		\label{fig:pressureErr}
+	\end{figure}
+	
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DAlginate_timeEvolution.pdf}
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DMC_timeEvolution.pdf}
+		\caption{Time evolution of the center-line velocity of an alginate (a) and methyl cellulose (b) poiseuille flow in 2D as seen in figure~\ref{fig:2Dvel}.}
+		\label{fig:2DTimeEvolution}
+	\end{figure}
+	
+	\begin{figure}[H]
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DAlginate_timeEvolution.pdf}
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DMC_timeEvolution.pdf}
+		\caption{Time evolution of the center-line velocity of an alginate (a) and methyl cellulose (b) poiseuille flow in 3D as seen in figure~\ref{fig:3Dvel}.}
+		\label{fig:3DTimeEvolution}
+	\end{figure}
+	
+	\begin{figure}[H]
+	\centering
+	\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/Nozzle_eta.pdf}
+	\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/RT-DC_eta.pdf}
+	\caption{"Viscosity" in a Nozzle (a) and RT-DC channel (b) calculated by dividing $\tau_{12}$ by the respective strain rate. This diverges along the center line, and thus it has been excluded. For the RT-DC channel this results in very large and unphysical values, which had to be clamped. The flow and stresses in these geometries can be seen in figures~\ref{fig:Nozzle} and \ref{fig:RT-DC}.}
+	\label{fig:Nozzle/RT-DC_eta}
 	\end{figure}
 
 

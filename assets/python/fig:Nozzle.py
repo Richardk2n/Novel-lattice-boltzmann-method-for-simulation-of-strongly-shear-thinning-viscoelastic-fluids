@@ -173,7 +173,7 @@ def process():
     plt.show()
 
     plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
-    # plt.title("(b)", loc="left", pad=45, x=-0.1)
+    plt.title("(c)", loc="left", pad=45, x=-0.1)
     plt.plot(x * L0 * 1e3, upper * L0 * 1e3, "k", linewidth=0.5)
     plt.plot(x * L0 * 1e3, lower * L0 * 1e3, "k", linewidth=0.5)
     plt.imshow(
@@ -205,7 +205,7 @@ def process():
     """
 
     plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
-    plt.title("(c)", loc="left", pad=45, x=-0.1)
+    plt.title("(a)", loc="left", pad=45, x=-0.1)
     plt.plot(x * L0 * 1e3, upper * L0 * 1e3, "k", linewidth=0.5)
     plt.plot(x * L0 * 1e3, lower * L0 * 1e3, "k", linewidth=0.5)
     plt.imshow(
