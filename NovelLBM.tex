@@ -258,7 +258,7 @@ The \SI{0.49}{\percent} methyl cellulose solution used in RT-DC measurements, in
 
 \begin{table}[H]
 	\centering
-		\begin{tabular}{l|p{3cm}|p{1.6cm}|p{1.6cm}|p{1.6cm}|p{2cm}}
+		\begin{tabular}{l|p{3cm}|p{1.8cm}|p{1.8cm}|p{1.8cm}|p{2cm}}
 			Author & Material & $\eta_0/\unit{\pascal\second}$ & $\eta_\infty/\unit{\pascal\second}$ & $R_\eta$ & extracted from \\
 			\hline
 			Amorim\cite{amorim2021} & pre-crosslinked alginate &  $>\num{1e4}$ & $<\num{3e-1}$ & $>\num{3e4}$ & Fig. 3b \\
@@ -267,7 +267,7 @@ The \SI{0.49}{\percent} methyl cellulose solution used in RT-DC measurements, in
 %			Paxton\cite{paxton2017} &Nivea Creme\n Alginate& 1e5\n5e4 & <1\n<5e1 & >1e5\n>1e3 & Fig. 4b \\
 			Paxton\cite{paxton2017} & Alginate& \num{5e4} & $<\num{5e1}$ & $>\num{1e3}$ & Fig. 4b \\
 			\rowcolor{secondaryBackground}
-			O'Connell\cite{oconnell2020} & pluronic F-127 & $>\num{1e6}$ & $<\num{8}$ & $>\num{2e5}$ & Chapter 7 Fig. 13 \\
+			Jalaal\cite{jalaal2017} & pluronic F-127 & $>\num{1e3}$ & $<\num{1e-1}$ & $>\num{1e4}$ & FIG. 6. (e) \\
 		\end{tabular}
 	\caption{Compilation of literature data on typical bioinks showing that a very viscosity ratio $ R_ \eta $ is a generic feature of these liquids.
 	\SG{ cross-check these values }\RK{Done and formatted}
@@ -364,7 +364,7 @@ At the walls, a zero-flux boundary condition for the stress is used.
 The source terms are integrated using the Euler method.
 
 To include the polymer stress into the LBM, we use the stress coupling scheme according to Dzanic \textit{et al.} \cite{dzanic2022_2, gupta2015, onishi2006}.
-For this, ... \SG{ more details }
+For this, ... \SG{ more details }\todo{SRT collision operator as implemented, advection as implemented, the whole as implemented appendix that was deleted}
 To handle inflow/outflow boundaries, the polymer conformation tensor is specified on the boundary and advected using the corner transport upwind scheme.
 
 
@@ -442,15 +442,14 @@ These conclusions remain unchanged even when varying the pressure gradient, and 
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyUWorst.pdf}
 		\caption{(a) Velocity profile of alginate in planar channel flow.
 		The time evolution of the center-line velocity is shown in the inset \ref{fig:2DTimeEvolution}\SG{ to do }\RK{Not an inset but plotted. Has to be inset?}.
-		(b) Velocity profile for methyl cellulose.
-}
+		(b) Velocity profile for methyl cellulose.}
 		\label{fig:2Dvel}
 	\end{figure}
 
 We proceed to evaluate the viscosity shuffling method for a cylindrical Poiseuille flow.
 The semi-analytical solution for this situation can be derived similarly as for the planar case and is given in appendix~\ref{app:semianalyticalPoiseuille}.
 Numerically, the cylindrical situation is slightly more complex due to discretization errors ("staircase effect") when mapping the rounded channel walls onto the rectilinear LBM grid \cite{Lehmann.20229da}.
-We use the same material parameters as above, but double the pressure gradient to \SI{-2e7}{\pascal\per\meter} and approximately \SI{-2.5e7}{\pascal\per\meter}, respectively, thereby mirroring the relation in Newtonian Poiseuille flow where twice the pressure is required to obtain the same flow rate in cylindrical compared to planar gemeotries.
+We use the same material parameters as above, but double the pressure gradient to \SI{-2e7}{\pascal\per\meter} and approximately \SI{-2.5e7}{\pascal\per\meter}, respectively, thereby mirroring the relation in Newtonian Poiseuille flow where twice the pressure is required to obtain the same flow rate in cylindrical compared to planar geometries.
 The channel has a diameter of \SI{20}{\micro\meter} and is discretized with 41 lattice points.
 Again, we initialize the polymers in the unstretched state for methyl cellulose and in the stretched state for alginate.
 The resulting velocity profile can be seen in figure~\ref{fig:3Dvel} and shows almost equally good agreement as for the planar case with an L2 error of \num{0.014} and \num{0.06}, respectively.
@@ -463,8 +462,7 @@ The robustness against pressure gradient changes is shown in figure~\ref{fig:pre
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyUWorst.pdf}
 		\caption{(a) Velocity profile of alginate in cylindrical channel flow.
 		The time evolution of the center-line velocity when starting from a pre-stretched configuration (see main text) is shown in the inset \ref{fig:3DTimeEvolution}.\RK{currently not an inset}
-		(b) Velocity profile for methyl cellulose.
-				}
+		(b) Velocity profile for methyl cellulose.}
 		\label{fig:3Dvel}
 	\end{figure}
 
@@ -495,7 +493,7 @@ At this point, we mention that there is a typographic mistake in eq.~(61) of \ci
 
 As can be seen in figure~\ref{fig:malaspinas2010}, the accuracy of our method does not depend on the Weissenberg Number and is generally somewhat better than the method of \cite{malaspinas2010}.
 We note a certain dependence of the accuracy on $R_\nu$ which we consider nevertheless acceptable given the overall smallness of the error.
-Finally, we find that the error of our method decreases with lattice resolution to the power of \num{-2}. \RK{They see diminishing returns we don't} \SG{ explain }
+Finally, we find that the error of our method decreases with lattice resolution to the power of \num{-2}. \RK{They see diminishing returns we don't} \SG{ explain }\RK{The topmost line starts from the first green dot and also is a power of -2 line, the second point is already a little of and the third and fourth deviate more and more. One could try to do a line with a smaller power, however that does not quite fit the data either. This is particularly evident for the red points. It looks like Malaspinas has about power of -2 for small N but the slope decreases for higher N. This can be explained through other error terms (for example their artificial viscosity) becoming more relevant as the lattice resolution caused error decreases. As we do not have those our error continues to decrease as expected}
 
 %e aim at the reproduction of figures 17 and 18 from said paper. We calculate this 2D flow in 3D as the viscoelastic algorithm has not been validated for 2D velocity sets. Otherwise, the geometry is identical. It is not entirely clear to us, how they define typical scales. We define the typical velocity as the maximum velocity, as is likely done in the paper. The typical length, we set as half of the channel width. We define the typical shear rate as typical velocity divided by typical length. We set $\eta_\text{s} = \SI{1}{\milli\pascal\second}$ as the paper only gives ratios, and it probably does not matter here. Nevertheless, our lattice units do not line up exactly with those from Malaspinas, as our viscosity is different due to the shuffling.
 %	The parameters from the paper ($R_\nu$, $Wi$ and $N$) are varied as in the paper.
@@ -555,7 +553,7 @@ This means that even for fast flows, cells flowing close to the center experienc
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/Nozzle_v.pdf}
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/Nozzle_sigma_vM.pdf}
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/Nozzle_tau_12.pdf}
-		\caption{Velocity profile (a), von Mises stress (b) and shear stress (c) for methyl cellulose in a conical nozzle as used for bioprinting. For the calculated viscosity see figure~\ref{fig:Nozzle/RT-DC_eta}.}
+		\caption{Velocity profile (a), von Mises stress (b) and shear stress (c) for methyl cellulose in a conical nozzle as used for bioprinting. For the calculated viscosity see figure~\ref{fig:Nozzle/RT-DC_eta}.\RK{The black lines currently hide our resolution shall I remove them to be consistent with the RT-DC plots or do we prefer this?}}
 		\label{fig:Nozzle}
 	\end{figure}
 
@@ -662,11 +660,14 @@ The first normal stress difference $N_1$ is calculated from the measured normal 
 
 \section{Semi-analytical solution for Poiseuille flows of PTT fluids with solvent viscosity}
 \label{app:semianalyticalPoiseuille}
-Our derivation is to the one in Oliveira \cite{oliveira1999}. For both Poiseuille flow and shear flow, we assume that the velocity is unidirectional: 
+Our derivation is \RK{hier könnte ein Adjektiv stehen} to the one in Oliveira \cite{oliveira1999}. For both Poiseuille flow and shear flow, we assume that the velocity is unidirectional:
 \begin{equation}
-	\vec{u} = \dot{\gamma}\left(y\right)\hat{e}_x.
+	\vec{u} = u_x\left(y\right)\hat{e}_x
 \end{equation}
-\SG{ This equation does not work, $ \dot{ \gamma  }$ is a shear rate, it should read $ \partial u_x / \partial y = \dot{ \gamma  }$. }
+\begin{equation}
+	\dot{\gamma}\left(y\right) = \frac{\partial u_x}{\partial y}
+\end{equation}
+\SG{ This equation does not work, $ \dot{ \gamma  }$ is a shear rate, it should read $ \partial u_x / \partial y = \dot{ \gamma  }$. }\RK{done, was supposed to read g(y) but could not read my own handwriting when copying... Made it a little more clear}
 
 With this the constitutive equation~(\ref{eq:polymerStress}) for $\xi=0$ in steady state reduces to
 \begin{align}
@@ -674,8 +675,8 @@ With this the constitutive equation~(\ref{eq:polymerStress}) for $\xi=0$ in stea
 	\exp\left(\frac{\epsilon\lambda}{\eta_\text{p}}\Tr\ma{\tau}\right)\tau_{xy} &= \eta_\text{p}\dot{\gamma} \label{eq:PTTDerivation2}
 \end{align}
 for a planar flow.
-In axisymmetric flows $y$ in eqs.~(\ref{eq:PTTDerivation1}, \ref{eq:PTTDerivation2}) needs to be replaced by the radial coordinate $r$. \SG{ no factor 2? }
-With $\Tr\ma{\tau} = \tau_{xy}$. \SG{ should be $ \tau _{ xx }$? }
+In axisymmetric flows $y$ in eqs.~(\ref{eq:PTTDerivation1}, \ref{eq:PTTDerivation2}) needs to be replaced by the radial coordinate $r$. \RK{2D case is also axisymmetric?}\SG{ no factor 2? }\RK{No, factor 2 comes from the NS eq. and thus is only relevant for Poiseuille solution. This replacement is also much more relevant there as here all ys disappear}
+With $\Tr\ma{\tau} = \tau_{xx}$. \SG{ should be $ \tau _{ xx }$? }\RK{yes}
 Eliminating $\tau_{xy}$ yields the following.
 \begin{equation}
 	\exp\left(2\frac{\epsilon\lambda}{\eta_\text{p}}\Tr\ma{\tau}\right)\tau_{xx} = 2\lambda\dot{\gamma}^2\eta_\text{p}
@@ -813,12 +814,19 @@ Importantly, we show in figure~\ref{fig:wiParameterStudy}~(b) that this very goo
 	\end{figure}
 	
 	\begin{figure}[H]
-	\centering
-	\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/Nozzle_eta.pdf}
-	\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/RT-DC_eta.pdf}
-	\caption{"Viscosity" in a Nozzle (a) and RT-DC channel (b) calculated by dividing $\tau_{12}$ by the respective strain rate. This diverges along the center line, and thus it has been excluded. For the RT-DC channel this results in very large and unphysical values, which had to be clamped. The flow and stresses in these geometries can be seen in figures~\ref{fig:Nozzle} and \ref{fig:RT-DC}.}
-	\label{fig:Nozzle/RT-DC_eta}
+		\centering
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/Nozzle_eta.pdf}
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/RT-DC_eta.pdf}
+		\caption{"Viscosity" in a Nozzle (a) and RT-DC channel (b) calculated by dividing $\tau_{12}$ by the respective strain rate. This diverges along the center line, and thus it has been excluded. For the RT-DC channel this results in very large and unphysical values, which had to be clamped. The flow and stresses in these geometries can be seen in figures~\ref{fig:Nozzle} and \ref{fig:RT-DC}.}
+		\label{fig:Nozzle/RT-DC_eta}
 	\end{figure}
+	
+	\begin{figure}[H]
+		\centering
+		%\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/ShuffleInPoiseuille.pdf}
+		\caption{In Poiseuille flow, the result is near identical for different $\alpha_\text{s}$. The error reveals minor differences. Aside from the wall nodes, the largest error appears for small shuffle fractions. For large ones, the error appears to become independent of $\alpha_\text{s}$. This indicates, that the observed difference might be due to the Mach number changing for different $\alpha_\text{s}$ and not due to the shuffling itself.\RK{I could probably prove this by running sims at different $\alpha_s$ that consistently are at Ma << 1}}
+		\label{fig:ShuffleInPoiseuille}
+	\end{figure}\todo{include plot, reference in main text}
 
 
 
