@@ -224,7 +224,7 @@ For a simple shear flow in the $xy$-plane of a PTT fluid with $ \xi =0$, an anal
 	\begin{equation}
 		N_1 = \frac{\eta_\text{p}}{2\epsilon\lambda}W_0\left(4\epsilon \mathrm{Wi}^2\right) \label{eq:shearN}
 	\end{equation}
-where $\mathrm{Wi} = \lambda\dot{\gamma}$ is the Weissenberg number and $W_0$ is the Lambert $W$-function. \SG{ check that $ \eta _ \mathrm{s}$ is correct }\RK{what do you mean by correct?}
+where $\mathrm{Wi} = \lambda\dot{\gamma}$ is the Weissenberg number and $W_0$ is the Lambert $W$-function.
 Fitting these equations to the rheological data for alginate and methyl cellulose leads to satisfactory agreement as shown in figures~\ref{fig:fit_alginate} and \ref{fig:fit_mc}.
 In the fit, the solvent viscosity was fixed at $\eta_\text{s} = \SI{1}{\milli\pascal\second}$ as the viscosity of the PBS buffer. 
 %\SG{ give ref }\RK{PBS is 99\% water. If you really want a citation tho we could use doi: 10.1063/1.4823586} \SG{ ok, let's leave it out. }
@@ -294,7 +294,7 @@ Later, hybrid schemes coupling an LB solver for the solvent to a finite-differen
 To improve numerical stability, some authors propose the inclusion of an artificial diffusivity \cite{malaspinas2010,ma2020,wang2020,wang2021}, which introduces a small error compared to the analytical solution of the constitutive equation.
 Other remedies include special decompositions of the stress tensor\cite{dzanic2022} or optimization of the solvent contribution\cite{gupta2015} \SG{ rephrase and give some more details }\RK{I have not the slightest clue what gupta is doing. I assume optimize is code for increase until stable but I do not know.}.
 Coupling of the resulting polymer stress to the Navier-Stokes LBM can be achieved via the inclusion of point forces or via a modification of the equilibrium populations.
-A recent comparison in 2D found that the former in general leads to better stability \cite{dzanic2022_2}.\RK{No in fact, it uses the latter and found to be more accurate than a paper using the former, stability was entirely attributed to the decomposition and artificial diffusivity.} \SG{ die Referenz war falsch, es war der andere Dzanic. Aber da steht eigentlich schon, dass forcing besser sei, oder? }\todo{check/do not mention this}
+Both methods have recently been compared in 2D \cite{dzanic2022_2}.
 
 The stable range of Weissenberg numbers covered by existing methods is up to $\mathrm{Wi}\approx\num{10}$ for the method of \cite{malaspinas2010} and up to $\mathrm{Wi}\approx\num{100}$ in \cite{gupta2015,ma2020,gupta2016}.
 However, another stability criterion, which is often overlooked is the viscosity ratio $R_\eta$ as defined in eq.~(\ref{eq:R_eta}).
@@ -364,10 +364,7 @@ At the walls, a zero-flux boundary condition for the stress is used.
 The source terms are integrated using the Euler method.
 
 To include the polymer stress into the LBM, we use the stress coupling scheme according to Dzanic \textit{et al.} \cite{dzanic2022_2, gupta2015, onishi2006}.
-For this, ... \SG{ do we really do stress coupling? Above it said that force coupling is better? }\RK{yes, no idea why you said that}
-\SG{ give some more details, especially since we do SRT }.\RK{what does this have to do with SRT?}
-\SG{ also include inflow/outflow BCs }\RK{done}
-\SG{ do you advect polymer stress or polymer conformation? }\RK{A, which is most similar to polymer conformation}
+For this, ... \SG{ more details }
 To handle inflow/outflow boundaries, the polymer conformation tensor is specified on the boundary and advected using the corner transport upwind scheme.
 
 
@@ -388,7 +385,7 @@ with the transferred ("shuffled") stress
 \begin{align}
 	\ma{\tau}_\text{shuffle} = 2\alpha_\text{s}\eta_\text{p}\ma{D}
 \end{align}
-containing an arbitrary parameter $\alpha_\text{s}$. \SG{ is there an allowed range for $ \alpha _ \mathrm{s}$? }\RK{LBM viscosity should stay positive; While $\alpha_s > 1$ stops decreasing the polymer stress and increases it again it can still be sensible as the relation of the stresses will still drop (which is desirable)}
+containing an arbitrary parameter $\alpha_\text{s}$. 
 Finally, this results in
 \begin{align}
 	\ma{\sigma} = 2\left(\eta_\text{s} + \alpha_\text{s}\eta_\text{p}\right)\ma{D} + \left(\ma{\tau} - 2\alpha_\text{s}\eta_\text{p}\ma{D}\right).
@@ -435,10 +432,9 @@ For a quantitative assessment, we compute the L2 error as follows.
 \begin{equation}
 	e_\text{L2} = \sqrt{\frac{\sum_i\left[\vec{u_i} - \vec{u}\left(y_i\right)\right]^2}{\sum_i\vec{u}\left(y_i\right)^2}}
 \end{equation}
-
+which gives \num{9e-4} and \num{1e-3} for alginate and methyl cellulose, respectively.
 The spatially resolved errors are shown in figure~\ref{fig:2DvelErr} in the appendix.
-Averaging over the channel diameter, we obtain an L2 error of \num{9e-4} and \num{1e-3}\RK{we do not "average" over the diameter, we calculate the L2 error along the diameter} for alginate and methyl cellulose, respectively.
-These conclusions remain robust even when varying the pressure gradient, and thus the flow velocity, over many orders of magnitude as shown in figure~\ref{fig:pressureErr}~(a) of the appendix.\RK{This is the worst case error for MC and it is tiny "remain robust" is too weak here}
+These conclusions remain unchanged even when varying the pressure gradient, and thus the flow velocity, over many orders of magnitude as shown in figure~\ref{fig:pressureErr}~(a) of the appendix.
 
 	\begin{figure}[H]
 		\centering
@@ -447,14 +443,14 @@ These conclusions remain robust even when varying the pressure gradient, and thu
 		\caption{(a) Velocity profile of alginate in planar channel flow.
 		The time evolution of the center-line velocity is shown in the inset \ref{fig:2DTimeEvolution}\SG{ to do }\RK{Not an inset but plotted. Has to be inset?}.
 		(b) Velocity profile for methyl cellulose.
-		\SG{ make these plots for different $ \alpha _ \mathrm{s}$, either include here or put into appendix }\RK{Why? Is likely identical down to fp32 precision (see appendix C)}}
+}
 		\label{fig:2Dvel}
 	\end{figure}
 
 We proceed to evaluate the viscosity shuffling method for a cylindrical Poiseuille flow.
 The semi-analytical solution for this situation can be derived similarly as for the planar case and is given in appendix~\ref{app:semianalyticalPoiseuille}.
 Numerically, the cylindrical situation is slightly more complex due to discretization errors ("staircase effect") when mapping the rounded channel walls onto the rectilinear LBM grid \cite{Lehmann.20229da}.
-We use the same material parameters as above, but double the pressure gradient to \SI{-2e7}{\pascal\per\meter} and approximately \SI{-2.5e7}{\pascal\per\meter} respectively. \SG{ why? } \RK{where analytical solutions exist in Poiseuille geometry the 3D solution differs from the 2D solution by a factor 2 (Due to the gradient of the stress in the derivation having a form in cylinder coordinates that can be solved by a factor 2). See the velocities in our sims being the same with this scaling}
+We use the same material parameters as above, but double the pressure gradient to \SI{-2e7}{\pascal\per\meter} and approximately \SI{-2.5e7}{\pascal\per\meter}, respectively, thereby mirroring the relation in Newtonian Poiseuille flow where twice the pressure is required to obtain the same flow rate in cylindrical compared to planar gemeotries.
 The channel has a diameter of \SI{20}{\micro\meter} and is discretized with 41 lattice points.
 Again, we initialize the polymers in the unstretched state for methyl cellulose and in the stretched state for alginate.
 The resulting velocity profile can be seen in figure~\ref{fig:3Dvel} and shows almost equally good agreement as for the planar case with an L2 error of \num{0.014} and \num{0.06}, respectively.
@@ -468,7 +464,7 @@ The robustness against pressure gradient changes is shown in figure~\ref{fig:pre
 		\caption{(a) Velocity profile of alginate in cylindrical channel flow.
 		The time evolution of the center-line velocity when starting from a pre-stretched configuration (see main text) is shown in the inset \ref{fig:3DTimeEvolution}.\RK{currently not an inset}
 		(b) Velocity profile for methyl cellulose.
-				\SG{ make these plots for different $ \alpha _ \mathrm{s}$, either include or put into Si }\RK{Why? Is likely identical down to fp32 precision (see appendix C)}}
+				}
 		\label{fig:3Dvel}
 	\end{figure}
 
@@ -481,7 +477,8 @@ In figure~\ref{fig:malaspinas2010}, we show the L2 error as function of lattice 
 \begin{align}
 	R_\nu = \frac{\nu_\text{s}}{\nu_\text{p}+\nu_\text{s}}
 \end{align}
-with the kinematic solvent and the polymer viscosity $\nu_\text{s}$ and $\nu_\text{p}$. \SG{ comment whether these definitions are identical or different than the definitions above. }\RK{different but can be transformed into each other $\frac{1}{R_\nu}-1=R_\eta$}
+with the kinematic solvent and the polymer viscosity $\nu_\text{s}$ and $\nu_\text{p}$. 
+We note that this can directly be transformed into the viscosity ratio used above as $\frac{1}{R_\nu}-1=R_\eta$.
 Furthermore, in agreement with \cite{malaspinas2010}, also the L2 error is defined differently than above, namely:
 	\begin{equation}\label{eq:l2error}
 		E_\text{u} = \frac{1}{u_\text{max}}\sqrt{\frac{1}{N}\sum\abs{u_\text{simulation}-u_\text{theory}}^2}.
@@ -498,7 +495,7 @@ At this point, we mention that there is a typographic mistake in eq.~(61) of \ci
 
 As can be seen in figure~\ref{fig:malaspinas2010}, the accuracy of our method does not depend on the Weissenberg Number and is generally somewhat better than the method of \cite{malaspinas2010}.
 We note a certain dependence of the accuracy on $R_\nu$ which we consider nevertheless acceptable given the overall smallness of the error.
-Finally, we find that the error of our method decreases with lattice resolution to the power of \num{-2} \SG{ give number, show dashed line in plot }\RK{done}.\RK{They see diminishing returns we don't}
+Finally, we find that the error of our method decreases with lattice resolution to the power of \num{-2}. \RK{They see diminishing returns we don't} \SG{ explain }
 
 %e aim at the reproduction of figures 17 and 18 from said paper. We calculate this 2D flow in 3D as the viscoelastic algorithm has not been validated for 2D velocity sets. Otherwise, the geometry is identical. It is not entirely clear to us, how they define typical scales. We define the typical velocity as the maximum velocity, as is likely done in the paper. The typical length, we set as half of the channel width. We define the typical shear rate as typical velocity divided by typical length. We set $\eta_\text{s} = \SI{1}{\milli\pascal\second}$ as the paper only gives ratios, and it probably does not matter here. Nevertheless, our lattice units do not line up exactly with those from Malaspinas, as our viscosity is different due to the shuffling.
 %	The parameters from the paper ($R_\nu$, $Wi$ and $N$) are varied as in the paper.
@@ -573,7 +570,7 @@ There are three qualitative differences compared to a purely viscous fluid.
 Directly after the inlet we find a region of low stress.
 Due to the fast advection, the polymers, despite being inside the constriction, have not reacted to the increased fluid stress yet.
 Similarly, directly after the constriction, the high stress inside the observation channel persists over a certain distance that is needed for the polymer stress to decay.
-\RK{There are three, proceeds to name two}
+\RK{There are three, proceeds to name two} \SG{ ? }
 
 
  	\begin{figure}[H]
@@ -581,7 +578,7 @@ Similarly, directly after the constriction, the high stress inside the observati
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/RT-DC_v.pdf}
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/RT-DC_sigma_vM.pdf}
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/RT-DC_tau.pdf}
-		\caption{Velocity profile (a), von Mises stress (b) and shear stress (c) for methyl cellulose in a typical RT-DC geometry. For the calculated viscosity see figure~\ref{fig:Nozzle/RT-DC_eta}.\SG{ draw channel contour with black lines }\RK{done something else instead. Better?}
+		\caption{Velocity profile (a), von Mises stress (b) and shear stress (c) for methyl cellulose in a typical RT-DC geometry. For the calculated viscosity see figure~\ref{fig:Nozzle/RT-DC_eta}.
 		\SG{ change to von Mises instead of $ \tau _{ 12 }$? }\RK{done something}}
 		\label{fig:RT-DC}
 	\end{figure}
@@ -604,7 +601,6 @@ At the edges of the simulation box in $y$ direction Dirichlet boundary condition
 In the von Mises stress shown in figure \ref{fig:cellInShear_vM} the effect of the cell is clearly visible.
 We observe four distinct regions of high stress radiating outwards from the cell body.
 These are particularly pronounced along the longest axis of the deformed cell.
-\SG{ connect to the ''viscoelastic wings'' paper \cite{Zhang.2020}}\RK{Our "wings" look very different}
 
 	\begin{figure}[H]
 		\centering
@@ -666,18 +662,20 @@ The first normal stress difference $N_1$ is calculated from the measured normal 
 
 \section{Semi-analytical solution for Poiseuille flows of PTT fluids with solvent viscosity}
 \label{app:semianalyticalPoiseuille}
-\SG{ make a self-contained derivation which is understandable even without reading Oliveira \\}\RK{done}
-\SG{ use Gl.~(\ref{eq:polymerStress}) as starting point and end with Poiseuille solution, but also shear solution Gl.~(\ref{eq:shearN}, \ref{eq:shearEta}) \\}\RK{done}
-Our derivation is in principal similar to Oliveira \cite{oliveira1999}. For both Poiseuille flow and shear flow the following holds.
+Our derivation is to the one in Oliveira \cite{oliveira1999}. For both Poiseuille flow and shear flow, we assume that the velocity is unidirectional: 
 \begin{equation}
-	\vec{u} = \dot{\gamma}\left(y\right)\hat{e}_x
+	\vec{u} = \dot{\gamma}\left(y\right)\hat{e}_x.
 \end{equation}
-With this the constitutive equation~(\ref{eq:polymerStress}) for $\xi=0$ in steady state reduces to the following.
+\SG{ This equation does not work, $ \dot{ \gamma  }$ is a shear rate, it should read $ \partial u_x / \partial y = \dot{ \gamma  }$. }
+
+With this the constitutive equation~(\ref{eq:polymerStress}) for $\xi=0$ in steady state reduces to
 \begin{align}
 	\exp\left(\frac{\epsilon\lambda}{\eta_\text{p}}\Tr\ma{\tau}\right)\tau_{xx} &= 2\lambda\dot{\gamma}\tau_{xy} \label{eq:PTTDerivation1}\\
 	\exp\left(\frac{\epsilon\lambda}{\eta_\text{p}}\Tr\ma{\tau}\right)\tau_{xy} &= \eta_\text{p}\dot{\gamma} \label{eq:PTTDerivation2}
 \end{align}
-With $\Tr\ma{\tau} = \tau_{xy}$. In the three-dimensional case $y$ refers to the radial coordinate.
+for a planar flow.
+In axisymmetric flows $y$ in eqs.~(\ref{eq:PTTDerivation1}, \ref{eq:PTTDerivation2}) needs to be replaced by the radial coordinate $r$. \SG{ no factor 2? }
+With $\Tr\ma{\tau} = \tau_{xy}$. \SG{ should be $ \tau _{ xx }$? }
 Eliminating $\tau_{xy}$ yields the following.
 \begin{equation}
 	\exp\left(2\frac{\epsilon\lambda}{\eta_\text{p}}\Tr\ma{\tau}\right)\tau_{xx} = 2\lambda\dot{\gamma}^2\eta_\text{p}
@@ -754,8 +752,7 @@ Importantly, we show in figure~\ref{fig:wiParameterStudy}~(b) that this very goo
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/wiParameterStudy.pdf}
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/suffleParameterStudy.pdf}
 		\caption{(a) The local viscosity determined by a shear flow simulation is in very good agreement with the semi-analytical theory.
-		(b) The error is negligibly small and independent of the shuffling parameter $\alpha_\text{s}$.
-		\SG{ plot over shear rate instead of $ \mathrm{Wi}$. Fix units of $ \eta $. }\RK{done, done}}
+		(b) The error is negligibly small and independent of the shuffling parameter $\alpha_\text{s}$.}
 		\label{fig:wiParameterStudy}
 	\end{figure}
 
@@ -777,7 +774,7 @@ Importantly, we show in figure~\ref{fig:wiParameterStudy}~(b) that this very goo
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DAlginateErr.pdf}
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErrWorst.pdf}
 		\caption{L2 error of the velocity profile in figure~\ref{fig:2Dvel} with respect to the semi-analytical theory in a planar Poiseuille flow for alginate (a) and methyl cellulose (b).
-			The relative error is highest near the wall as the velocity is lowest there, but also because the simple half way bounce back boundaries used here allow some slip along the wall.}\RK{this is linear error}
+			The relative error is highest near the wall as the velocity is lowest there, but also because the simple half way bounce back boundaries used here allow some slip along the wall.}\RK{this is linear error} \SG{ define }
 		\label{fig:2DvelErr}
 	\end{figure}
 
@@ -794,8 +791,8 @@ Importantly, we show in figure~\ref{fig:wiParameterStudy}~(b) that this very goo
 		\centering
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErr.pdf}
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyErr.pdf}
-		\caption{Average error of the velocity for a planar (a) and a cylindrical (b) Poiseuille flow of methyl cellulose at different pressure gradients.
-		The peak in the error profile appears when the average shear rate across the channel corresponds to the maximum slope in the viscosity profile of figure~\ref{fig:wiParameterStudy}.}\RK{this is L2 error norm not "average"}
+		\caption{L2 error of the velocity for a planar (a) and a cylindrical (b) Poiseuille flow of methyl cellulose at different pressure gradients.
+		The peak in the error profile appears when the average shear rate across the channel corresponds to the maximum slope in the viscosity profile of figure~\ref{fig:wiParameterStudy}.}
 		\label{fig:pressureErr}
 	\end{figure}
 	
