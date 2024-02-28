@@ -125,4 +125,5 @@ if __name__ == "__main__":
     plt.xlabel(r"$y/\unit{\micro\meter}$")
     plt.ylabel(r"$error$")
     plt.legend()
+    plt.savefig("../plots/ShuffleInPoiseuille.pdf", bbox_inches="tight", pad_inches=0)
     plt.show()

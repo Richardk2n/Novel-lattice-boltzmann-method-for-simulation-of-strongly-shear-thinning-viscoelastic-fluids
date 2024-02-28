@@ -136,9 +136,8 @@ To satisfy the latter requirement, cell carriers used in biofabrication ("bioink
 To understand the rheology of such complex liquids in non-trivial geometries, computer simulations are an invaluable tool.
 While a number of numerical techniques have been developed, the simulation of viscoelastic liquids remain an involved subject \cite{Alves.2020}, in particular for high viscosity ratios.
 A very popular simulation technique for Newtonian fluids is the Lattice Boltzmann method \cite{Kruger_book} due to its simplicity and high parallelizability.
-LBM has also been extended to viscoelastic situations, mainly in two \cite{ispolatov2002,wang2019,su2013,giraud1998,xie2018,dzanic2022,frank2006,zou2014,lee2017,dzanic2022_2,sedaghat2021,frantziskonis2011,qin2023,yoshino2008,papenkort2015,phillips2011,onishi2005} but occasionally also in three \cite{malaspinas2010,gupta2015,lallemand2003,ma2020,onishi2006,wang2020,dellar2014,su2013_2,wang2021,kuron2021,gupta2016} dimensions.
-To alleviate stability problems, some of these works include an artificial diffusivity of the polymer stress \cite{malaspinas2010,ma2020,wang2020,wang2021}.
-Other remedies include special decompositions of the stress tensor \cite{dzanic2022} or optimization of the solvent contribution \cite{gupta2015} \SG{ what is this? }\RK{Gupta is not specific in what he does but states to "optimize" $\eta_\text{s}$. I suspect an artificial increase but do not know}.
+LBM has also been extended to viscoelastic situations, mainly in two \cite{ispolatov2002,wang2019,su2013,giraud1998,xie2018,dzanic2022,frank2006,zou2014,lee2017,dzanic2022_2,sedaghat2021,frantziskonis2011,qin2023,yoshino2008,papenkort2015,phillips2011,onishi2005} but occasionally also in three \cite{malaspinas2010,gupta2015,gupta2015_2,lallemand2003,ma2020,onishi2006,wang2020,dellar2014,su2013_2,wang2021,kuron2021,gupta2016} dimensions.
+To alleviate stability problems, some of these works include an artificial diffusivity of the polymer stress \cite{malaspinas2010,ma2020,wang2020,wang2021}, or perform special decompositions of the stress tensor \cite{dzanic2022}.
 Despite these improvements, however, none of these methods has been applied to very high viscosity ratio fluids which are often used as cell carrier fluids in lab experiments or technological applications.
 
 To fill this gap, here we develop a new variant of viscoelastic LBM which allows the stable and accurate simulation of very high viscosity ratio fluids.
@@ -249,8 +248,8 @@ We introduce the ratio between the polymer and the solvent viscosity as
 \begin{align}
 	R_\eta = \frac{\eta_\text{p}}{\eta_\text{s}} = \frac{\eta_0-\eta_\infty}{\eta_\infty}		\label{eq:R_eta}
 \end{align}
-which will turn out to be an important parameter to determine numerical stability of LB simulations.
-\SG{ wo don't actually show that $R_ \eta  $ determines stability? }\RK{we do not. We could do a few simulations with $\alpha_s = 0$ and increasing $R_\eta$ until the sim breaks if you want} \SG{ wie besprochen, bau einfach die Zitate ein, das reicht dann. }\todo{do}
+which we and others found to be an important parameter to determine numerical stability of LB simulations, especially if no artificial diffusivity is used \cite{malaspinas2010,dzanic2022_2}.
+\SG{ wo don't actually show that $R_ \eta  $ determines stability? }\RK{we do not. We could do a few simulations with $\alpha_s = 0$ and increasing $R_\eta$ until the sim breaks if you want} \SG{ wie besprochen, bau einfach die Zitate ein, das reicht dann. }\RK{done}
 This ratio can similarly be defined for other models such as FENE-P or the inelastic, but shear-thinning Carreau-Yasuda model \cite{carreau1972, yasuda1979} using the zero-shear viscosity $\eta_0$ and the infinite-shear viscosity $\eta_\infty$.
 For our alginate solution we obtain $R_\eta = \num{48.2\pm0.4e3}$, indicating that the solution viscosity at very low shear rates is more than four orders of magnitude larger than the solvent viscosity which represents a severe challenge to standard numerical algorithms.
 That this characteristic is not unique to alginate, but is in fact a generic feature of cell carrier fluids used in bioprinting is shown in table~\ref{tab:bioinks} where rheological data from various literature sources have been compiled into a single format to determine $R_\eta$.
@@ -283,22 +282,22 @@ The \SI{0.49}{\percent} methyl cellulose solution used in RT-DC measurements, in
 \section{Existing LBM methods}
 
 \SG{ make sure that all papers cited in the introduction as ''3D'' are discussed here as well }\RK{dellar is missing}
-\SG{ and vice versa: make sure that all papers discussed here are also cited in the introduction }\RK{gupta2015\_2 not in intro} \SG{ dann setz einfach die Zitate so rein, wie du sie fuer passend haeltst. }\todo{do}
+\SG{ and vice versa: make sure that all papers discussed here are also cited in the introduction }\RK{gupta2015\_2 not in intro} \SG{ dann setz einfach die Zitate so rein, wie du sie fuer passend haeltst. }\RK{done}
 Since the early days of LBM, variants for viscoelastic fluids have been developed.
 Keeping in mind our target geometries, we focus here on three-dimensional formulations.
-The first approaches avoided an explicit modeling of a viscoelastic constitutive equation and simply modified the LB collision operator to obtain a basic viscoelastic fluid obeying Jeffery's model \cite{lallemand2003}.
+The first approaches avoided an explicit modeling of a viscoelastic constitutive equation and simply modified the LB collision operator to obtain a basic viscoelastic fluid obeying Jeffery's model \cite{lallemand2003}. This can also be archived by the introduction of a second local stress tensor \cite{dellar2014}.
 More advanced approaches include the work of Onishi \textit{et al.} \cite{onishi2005, onishi2006} who considered a non-shear-thinning Oldroyd-B model using a microscopic Fokker-Planck equation for the polymer dumbbells.
 The work of \cite{wang2020} solved the advection part of the model using a second LBM running in parallel to the Navier-Stokes LBM.
 The same technique was used by \cite{malaspinas2010} and \cite{ma2020} for the Oldroyd-B and FENE-P models.
 Later, hybrid schemes coupling an LB solver for the solvent to a finite-difference \cite{gupta2015_2, gupta2015, gupta2016} or finite-volume \cite{kuron2021} scheme for the polymer stress (or, alternatively, the polymer conformation) tensor were introduced.
 To improve numerical stability, some authors propose the inclusion of an artificial diffusivity \cite{malaspinas2010,ma2020,wang2020,wang2021}, which introduces a small error compared to the analytical solution of the constitutive equation.
-Other remedies include special decompositions of the stress tensor\cite{dzanic2022} or optimization of the solvent contribution\cite{gupta2015} \SG{ rephrase and give some more details }\RK{I have not the slightest clue what gupta is doing. I assume optimize is code for increase until stable but I do not know.}.
+Others perform special decompositions of the stress tensor\cite{dzanic2022}.
 Coupling of the resulting polymer stress to the Navier-Stokes LBM can be achieved via the inclusion of point forces or via a modification of the equilibrium populations.
 Both methods have recently been compared in 2D \cite{dzanic2022_2}.
 
 The stable range of Weissenberg numbers covered by existing methods is up to $\mathrm{Wi}\approx\num{10}$ for the method of \cite{malaspinas2010} and up to $\mathrm{Wi}\approx\num{100}$ in \cite{gupta2015,ma2020,gupta2016}.
 However, another stability criterion, which is often overlooked is the viscosity ratio $R_\eta$ as defined in eq.~(\ref{eq:R_eta}).
-Existing methods often stay at or below $R_\eta = \num{1}$ \cite{gupta2015,onishi2006,wang2020,su2013_2,gupta2015_2}, while others report being limited below $R_\eta = \num{10}$ \cite{malaspinas2010,ma2020,kuron2021} due to stability issues.
+Existing methods often stay at or below $R_\eta = \num{1}$ \cite{gupta2015,onishi2006,wang2020,su2013_2,gupta2015_2}, while others report being limited below $R_\eta = \num{10}$ \cite{malaspinas2010,ma2020,kuron2021} according to Malaspinas \textit{et al.} due to stability issues.
 The details are listed in table~\ref{tab:viscRatio}.
 Comparing to the rheological data presented in figures~\ref{fig:fit_alginate} and \ref{fig:fit_mc}, we conclude that existing LB methods appear to be appropriate only for relatively dilute solutions and in particular do not cover the viscosity ratio required by technologically important cell carrier fluids such alginate and methyl cellulose.
 We therefore set out to develop a novel viscoelastic LBM scheme which we will present in the next section.
@@ -568,7 +567,7 @@ There are three qualitative differences compared to a purely viscous fluid.
 Directly after the inlet we find a region of low stress.
 Due to the fast advection, the polymers, despite being inside the constriction, have not reacted to the increased fluid stress yet.
 Similarly, directly after the constriction, the high stress inside the observation channel persists over a certain distance that is needed for the polymer stress to decay.
-\RK{There are three, proceeds to name two} \SG{ ? }
+\RK{There are three, proceeds to name two} \SG{ ? }\todo{do}
 
 
  	\begin{figure}[H]
@@ -777,7 +776,7 @@ Importantly, we show in figure~\ref{fig:wiParameterStudy}~(b) that this very goo
 		\caption{L2 error of the velocity profile in figure~\ref{fig:2Dvel} with respect to the semi-analytical theory in a planar Poiseuille flow for alginate (a) and methyl cellulose (b).
 			The relative error is highest near the wall as the velocity is lowest there, but also because the simple half way bounce back boundaries used here allow some slip along the wall.}\RK{this is linear error} \SG{ define }
 		\label{fig:2DvelErr}
-	\end{figure}
+	\end{figure}\todo{do}
 
 	\begin{figure}[H]
 		\centering
@@ -823,10 +822,10 @@ Importantly, we show in figure~\ref{fig:wiParameterStudy}~(b) that this very goo
 	
 	\begin{figure}[H]
 		\centering
-		%\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/ShuffleInPoiseuille.pdf}
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/ShuffleInPoiseuille.pdf}
 		\caption{In Poiseuille flow, the result is near identical for different $\alpha_\text{s}$. The error reveals minor differences. Aside from the wall nodes, the largest error appears for small shuffle fractions. For large ones, the error appears to become independent of $\alpha_\text{s}$. This indicates, that the observed difference might be due to the Mach number changing for different $\alpha_\text{s}$ and not due to the shuffling itself.\RK{I could probably prove this by running sims at different $\alpha_s$ that consistently are at Ma << 1}}
 		\label{fig:ShuffleInPoiseuille}
-	\end{figure}\todo{include plot, reference in main text}
+	\end{figure}\todo{reference in main text}
 
 
 
