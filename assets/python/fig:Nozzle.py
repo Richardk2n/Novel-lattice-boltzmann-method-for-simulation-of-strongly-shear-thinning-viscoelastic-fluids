@@ -129,8 +129,8 @@ def process():
 
     plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
     plt.title("(a)", loc="left", pad=45, x=-0.1)
-    plt.plot(x * L0 * 1e3, upper * L0 * 1e3, "k", linewidth=0.5)
-    plt.plot(x * L0 * 1e3, lower * L0 * 1e3, "k", linewidth=0.5)
+    # plt.plot(x * L0 * 1e3, upper * L0 * 1e3, "k", linewidth=0.5)
+    # plt.plot(x * L0 * 1e3, lower * L0 * 1e3, "k", linewidth=0.5)
     plt.imshow(
         vSlice.T,
         cmap="coolwarm",
@@ -151,8 +151,8 @@ def process():
 
     plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
     plt.title("(b)", loc="left", pad=45, x=-0.1)
-    plt.plot(x * L0 * 1e3, upper * L0 * 1e3, "k", linewidth=0.5)
-    plt.plot(x * L0 * 1e3, lower * L0 * 1e3, "k", linewidth=0.5)
+    # plt.plot(x * L0 * 1e3, upper * L0 * 1e3, "k", linewidth=0.5)
+    # plt.plot(x * L0 * 1e3, lower * L0 * 1e3, "k", linewidth=0.5)
     plt.imshow(
         vonMiesesSlice.T,
         cmap="coolwarm",
@@ -174,8 +174,8 @@ def process():
 
     plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
     plt.title("(c)", loc="left", pad=45, x=-0.1)
-    plt.plot(x * L0 * 1e3, upper * L0 * 1e3, "k", linewidth=0.5)
-    plt.plot(x * L0 * 1e3, lower * L0 * 1e3, "k", linewidth=0.5)
+    # plt.plot(x * L0 * 1e3, upper * L0 * 1e3, "k", linewidth=0.5)
+    # plt.plot(x * L0 * 1e3, lower * L0 * 1e3, "k", linewidth=0.5)
     plt.imshow(
         tau12.T,
         cmap="coolwarm",
@@ -206,8 +206,8 @@ def process():
 
     plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
     plt.title("(a)", loc="left", pad=45, x=-0.1)
-    plt.plot(x * L0 * 1e3, upper * L0 * 1e3, "k", linewidth=0.5)
-    plt.plot(x * L0 * 1e3, lower * L0 * 1e3, "k", linewidth=0.5)
+    # plt.plot(x * L0 * 1e3, upper * L0 * 1e3, "k", linewidth=0.5)
+    # plt.plot(x * L0 * 1e3, lower * L0 * 1e3, "k", linewidth=0.5)
     plt.imshow(
         eta.T * 1e3,
         cmap="coolwarm",
