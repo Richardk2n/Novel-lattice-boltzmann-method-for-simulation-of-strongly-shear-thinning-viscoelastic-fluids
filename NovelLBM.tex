@@ -681,7 +681,7 @@ With this the constitutive equation~(\ref{eq:polymerStress}) for $\xi=0$ in stea
 	\exp\left(\frac{\epsilon\lambda}{\eta_\text{p}}\Tr\ma{\tau}\right)\tau_{xy} &= \eta_\text{p}\sgn\left(y\right)\dot{\gamma}
 \end{align}
 With $\Tr\ma{\tau} = \tau_{xx}$. Note that all other components aside from $\tau_{xx}$ and $\tau_{xy}$/$\tau_{yx}$ are zero.
-We define $\tau_{xr} = \tau_{xy}\sgn\left(y\right) < 0$ to get the following.
+We define $\tau_{xr} = \tau_{xy}\sgn\left(y\right) \leq 0$ to get the following.
 \begin{align}
 	\exp\left(\frac{\epsilon\lambda}{\eta_\text{p}}\Tr\ma{\tau}\right)\tau_{xx} &= 2\lambda\dot{\gamma}\tau_{xr} \label{eq:PTTDerivation1}\\
 	\exp\left(\frac{\epsilon\lambda}{\eta_\text{p}}\Tr\ma{\tau}\right)\tau_{xr} &= \eta_\text{p}\dot{\gamma} \label{eq:PTTDerivation2}
@@ -704,7 +704,7 @@ For the viscosity, we insert this into equation~(\ref{eq:PTTDerivation2}) and re
 	&= \frac{\tau_{xr} + \eta_\text{s}\dot{\gamma}}{\dot{\gamma}} \\
 	&= \eta\left(\dot{\gamma}\right) = \frac{\eta_\text{p}}{\exp\left[0.5W_0\left(4\epsilon \mathrm{Wi}^2\right)\right]} + \eta_\text{s} %\label{eq:shearEta}
 \end{align}
-With $\sigma_{xr} = \sigma_{xy}\sgn\left(y\right) < 0$.
+With $\sigma_{xr} = \sigma_{xy}\sgn\left(y\right) \leq 0$.
 This gives the relevant solutions for shear flow. However, these equations also hold for Poiseuille flow.
 
 In three dimensions we pick cylindrical coordinates as follows.
@@ -731,6 +731,7 @@ Limiting $\varphi$ to $\varphi\in\left\{0, \pi\right\}$ reproduces the above def
 	&\left.{ }+\tau_{\varphi x}\hat{e}_\varphi\otimes\hat{e}_x+\tau_{\varphi r}\hat{e}_\varphi\otimes\hat{e}_r+\tau_{\varphi\varphi}\hat{e}_\varphi\otimes\hat{e}_\varphi\right)
 \end{split}
 \end{equation}
+Multiply. Most of the products are zero, the rest can be written using different pairs of unit vectors.
 \begin{equation}
 	\left(\nabla\vec{u}\right)^\mathrm{T}\cdot\ma{\tau} = \frac{\partial u_x}{\partial r}\left(\tau_{rx}\hat{e}_x\otimes\hat{e}_x+\tau_{rr}\hat{e}_x\otimes\hat{e}_r+\tau_{r\varphi}\hat{e}_x\otimes\hat{e}_\varphi\right)
 \end{equation}
