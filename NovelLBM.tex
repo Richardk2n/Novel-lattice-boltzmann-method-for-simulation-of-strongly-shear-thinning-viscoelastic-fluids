@@ -662,20 +662,31 @@ The first normal stress difference $N_1$ is calculated from the measured normal 
 
 \section{Semi-analytical solution for Poiseuille flows of PTT fluids with solvent viscosity}
 \label{app:semianalyticalPoiseuille}
-Our derivation is similar to the one in Oliveira \cite{oliveira1999}. The origin is placed in the center of the channel. The $x$-axis points in flow direction. For the two-dimensional case the $y$-axis points along the velocity gradient.
-We separate the derivation for two and three dimensions for mathematical clarity. They are however similar. We start with shear flow in the two-dimensional case.\todo{maybe}
-\subsection{Shear flow}
-For both Poiseuille flow and shear flow, symmetry dictates that the velocity is unidirectional:
+Our derivation is similar to the one in Oliveira \cite{oliveira1999}. The origin is placed in the center of the channel. The $x$-axis points in flow direction.
+We solve both the three-dimensional and the two-dimensional case. In three dimensions we pick cylindrical coordinates as follows.
+\begin{align}
+	x &= x\\
+	y &= r\cos\varphi\\
+	z &= r\sin\varphi
+\end{align}
+This unusual choice is to keep the coordinate systems consistent between the two- and three-dimensional cases. For two dimensions the $y$-axis points along the velocity gradient. This follows from the 3D case limiting $\varphi$ to $\varphi\in\left\{0, \pi\right\}$. Consequently, we define $r = \abs{y}$ in the 2D case. Note, that in 2D this leads to the sign being tracked explicitly as follows.
+\begin{equation}
+	\frac{\partial}{\partial r} =  \sgn\left(y\right)\frac{\partial}{\partial y}
+\end{equation}
+
+For both Poiseuille flow and shear flow, symmetry dictates, that the velocity is unidirectional:
 \begin{equation}
 	\vec{u} = u_x\left(r\right)\hat{e}_x
 \end{equation}
+We also define the shear rate as follows.
 \begin{equation}
-	\dot{\gamma}\left(r\right) = \frac{\partial u_x}{\partial r} = \sgn\left(y\right)\frac{\partial u_x}{\partial y} \leq 0
+\dot{\gamma}\left(r\right) = \frac{\partial u_x}{\partial r} \leq 0
 \end{equation}
-With $r = \abs{y}$.
-For pure shear flow, $\dot{\gamma}$ is a constant.
+Note, that with this the shear rate is always negative. Also, $\dot{\gamma}$ is a constant for pure shear flow.
 
-With this the constitutive equation~(\ref{eq:polymerStress}) for $\xi=0$ in steady state reduces to the following. Note, that $\ma{\tau}$ is symmetric.\RK{Am I allowed to assume this is trivial?}
+We start with the solutions of the constitutive equation.
+\subsection{Shear solutions}
+In two dimensions, the constitutive equation~(\ref{eq:polymerStress}) for $\xi=0$ in steady state easily reduces to the following. Note, that $\ma{\tau}$ is symmetric.
 \begin{align}
 	\exp\left(\frac{\epsilon\lambda}{\eta_\text{p}}\Tr\ma{\tau}\right)\tau_{xx} &= 2\lambda\sgn\left(y\right)\dot{\gamma}\tau_{xy}\\
 	\exp\left(\frac{\epsilon\lambda}{\eta_\text{p}}\Tr\ma{\tau}\right)\tau_{xy} &= \eta_\text{p}\sgn\left(y\right)\dot{\gamma}
@@ -686,7 +697,58 @@ We define $\tau_{xr} = \tau_{xy}\sgn\left(y\right) \leq 0$ to get the following.
 	\exp\left(\frac{\epsilon\lambda}{\eta_\text{p}}\Tr\ma{\tau}\right)\tau_{xx} &= 2\lambda\dot{\gamma}\tau_{xr} \label{eq:PTTDerivation1}\\
 	\exp\left(\frac{\epsilon\lambda}{\eta_\text{p}}\Tr\ma{\tau}\right)\tau_{xr} &= \eta_\text{p}\dot{\gamma} \label{eq:PTTDerivation2}
 \end{align}
-Eliminating $\tau_{xr}$ yields the following.
+
+The three-dimensional case yields the same formula using significantly more math.
+We set $\xi=0$ and start from the velocity gradient.
+\begin{equation}
+	\nabla\vec{u} = \frac{\partial u_x}{\partial r}\hat{e}_r\otimes\hat{e}_x
+\end{equation}
+This, together with the general formula for $\ma{\tau}$,
+\begin{equation}
+	\ma{\tau} = \tau_{ij}\hat{e}_i\otimes\hat{e}_j
+\end{equation}
+is used to find the non-zero terms of the upper convected derivative in steady state as follows.
+\begin{equation}
+	\begin{split}
+		\left(\nabla\vec{u}\right)^\mathrm{T}\cdot\ma{\tau} = \frac{\partial u_x}{\partial r}\hat{e}_x\otimes\hat{e}_r&\left(\tau_{xx}\hat{e}_x\otimes\hat{e}_x+\tau_{xr}\hat{e}_x\otimes\hat{e}_r+\tau_{x\varphi}\hat{e}_x\otimes\hat{e}_\varphi\right.\\
+		&+\tau_{rx}\hat{e}_r\otimes\hat{e}_x+\tau_{rr}\hat{e}_r\otimes\hat{e}_r+\tau_{r\varphi}\hat{e}_r\otimes\hat{e}_\varphi\\
+		&\left.{ }+\tau_{\varphi x}\hat{e}_\varphi\otimes\hat{e}_x+\tau_{\varphi r}\hat{e}_\varphi\otimes\hat{e}_r+\tau_{\varphi\varphi}\hat{e}_\varphi\otimes\hat{e}_\varphi\right)
+	\end{split}
+\end{equation}
+With the orthonormality
+\begin{equation}
+	\hat{e}_a\otimes\hat{e}_b\hat{e}_c\otimes\hat{e}_d = \hat{e}_a\hat{e}_b^\mathrm{T}\hat{e}_c\hat{e}_d^\mathrm{T} = \hat{e}_a\left(\hat{e}_b\cdot\hat{e}_c\right)\hat{e}_d^\mathrm{T} = \hat{e}_a\left(\delta_{bc}\right)\hat{e}_d^\mathrm{T} = \delta_{bc}\hat{e}_a\otimes\hat{e}_d
+\end{equation}
+we can reduce this to the following.
+\begin{equation}
+	\left(\nabla\vec{u}\right)^\mathrm{T}\cdot\ma{\tau} = \frac{\partial u_x}{\partial r}\left(\tau_{rx}\hat{e}_x\otimes\hat{e}_x+\tau_{rr}\hat{e}_x\otimes\hat{e}_r+\tau_{r\varphi}\hat{e}_x\otimes\hat{e}_\varphi\right)
+\end{equation}
+The second non-zero term in the upper convected derivative due to the symmetry of $\ma{\tau}$ is the transpose of this. Together with the strain rate tensor, which is calculated using the velocity gradient from above, the complete constitutive equation reads:
+\begin{equation}
+	\begin{split}
+		0 &= \frac{\partial u_x}{\partial r}\left[2\tau_{rx}\hat{e}_x\otimes\hat{e}_x+\tau_{rr}\left(\hat{e}_x\otimes\hat{e}_r+\hat{e}_r\otimes\hat{e}_x\right)+\tau_{r\varphi}\left(\hat{e}_x\otimes\hat{e}_\varphi + \hat{e}_\varphi\otimes\hat{e}_x\right)\right]\\
+		&- \exp\left(\frac{\epsilon\lambda}{\eta_\text{p}}\Tr\ma{\tau}\right)\frac{\ma{\tau}}{\lambda} + \frac{\eta_\text{p}}{\lambda}\frac{\partial u_x}{\partial r}\left(\hat{e}_r\otimes\hat{e}_x + \hat{e}_x\otimes\hat{e}_r\right)
+	\end{split}
+\end{equation}
+We separate this equation by components, meaning if $\hat{e}_i\otimes\hat{e}_j$ does not appear in this equation $\tau_{ij} = 0$.
+\begin{equation}
+	0 = \frac{\partial u_x}{\partial r}\left[2\tau_{rx}\hat{e}_x\otimes\hat{e}_x\right]- \exp\left(\frac{\epsilon\lambda}{\eta_\text{p}}\Tr\ma{\tau}\right)\frac{\ma{\tau}}{\lambda} + \frac{\eta_\text{p}}{\lambda}\frac{\partial u_x}{\partial r}\left(\hat{e}_r\otimes\hat{e}_x + \hat{e}_x\otimes\hat{e}_r\right)
+\end{equation}
+The symmetry of $\ma{\tau}$ also holds in cylindrical coordinates, meaning $\tau_{rx} = \tau_{xr}$. We reorder accordingly.
+\begin{equation}
+	\exp\left(\frac{\epsilon\lambda}{\eta_\text{p}}\Tr\ma{\tau}\right)\frac{\ma{\tau}}{\lambda} = \dot{\gamma}\left[2\tau_{xr}\hat{e}_x\otimes\hat{e}_x\right] + \frac{\eta_\text{p}}{\lambda}\dot{\gamma}\left(\hat{e}_r\otimes\hat{e}_x + \hat{e}_x\otimes\hat{e}_r\right)
+\end{equation}
+We separate the components once more. Yielding two unique equations.
+\begin{align}
+	\exp\left(\frac{\epsilon\lambda}{\eta_\text{p}}\Tr\ma{\tau}\right)\tau_{xx} &= 2\lambda\dot{\gamma}\tau_{xr} \\
+	\exp\left(\frac{\epsilon\lambda}{\eta_\text{p}}\Tr\ma{\tau}\right)\tau_{xr} &= \eta_\text{p}\dot{\gamma}
+\end{align}
+The trace con be found to be:
+\begin{equation}
+	\Tr\ma{\tau} = \tau_{xx} + \tau_{rr} + \tau_{\varphi\varphi} = \tau_{xx}
+\end{equation}
+As stated above this solution has the same form as for the two-dimensional case. Therefore, the following holds for both cases.
+We eliminate $\tau_{xr}$ yielding the following.
 \begin{equation}
 	\exp\left(2\frac{\epsilon\lambda}{\eta_\text{p}}\Tr\ma{\tau}\right)\tau_{xx} = 2\lambda\dot{\gamma}^2\eta_\text{p}
 \end{equation}
@@ -694,9 +756,19 @@ This is solved by the Lambert $W$ function as follows.
 \begin{equation}
 	\tau_{xx} = \frac{\eta_\text{p}}{2\epsilon\lambda}W_0\left(4\epsilon\lambda^2\dot{\gamma}^2\right)\label{eq:tau_xx}
 \end{equation}
-With $\tau_{yy} = 0$ this yields the first normal stress difference $N_1$ as follows. The second normal stress difference is proportional to $\xi$ and therefore $0$.
+As already mentioned above most components of $\ma{\tau}$ are zero, using specifically
 \begin{equation}
-	N_1 = \sigma_{xx} - \sigma_{yy} = \tau_{xx} = \frac{\eta_\text{p}}{2\epsilon\lambda}W_0\left(4\epsilon\mathrm{Wi}^2\right) %\label{eq:shearN}
+	0 = \begin{cases}
+		\tau_{yy} = \sigma_{yy},\quad\text{in 2D} \\
+		\tau_{rr} = \sigma_{rr},\quad\text{in 3D}
+	\end{cases}
+\end{equation}
+yields the first normal stress difference $N_1$ as follows. The second normal stress difference is proportional to $\xi$ and therefore $0$.
+\begin{equation}
+	N_1 = \sigma_{xx} - \begin{cases}
+		\sigma_{yy},\quad\text{in 2D} \\
+		\sigma_{rr},\quad\text{in 3D}
+	\end{cases} = \tau_{xx} = \frac{\eta_\text{p}}{2\epsilon\lambda}W_0\left(4\epsilon\mathrm{Wi}^2\right) %\label{eq:shearN}
 \end{equation}
 For the viscosity, we insert this into equation~(\ref{eq:PTTDerivation2}) and retrieve the following.
 \begin{align}
@@ -704,133 +776,41 @@ For the viscosity, we insert this into equation~(\ref{eq:PTTDerivation2}) and re
 	&= \frac{\tau_{xr} + \eta_\text{s}\dot{\gamma}}{\dot{\gamma}} \\
 	&= \eta\left(\dot{\gamma}\right) = \frac{\eta_\text{p}}{\exp\left[0.5W_0\left(4\epsilon \mathrm{Wi}^2\right)\right]} + \eta_\text{s} %\label{eq:shearEta}
 \end{align}
-With $\sigma_{xr} = \sigma_{xy}\sgn\left(y\right) \leq 0$.
-This gives the relevant solutions for shear flow. However, these equations also hold for Poiseuille flow.
-
-In three dimensions we pick cylindrical coordinates as follows.
-\begin{align}
-	x &= x\\
-	y &= r\cos\varphi\\
-	z &= r\sin\varphi
-\end{align}
-Limiting $\varphi$ to $\varphi\in\left\{0, \pi\right\}$ reproduces the above definition of $r$ in two dimensions. Other than this expansion of the definitions, the equations from above are the same in three dimension as they are in two.
-\RK{The definitions of $r$ above are entirely valid in 2D and picked in a way to make the signs consistent with 3D. In my opinion this means, that we do not need to show the calculation here. But I could if you want multiple pages of boring math. See:}
-
-\RK{
-
+With $\sigma_{xr} = \sigma_{xy}\sgn\left(y\right) \leq 0$ in the 2D case analogous to $\tau_{xr}$.
+This concludes the relevant solutions for shear flow. However, these equations also hold for Poiseuille flow. Next we calculate the velocity profile for Poiseuille flow.
+\subsection{Velocity profile}
+We start with the Cauchy momentum equation (neglecting gravity), which reads as follows.
 \begin{equation}
-	\nabla\vec{u} = \frac{\partial u_x}{\partial r}\hat{e}_r\otimes\hat{e}_x
+	\rho\frac{\Dif\vec{u}}{\Dif t} = -\nabla p + \nabla\cdot\ma{\sigma}
 \end{equation}
+In steady state for this geometry in two dimensions, this reduces to the following.
 \begin{equation}
-	\ma{\tau} = \tau_{ij}\hat{e}_i\otimes\hat{e}_j
+	\frac{\partial \sigma_{xr}}{\partial r} = \frac{\partial p}{\partial x}
 \end{equation}
+In three dimensions there is a slight difference. We start from the stress.
 \begin{equation}
-\begin{split}
-	\left(\nabla\vec{u}\right)^\mathrm{T}\cdot\ma{\tau} = \frac{\partial u_x}{\partial r}\hat{e}_x\otimes\hat{e}_r&\left(\tau_{xx}\hat{e}_x\otimes\hat{e}_x+\tau_{xr}\hat{e}_x\otimes\hat{e}_r+\tau_{x\varphi}\hat{e}_x\otimes\hat{e}_\varphi\right.\\
-	&+\tau_{rx}\hat{e}_r\otimes\hat{e}_x+\tau_{rr}\hat{e}_r\otimes\hat{e}_r+\tau_{r\varphi}\hat{e}_r\otimes\hat{e}_\varphi\\
-	&\left.{ }+\tau_{\varphi x}\hat{e}_\varphi\otimes\hat{e}_x+\tau_{\varphi r}\hat{e}_\varphi\otimes\hat{e}_r+\tau_{\varphi\varphi}\hat{e}_\varphi\otimes\hat{e}_\varphi\right)
-\end{split}
+	\ma{\sigma} =  \ma{\tau} + 2\eta_\text{s}\ma{D} = \ma{\tau} + \eta_\text{s}\left(\hat{e}_{x}\otimes\hat{e}_{r} + \hat{e}_{r}\otimes\hat{e}_{x}\right)
 \end{equation}
-Multiply. Most of the products are zero, the rest can be written using different pairs of unit vectors.
+Therefor as seen for $\ma{\tau}$ above, $\ma{\sigma}$ also only has $\sigma_{xx}$, $\sigma_{xr}$, $\sigma_{rx}$ components. Furthermore, from symmetry $x$ and $\varphi$ derivatives of $\ma{\sigma}$ are zero. This reduces the divergence to the following.
 \begin{equation}
-	\left(\nabla\vec{u}\right)^\mathrm{T}\cdot\ma{\tau} = \frac{\partial u_x}{\partial r}\left(\tau_{rx}\hat{e}_x\otimes\hat{e}_x+\tau_{rr}\hat{e}_x\otimes\hat{e}_r+\tau_{r\varphi}\hat{e}_x\otimes\hat{e}_\varphi\right)
+	\nabla\cdot\sigma = \frac{\partial \sigma_{xr}}{\partial r}\hat{e}_x + \frac{\sigma_{xr}}{r}\hat{e}_x
 \end{equation}
-Make other term via transpose.
+Notably this leads to a different reduced Cauchy momentum equation than for the 2D case.
 \begin{equation}
-	\begin{split}
-		0 &= \frac{\partial u_x}{\partial r}\left[2\tau_{rx}\hat{e}_x\otimes\hat{e}_x+\tau_{rr}\left(\hat{e}_x\otimes\hat{e}_r+\hat{e}_r\otimes\hat{e}_x\right)+\tau_{r\varphi}\hat{e}_x\otimes\hat{e}_\varphi + \tau_{r\varphi}\hat{e}_\varphi\otimes\hat{e}_x\right]\\
-		&- \exp\left(\frac{\epsilon\lambda}{\eta_\text{p}}\Tr\ma{\tau}\right)\frac{\ma{\tau}}{\lambda} + \frac{\eta_\text{p}}{\lambda}\frac{\partial u_x}{\partial r}\left(\hat{e}_r\otimes\hat{e}_x + \hat{e}_x\otimes\hat{e}_r\right)
-	\end{split}
+	\frac{\partial \sigma_{xr}}{\partial r} + \frac{\sigma_{xr}}{r} = \frac{\partial p}{\partial x}
 \end{equation}
-If $\hat{e}_i\otimes\hat{e}_j$ does not appear in this equation $\tau_{ij} = 0$.
+However, due to the convenient form of the additional term both cases are solved by the following.
 \begin{equation}
-	0 = \frac{\partial u_x}{\partial r}\left[2\tau_{rx}\hat{e}_x\otimes\hat{e}_x\right]- \exp\left(\frac{\epsilon\lambda}{\eta_\text{p}}\Tr\ma{\tau}\right)\frac{\ma{\tau}}{\lambda} + \frac{\eta_\text{p}}{\lambda}\frac{\partial u_x}{\partial r}\left(\hat{e}_r\otimes\hat{e}_x + \hat{e}_x\otimes\hat{e}_r\right)
+	\sigma_{xr} = \frac{\partial p}{\partial x}\frac{r}{2^j}
 \end{equation}
-If $\ma{\tau}$ is symmetric $\tau_{rx} = \tau_{xr}$.
+Here $j$ is $0$ for the two-dimensional case and $1$ in the three-dimensional flow. From here the solution is independent of the dimensionality again.
+The total stress experienced by the fluid is the one described by the constitutive equation plus the solvent contribution, which can also be written as follows.
 \begin{equation}
-	\exp\left(\frac{\epsilon\lambda}{\eta_\text{p}}\Tr\ma{\tau}\right)\frac{\ma{\tau}}{\lambda} = \dot{\gamma}\left[2\tau_{xr}\hat{e}_x\otimes\hat{e}_x\right] + \frac{\eta_\text{p}}{\lambda}\dot{\gamma}\left(\hat{e}_r\otimes\hat{e}_x + \hat{e}_x\otimes\hat{e}_r\right)
+	\tau_{xr} = \partial_xp\frac{r}{2^j} - \eta_\text{s}\dot{\gamma}
 \end{equation}
-Separate by components.
-\begin{align}
-	\exp\left(\frac{\epsilon\lambda}{\eta_\text{p}}\Tr\ma{\tau}\right)\tau_{xx} &= 2\lambda\dot{\gamma}\tau_{xr} \\
-	\exp\left(\frac{\epsilon\lambda}{\eta_\text{p}}\Tr\ma{\tau}\right)\tau_{xr} &= \eta_\text{p}\dot{\gamma}
-\end{align}
-The trace works out to:
-\begin{equation}
-	\Tr\ma{\tau} = \tau_{xx} + \tau_{rr} + \tau_{\varphi\varphi} = \tau_{xx}
-\end{equation}
-TODO: $N_1$? Defined along shear axis or always yy? ends up as $\tau_{xx}$ either way
-
-}
-
-
-\subsection{Channel flow}
-For Poiseuille flow, we start with the Cauchy momentum equation (neglecting gravity), which reads as follows.
-\begin{equation}
-	\rho\frac{\Dif\vec{u}}{\Dif t} = -\nabla p + \nabla\cdot\sigma
-\end{equation}
-In steady state for this geometry, once integrated along $y$, this reduces to the following.
-\begin{equation}
-	\sigma_{xy} = \frac{\partial p}{\partial x}y
-\end{equation}
-The total stress experienced by the fluid is the one described by the constitutive equation plus the solvent contribution and thus the following holds.
-\begin{equation}
-	\tau_{xy} = \partial_xpy - \eta_\text{s}\dot{\gamma}
-\end{equation}
-Dividing equation~(\ref{eq:PTTDerivation1_2D}) by equation~(\ref{eq:PTTDerivation2_2D}) leads to the following relation.
-\begin{equation}
-	\tau_{xx} = \frac{2\lambda}{\eta_\text{p}}\tau_{xy}^2 =  \frac{2\lambda}{\eta_\text{p}}\left(\partial_xpy - \eta_\text{s}\dot{\gamma}\right)^2
-\end{equation}
-Inserting this back into equation~(\ref{eq:PTTDerivation2_2D}) yields the following.
-\begin{align}
-	\dot{\gamma} &= \exp\left(\frac{2\epsilon\lambda^2}{\eta_\text{p}^2}\left[\partial_xpy - \eta_\text{s}\dot{\gamma}\right]^2\right)\frac{1}{\eta_\text{p}}\left(\partial_xpy-\eta_\text{s}\dot{\gamma}\right)
-	\intertext{This cannot be integrated as easily as without $\eta_\text{s}$, and is only solvable semi-analytically.}
-	1 &= \exp\left(\frac{2\epsilon\lambda^2}{\eta_\text{p}^2}\left[\partial_xpy - \eta_\text{s}\dot{\gamma}\right]^2\right)\frac{1}{\eta_\text{p}}\left(\partial_xp\frac{y}{\dot{\gamma}}-\eta_\text{s}\right) \\
-	0 &= \frac{2\epsilon\lambda^2}{\eta_\text{p}^2}\left[\partial_xpy - \eta_\text{s}\dot{\gamma}\right]^2 - \ln\eta_\text{p} + \ln\left(\partial_xp\frac{y}{\dot{\gamma}}-\eta_\text{s}\right) \\
-	0 &= 2\epsilon\lambda^2\dot{\gamma}^2\left[\partial_xp\frac{y}{\dot{\gamma}\eta_\text{p}} - \frac{\eta_\text{s}}{\eta_\text{p}}\right]^2 + \ln\left(\partial_xp\frac{y}{\dot{\gamma}\eta_\text{p}}-\frac{\eta_\text{s}}{\eta_\text{p}}\right) \\
-	0 &= 2\epsilon\lambda^2\dot{\gamma}^2\left[\partial_xp\frac{y}{\dot{\gamma}\eta_\text{p}} - \frac{\eta_\text{s}}{\eta_\text{p}}\right]^2 + \ln\left(\partial_xp\frac{y}{\dot{\gamma}\eta_\text{p}}-\frac{\eta_\text{s}}{\eta_\text{p}}\right)
-	\intertext{This has the following form}
-	0 &= ab^2 + \ln b
-\end{align}
-This can be solved using the Lambert $W$ function as follows.
-\begin{align}
-	b &= \sqrt{\frac{W_0\left(2a\right)}{2a}}
-	\intertext{Resolving for $y$ yields the following.}
-	y &= \frac{\eta_\text{s}}{\partial_xp}\dot{\gamma} + \sgn\left(\dot{\gamma}\right)\frac{\eta_\text{p}}{2\lambda\sqrt{\epsilon}\partial_xp}\sqrt{W_0\left(4\epsilon\lambda^2\dot{\gamma}^2\right)}
-\end{align}
-We notice, that this is the solution for a poiseuille flow with viscosity $\eta_\text{s}$ expanded by a term that applies a nonuniform scaling of the profile  along the $y$-axis towards higher absolute values. We simplify again using $c < 0$ and $d > 0$.
-\begin{equation}
-	y = c\dot{\gamma} - R_\eta\frac{c}{d}\sqrt{W_0\left(d^2\dot{\gamma}^2\right)}\label{eq:semiAnalyticGD_2D}
-\end{equation}\todo{sign and rest of explainer at the end?}
-Finally this function needs to be inverted. This needs to be done numerically. We calculate a range of $\dot{\gamma}$ from $0$ to $\frac{R}{c}$ with a small step interval. Here $R$ is the radius of the channel or pipe. This is guaranteed to contain all relevant radii. We flip the axis and integrate numerically using \pyth{scipy.integrate.cumulative_trapezoid} \cite{scipy}. This is very accurate as we conveniently picked the spacing of our now $x$-axis in a way, that the $y$-axis ($\dot{\gamma}$) varies little for each step. From the recovered curve $u$ is calculated at each required $r$ through linear interpolation.
-
-
-
-
-
-\subsection{Pipe flow}
-
-
-
-
-
-
-For Poiseuille flow, we start with the Cauchy momentum equation (neglecting gravity), which reads as follows.
-\begin{equation}
-	\rho\frac{\Dif\vec{u}}{\Dif t} = -\nabla p + \nabla\cdot\sigma
-\end{equation}
-In steady state for this geometry, once integrated along $y$, this reduces to the following.
-\begin{equation}
-	\sigma_{xy} = \frac{\partial p}{\partial x}\frac{y}{2^j}
-\end{equation}
-Here $j$ is $0$ for the two-dimensional case and $1$ in the three-dimensional flow. The total stress experienced by the fluid is the one described by the constitutive equation plus the solvent contribution and thus the following holds.
-\begin{equation}
-	\tau_{xy} = \partial_xp\frac{r}{2^j} - \eta_\text{s}\dot{\gamma}
-\end{equation}
-Here we switched from y to writing $y$ to $r$ in order to clarify, that this is a radial coordinate being $0$ in the center of the channel for both cases.
 Dividing equation~(\ref{eq:PTTDerivation1}) by equation~(\ref{eq:PTTDerivation2}) leads to the following relation.
 \begin{equation}
-	\tau_{xx} = \frac{2\lambda}{\eta_\text{p}}\tau_{xy}^2 =  \frac{2\lambda}{\eta_\text{p}}\left(\partial_xp\frac{r}{2^j} - \eta_\text{s}\dot{\gamma}\right)^2
+	\tau_{xx} = \frac{2\lambda}{\eta_\text{p}}\tau_{xr}^2 =  \frac{2\lambda}{\eta_\text{p}}\left(\partial_xp\frac{r}{2^j} - \eta_\text{s}\dot{\gamma}\right)^2
 \end{equation}
 Inserting this back into equation~(\ref{eq:PTTDerivation2}) yields the following.
 	\begin{align}
@@ -845,7 +825,7 @@ Inserting this back into equation~(\ref{eq:PTTDerivation2}) yields the following
 	\end{align}
 	This can be solved using the Lambert $W$ function as follows.
 	\begin{align}
-		b &= -\sqrt{\frac{W_0\left(2a\right)}{2a}}
+		b &= \sqrt{\frac{W_0\left(2a\right)}{2a}}
 		\intertext{Resolving for $r$ yields the following.}
 		r &=  \frac{2^j\eta_\text{s}}{\partial_xp}\dot{\gamma} - \frac{\eta_\text{p}2^{j-1}}{\lambda\sqrt{\epsilon}\partial_xp}\sqrt{W_0\left(4\epsilon\lambda^2\dot{\gamma}^2\right)}
 	\end{align}
