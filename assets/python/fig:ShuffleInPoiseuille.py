@@ -99,7 +99,7 @@ def process(index):
         # label=f"{i}",
     )
     plt.xlabel(r"$y/\unit{\micro\meter}$")
-    plt.ylabel(r"$error$")
+    plt.ylabel(r"$e_\text{L1}$")
     # plt.legend()
     # plt.savefig("../plots/2DParameterStudyErrWorst.pdf", bbox_inches="tight", pad_inches=0)
     plt.show()
@@ -123,7 +123,7 @@ if __name__ == "__main__":
     plt.plot(r * 1e6, errs[1], "x", color=color(3), label=r"$\alpha_\text{s}=\num{1}$")
     plt.plot(r * 1e6, errs[2], "x", color=color(4), label=r"$\alpha_\text{s}=\num{10}$")
     plt.xlabel(r"$y/\unit{\micro\meter}$")
-    plt.ylabel(r"$error$")
+    plt.ylabel(r"$e_\text{L1}$")
     plt.legend()
     plt.savefig("../plots/ShuffleInPoiseuille.pdf", bbox_inches="tight", pad_inches=0)
     plt.show()

@@ -77,7 +77,7 @@ def process(i):
         # label=f"{i}",
     )
     plt.xlabel(r"$y/\unit{\micro\meter}$")
-    plt.ylabel(r"$error$")
+    plt.ylabel(r"$e_\text{L1}$")
     # plt.legend()
     plt.savefig("../plots/2DAlginateErr.pdf", bbox_inches="tight", pad_inches=0)
     plt.show()

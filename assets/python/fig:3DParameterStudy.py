@@ -91,7 +91,7 @@ def process(index):
         label=f"{i}",
     )
     plt.xlabel(r"$r/\unit{\micro\meter}$")
-    plt.ylabel(r"$error$")
+    plt.ylabel(r"$e_\text{L1}$")
     plt.legend()
     plt.savefig(f"../plots/3DParameterStudyErr{i}.pdf", bbox_inches="tight", pad_inches=0)
     plt.show()
@@ -175,7 +175,7 @@ def plotWorst(index=7):
         # label=f"{i}",
     )
     plt.xlabel(r"$r/\unit{\micro\meter}$")
-    plt.ylabel(r"$error$")
+    plt.ylabel(r"$e_\text{L1}$")
     # plt.legend()
     plt.savefig("../plots/3DParameterStudyErrWorst.pdf", bbox_inches="tight", pad_inches=0)
     plt.show()
@@ -215,7 +215,7 @@ if __name__ == "__main__":
     plt.plot(Gs, errs, "rx")
     plt.xscale("log")
     plt.xlabel(r"$-\frac{\partial p}{\partial x}/\unit{\pascal\per\meter}$")
-    plt.ylabel(r"$error$")
+    plt.ylabel(r"$e_\text{L2}$")
     plt.savefig("../plots/3DParameterStudyErr.pdf", bbox_inches="tight", pad_inches=0)
     plt.show()
 

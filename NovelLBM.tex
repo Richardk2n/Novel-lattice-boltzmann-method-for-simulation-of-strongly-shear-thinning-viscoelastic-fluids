@@ -439,8 +439,12 @@ For a quantitative assessment, we compute the L2 error as follows.
 \begin{equation}
 	e_\text{L2} = \sqrt{\frac{\sum_i\left[\vec{u_i} - \vec{u}\left(y_i\right)\right]^2}{\sum_i\vec{u}\left(y_i\right)^2}}
 \end{equation}
-which gives \num{9e-4} and \num{1e-3} for alginate and methyl cellulose, respectively.
-The spatially resolved errors are shown in figure~\ref{fig:2DvelErr} in the appendix.
+Using the simulated velocities $\vec{u_i}$ and the semi-analytical results $\vec{u}$. This gives \num{9e-4} and \num{1e-3} for alginate and methyl cellulose, respectively.
+The spatially resolved L1 error defined as follows is shown in figure~\ref{fig:2DvelErr} in the appendix.
+\begin{equation}
+	e_\text{L1} = \frac{\vec{u_i} - \vec{u}\left(y_i\right)}{\vec{u}\left(y_i\right)}
+\end{equation}
+\RK{This error definition is new}
 These conclusions remain unchanged even when varying the pressure gradient, and thus the flow velocity, over many orders of magnitude as shown in figure~\ref{fig:pressureErr}~(a) of the appendix.
 
 	\begin{figure}[H]
@@ -460,7 +464,7 @@ We use the same material parameters as above, but double the pressure gradient t
 The channel has a diameter of \SI{20}{\micro\meter} and is discretized with 41 lattice points.
 Again, we initialize the polymers in the unstretched state for methyl cellulose and in the stretched state for alginate.
 The resulting velocity profile can be seen in figure~\ref{fig:3Dvel} and shows almost equally good agreement as for the planar case with an L2 error of \num{0.014} and \num{0.06}, respectively.
-The spatially resolved error in figure~\ref{fig:3DvelErr} of the appendix shows that this larger average is indeed mainly attributable to the staircase effect as the error near the walls increases significantly.
+The spatially resolved L1 error in figure~\ref{fig:3DvelErr} of the appendix shows that this larger average is indeed mainly attributable to the staircase effect as the error near the walls increases significantly.
 The robustness against pressure gradient changes is shown in figure~\ref{fig:pressureErr}~(b) of the appendix.
 
 	\begin{figure}[H]
@@ -477,7 +481,7 @@ The robustness against pressure gradient changes is shown in figure~\ref{fig:pre
 %Malaspinas: We use richard/master fe0fc04115b9b6ea6628bcc6cb6593d3f72ac0ea (2023-11-05)
 Finally, we assess the quality of our algorithm by comparing to an existing study on viscoelastic LBM by Malapsinas \textit{et al.} \cite{malaspinas2010}.
 The authors studied an Oldroyd-B fluid in a planar Poiseuille flow and compared the error in the simulated velocity profile to an exact analytical solution.
-The Oldroyd-B model is a special case of the PTT model which is obtained by setting $\xi = \epsilon = 0$ in eq.~(\ref{eq:polymerStress}) and is thus easily tractable with our code.\RK{was simulated with a direct Oldroyd-B implementation, which I now see was unnecessary...} \SG{ hast du mal kurz geprueft, ob dasselbe rauskommt? }\RK{Nein}\todo{check}
+The Oldroyd-B model is a special case of the PTT model which is obtained by setting $\xi = \epsilon = 0$ in eq.~(\ref{eq:polymerStress}) and is thus easily tractable with our code.\RK{was simulated with a direct Oldroyd-B implementation, which I now see was unnecessary...} \SG{ hast du mal kurz geprueft, ob dasselbe rauskommt? }\RK{Ja, ist aber auch von code offensichtlich, der unterschied wird zur OpenCL compile time entfernt}
 In figure~\ref{fig:malaspinas2010}, we show the L2 error as function of lattice resolution for different values of $\mathrm{Wi}$ and $R_ \nu $ which is defined as \cite{malaspinas2010}
 \begin{align}
 	R_\nu = \frac{\nu_\text{s}}{\nu_\text{p}+\nu_\text{s}}
@@ -874,17 +878,17 @@ Importantly, we show in figure~\ref{fig:wiParameterStudy}~(b) that this very goo
 		\centering
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DAlginateErr.pdf}
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/2DParameterStudyErrWorst.pdf}
-		\caption{L2 error of the velocity profile in figure~\ref{fig:2Dvel} with respect to the semi-analytical theory in a planar Poiseuille flow for alginate (a) and methyl cellulose (b).
-			The relative error is highest near the wall as the velocity is lowest there, but also because the simple half way bounce back boundaries used here allow some slip along the wall.}\RK{this is linear error} \SG{ define }
+		\caption{L1 error of the velocity profile in figure~\ref{fig:2Dvel} with respect to the semi-analytical theory in a planar Poiseuille flow for alginate (a) and methyl cellulose (b).
+			The relative error is highest near the wall as the velocity is lowest there, but also because the simple half way bounce back boundaries used here allow some slip along the wall.}\RK{this is linear error} \SG{ define }\RK{done}
 		\label{fig:2DvelErr}
-	\end{figure}\todo{do}
+	\end{figure}
 
 	\begin{figure}[H]
 		\centering
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DAlginateErr.pdf}
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/3DParameterStudyErrWorst.pdf}
-		\caption{L2 error of the velocity profile in \ref{fig:3Dvel} with respect to the semi-analytical theory in a cylindrical Poiseuille flow for alginate (a) and methyl cellulose (b).
-			The relative error is highest near the wall as the velocity is lowest there, but also because the simple half way bounce back boundaries used here allow some slip along the wall.}\RK{this is linear error}
+		\caption{L1 error of the velocity profile in \ref{fig:3Dvel} with respect to the semi-analytical theory in a cylindrical Poiseuille flow for alginate (a) and methyl cellulose (b).
+			The relative error is highest near the wall as the velocity is lowest there, but also because the simple half way bounce back boundaries used here allow some slip along the wall.}
 		\label{fig:3DvelErr}
 	\end{figure}
 
