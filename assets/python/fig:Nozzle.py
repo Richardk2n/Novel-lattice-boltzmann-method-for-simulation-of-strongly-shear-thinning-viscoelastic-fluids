@@ -166,10 +166,10 @@ def process():
     )
     plt.xlabel(r"$x/\unit{\milli\meter}$")
     plt.ylabel(r"$y/\unit{\milli\meter}$")
-    plt.colorbar(location="top", label=r"$\sigma_\text{vM}/\unit{\pascal}$")
+    plt.colorbar(location="top", label=r"$\tau_\text{vM}/\unit{\pascal}$")
     plt.gca().spines["top"].set_visible(False)
     plt.gca().spines["right"].set_visible(False)
-    plt.savefig("../plots/Nozzle_sigma_vM.pdf", dpi=1200, bbox_inches="tight", pad_inches=0)
+    plt.savefig("../plots/Nozzle_tau_vM.pdf", dpi=1200, bbox_inches="tight", pad_inches=0)
     plt.show()
 
     plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))

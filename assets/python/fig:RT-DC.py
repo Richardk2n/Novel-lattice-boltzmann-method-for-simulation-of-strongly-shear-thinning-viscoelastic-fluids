@@ -165,10 +165,10 @@ def process():
     )
     plt.xlabel(r"$x/\unit{\micro\meter}$")
     plt.ylabel(r"$y/\unit{\micro\meter}$")
-    plt.colorbar(location="top", label=r"$\sigma_\text{vM}/\unit{\pascal}$")
+    plt.colorbar(location="top", label=r"$\tau_\text{vM}/\unit{\pascal}$")
     plt.gca().spines["top"].set_visible(False)
     plt.gca().spines["right"].set_visible(False)
-    plt.savefig("../plots/RT-DC_sigma_vM.pdf", dpi=1200, bbox_inches="tight", pad_inches=0)
+    plt.savefig("../plots/RT-DC_tau_vM.pdf", dpi=1200, bbox_inches="tight", pad_inches=0)
     plt.show()
 
     plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
@@ -183,7 +183,7 @@ def process():
     plt.colorbar(location="top", label=r"$\tau_{12}/\unit{\pascal}$")
     plt.gca().spines["top"].set_visible(False)
     plt.gca().spines["right"].set_visible(False)
-    plt.savefig("../plots/RT-DC_tau.pdf", dpi=1200, bbox_inches="tight", pad_inches=0)
+    plt.savefig("../plots/RT-DC_tau_12.pdf", dpi=1200, bbox_inches="tight", pad_inches=0)
     plt.show()
 
     r"""

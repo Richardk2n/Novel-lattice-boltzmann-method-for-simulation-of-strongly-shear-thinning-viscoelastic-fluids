@@ -554,15 +554,19 @@ Due to the difference in inlet/outlet radii, the system cannot be modeled with p
 The required values for velocity and polymer conformation are obtained from simulations of pipes of the respective radii and a fixed volume flow of $\approx\SI{3}{\micro\liter\per\second}$.
 The resulting flow field can be seen in figure \ref{fig:Nozzle}~(a).
 To quantify the total stress as a single number, we use the von Mises stress which is defined as \cite{Mueller.2023}:
-\begin{align}
-	\sigma_\text{vM} = \sqrt{\frac{1}{2}\left[\left(\sigma_1 - \sigma_2\right)^2 + \left(\sigma_2 - \sigma_3\right)^2 + \left(\sigma_3 - \sigma_1\right)^2\right]}.
-\end{align}
+\begin{equation}
+	\tau_\text{vM} = \sqrt{\frac{3}{2}\tau_{ij}^\text{dev}\tau_{ij}^\text{dev}}.
+\end{equation}
+With the deviator of the stress tensor defined as follows.
+\begin{equation}
+	\tau_{ij}^\text{dev} = \tau_{ij} - \frac{1}{3}\tau_{kk}
+\end{equation}
 It can be seen in figure~\ref{fig:Nozzle}~(b) that the highest stresses arise at the nozzle exit in direct vicinity to the wall.
 This means that even for fast flows, cells flowing close to the center experience less stress than cells flowing near the walls in agreement with earlier results in Newtonian fluids \cite{Mueller.2023}.
 	\begin{figure}[H]
 		\centering
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/Nozzle_v.pdf}
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/Nozzle_sigma_vM.pdf}
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/Nozzle_tau_vM.pdf}
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/Nozzle_tau_12.pdf}
 		\caption{Velocity profile (a), von Mises stress (b) and shear stress (c) for methyl cellulose in a conical nozzle as used for bioprinting. For the calculated viscosity see figure~\ref{fig:Nozzle/RT-DC_eta}.}
 		\label{fig:Nozzle}
@@ -584,8 +588,8 @@ Similarly, directly after the constriction, the high stress inside the observati
  	\begin{figure}[H]
 		\centering
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/RT-DC_v.pdf}
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/RT-DC_sigma_vM.pdf}
-		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/RT-DC_tau.pdf}
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/RT-DC_tau_vM.pdf}
+		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/RT-DC_tau_12.pdf}
 		\caption{Velocity profile (a), von Mises stress (b) and shear stress (c) for methyl cellulose in a typical RT-DC geometry. For the calculated viscosity see figure~\ref{fig:Nozzle/RT-DC_eta}.}
 		\label{fig:RT-DC}
 	\end{figure}
@@ -921,7 +925,7 @@ Importantly, we show in figure~\ref{fig:wiParameterStudy}~(b) that this very goo
 		\centering
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/Nozzle_eta.pdf}
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/RT-DC_eta.pdf}
-		\caption{"Viscosity" in a Nozzle (a) and RT-DC channel (b) calculated by dividing $\tau_{12}$ by the respective strain rate. This diverges along the center line, and thus it has been excluded. For the RT-DC channel this results in very large and unphysical values, which had to be clamped. The flow and stresses in these geometries can be seen in figures~\ref{fig:Nozzle} and \ref{fig:RT-DC}.}
+		\caption{"Viscosity" in a Nozzle (a) and RT-DC channel (b) calculated by dividing $\tau_{12}$ by the respective strain rate and adding the solvent viscosity. This diverges along the center line, and thus it has been excluded. For the RT-DC channel this results in very large and unphysical values, which had to be clamped. The flow and stresses in these geometries can be seen in figures~\ref{fig:Nozzle} and \ref{fig:RT-DC}.}
 		\label{fig:Nozzle/RT-DC_eta}
 	\end{figure}
 	
