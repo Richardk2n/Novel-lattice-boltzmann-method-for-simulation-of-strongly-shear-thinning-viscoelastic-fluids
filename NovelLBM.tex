@@ -771,13 +771,21 @@ As already mentioned above most components of $\ma{\tau}$ are zero, using specif
 		\tau_{rr} = \sigma_{rr},\quad\text{in 3D}
 	\end{cases}
 \end{equation}
-yields the first normal stress difference $N_1$ as follows. The second normal stress difference is proportional to $\xi$ and therefore $0$.
+yields the first normal stress difference $N_1$ as follows.
 \begin{equation}
 	N_1 = \sigma_{xx} - \begin{cases}
 		\sigma_{yy},\quad\text{in 2D} \\
 		\sigma_{rr},\quad\text{in 3D}
 	\end{cases} = \tau_{xx} = \frac{\eta_\text{p}}{2\epsilon\lambda}W_0\left(4\epsilon\mathrm{Wi}^2\right) %\label{eq:shearN}
 \end{equation}
+The second normal stress difference, which is defined as follows, is zero on account of the components in the equation being zero.
+\begin{equation}
+	N_2 = \begin{cases}
+		\sigma_{yy} - \sigma_{zz} = \tau_{yy} - \tau_{zz},\quad\text{in 2D} \\
+		\sigma_{rr} - \sigma_{\varphi\varphi} = \tau_{rr} - \tau_{\varphi\varphi},\quad\text{in 3D}
+	\end{cases} = 0
+\end{equation}
+\RK{zz Komponente in 2D ist ein bischen fragwürdig... Da beißt mich jetzt, dass ich mit 2D eigentlich channel flow meine. Sollte man bei der geometrie oben evtl. erwähnen. $N_2$ proportional zu $\xi$ stimmt übrigens. Aufgrund von $\sigma_{ii} = \tau_{ii}$ kann man für $N_1$ und $N_2$ nämlich die Lösungen für $\eta_\text{s} = 0$ verwenden (siehe ferras\cite{ferras2019})}
 For the viscosity, we insert this into equation~(\ref{eq:PTTDerivation2}) and retrieve the following.
 \begin{align}
 	\eta &= \frac{\sigma_{xr}}{\dot{\gamma}} \\
@@ -787,7 +795,7 @@ For the viscosity, we insert this into equation~(\ref{eq:PTTDerivation2}) and re
 With $\sigma_{xr} = \sigma_{xy}\sgn\left(y\right) \leq 0$ in the 2D case analogous to $\tau_{xr}$.
 This concludes the relevant solutions for shear flow. However, these equations also hold for Poiseuille flow. Next we calculate the velocity profile for Poiseuille flow.
 \subsection{Velocity profile}
-We start with the Cauchy momentum equation (neglecting gravity), which reads as follows.
+We start with the Navier-Stokes equation (neglecting gravity), which reads as follows.
 \begin{equation}
 	\rho\frac{\Dif\vec{u}}{\Dif t} = -\nabla p + \nabla\cdot\ma{\sigma}
 \end{equation}
@@ -826,7 +834,6 @@ Inserting this back into equation~(\ref{eq:PTTDerivation2}) yields the following
 		\intertext{This cannot be integrated as easily as without $\eta_\text{s}$, and is only solvable semi-analytically.}
 		1 &= \exp\left(\frac{2\epsilon\lambda^2}{\eta_\text{p}^2}\left[\partial_xp\frac{r}{2^j} - \eta_\text{s}\dot{\gamma}\right]^2\right)\frac{1}{\eta_\text{p}}\left(\partial_xp\frac{r}{2^j\dot{\gamma}}-\eta_\text{s}\right) \\
 		0 &= \frac{2\epsilon\lambda^2}{\eta_\text{p}^2}\left[\partial_xp\frac{r}{2^j} - \eta_\text{s}\dot{\gamma}\right]^2 - \ln\eta_\text{p} + \ln\left(\partial_xp\frac{r}{2^j\dot{\gamma}}-\eta_\text{s}\right) \\
-		0 &= 2\epsilon\lambda^2\dot{\gamma}^2\left[\partial_xp\frac{r}{2^j\dot{\gamma}\eta_\text{p}} - \frac{\eta_\text{s}}{\eta_\text{p}}\right]^2 + \ln\left(\partial_xp\frac{r}{2^j\dot{\gamma}\eta_\text{p}}-\frac{\eta_\text{s}}{\eta_\text{p}}\right) \\
 		0 &= 2\epsilon\lambda^2\dot{\gamma}^2\left[\partial_xp\frac{r}{2^j\dot{\gamma}\eta_\text{p}} - \frac{\eta_\text{s}}{\eta_\text{p}}\right]^2 + \ln\left(\partial_xp\frac{r}{2^j\dot{\gamma}\eta_\text{p}}-\frac{\eta_\text{s}}{\eta_\text{p}}\right)
 		\intertext{This has the following form}
 		0 &= ab^2 + \ln b
