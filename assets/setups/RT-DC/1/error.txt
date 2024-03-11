@@ -1,0 +1,4 @@
+As can be seen from the log, lambda was set to 0.321-3 instead of 0.321e-3
+We did not use this sim (which is invalid) in the paper thankfully
+The files are only included here for context. The setup has been corrected
+to not introduce more errors if someone copies without reading this.

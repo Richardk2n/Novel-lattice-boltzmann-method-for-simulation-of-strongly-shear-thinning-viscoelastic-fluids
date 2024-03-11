@@ -100,7 +100,7 @@ void example(SimulationOptions& options, Parameters& parameters) {
 	units.set_m_kg_s(1.0f, 1, rho, grid_SI, V0, rho_SI);
 
 
-	const double lambda_polymer_SI = 0.321-3;
+	const double lambda_polymer_SI = 0.321e-3;
 	const double lambda_polymer = lambda_polymer_SI/T0;
 	spdlog::info("lp: {}", lambda_polymer);
 	const double eta_polymer = eta_polymer_SI/mu0;
