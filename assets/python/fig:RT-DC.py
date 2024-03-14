@@ -213,6 +213,14 @@ def process():
     plt.savefig("../plots/RT-DC_eta.pdf", dpi=1200, bbox_inches="tight", pad_inches=0)
     plt.show()
 
+    y = (np.arange(Ly) - Ly / 2 + 0.5) * L0
+    plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
+    plt.plot(y * 1e6, eta[Lx // 2, ...] * 1e3)
+    plt.xlabel(r"$y/\unit{\micro\meter}$")
+    plt.ylabel(r"$\eta/\unit{\milli\pascal\second}$")
+    plt.savefig("../plots/RT-DC_eta_cut.pdf", bbox_inches="tight", pad_inches=0)
+    plt.show()
+
 
 if __name__ == "__main__":
     t1 = time()
