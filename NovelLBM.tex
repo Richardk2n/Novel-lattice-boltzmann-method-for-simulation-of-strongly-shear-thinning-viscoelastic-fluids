@@ -18,8 +18,7 @@
 \newcommand{\SG}[1]{{\color{red}SG: #1}}
 
 \usepackage{hyperref} %link support
-\hypersetup{colorlinks,breaklinks,
-            allcolors=blue}
+\hypersetup{colorlinks,breaklinks,allcolors=blue}
 
 \usepackage{pdflscape} %pages can be landscape
 \usepackage{colortbl} %colored table rows and columns
@@ -99,9 +98,6 @@ sorting=none
 		$^2$ Department of Functional Materials in Medicine and Dentistry Institute of Functional Materials and Biofabrication (IFB) and KeyLab Polymers for Medicine of the Bavarian Polymer Institute (BPI) Universität Würzburg, Würzburg, Germany
 	\end{center}
 	\vspace{\fill}
-	\begin{center}
-		%TODO abstact
-	\end{center}
 	%TODO keywords
 
 	\newpage
@@ -216,9 +212,9 @@ The upper convected derivative of an arbitrary tensor $\ma{A}$ is defined as fol
 where $\vec{u}$ is the fluid velocity and $\left(\nabla\vec{u}\right)_{ij} = \nabla_i\vec{u}_j$.
 The material derivative is
 	\begin{equation}
-		\frac{\Dif\ma{A}}{\Dif t} = \frac{\partial\ma{A}}{\partial t} + \vec{u}\cdot\nabla\ma{A}.
+		\frac{\Dif\ma{A}}{\Dif t} = \frac{\partial\ma{A}}{\partial t} + \left(\vec{u}\cdot\nabla\right)\ma{A}.
 	\end{equation}
-\SG{ Kannst du der Vollständigkeit halber nochmal die Definition von $ \nabla \ma{ A }$ hinschreiben? }	
+\SG{ Kannst du der Vollständigkeit halber nochmal die Definition von $ \nabla \ma{ A }$ hinschreiben? }\RK{Nein}
 Finally, the total fluid stress $\ma{\sigma}$ is the sum of the polymer stress $\ma{\tau}$ and a solvent stress due to the Newtonian solvent with viscosity $\eta_\text{s}$:
 	\begin{align}
 		\ma{\sigma} &= \ma{\tau} + 2\eta_\text{s}\ma{D} 		\label{eq:totalStress}
@@ -242,12 +238,14 @@ The obtained parameters are given in table~\ref{tab:PTTparameters}.
 		\begin{tabular}{c|c|c|c|c}
 			Fluid & $\eta_\text{p}/\unit{\milli\pascal\second}$ & $\lambda/\unit{\milli\second}$ & $\epsilon$ & $R_\eta$ \\
 			\hline
-			alginate \SI{4}{\percent} & \num{48.2\pm0.4e3} & \num{343 \pm 4} & \num{0.545 \pm 0.010} & \num{4.8e4} \\
+			alginate \SI{4}{\percent} & \num{48.2\pm0.4e3} & \num{343 \pm 4} & \num{0.545 \pm 0.010} & \num{4.82e4} \\
+			\rowcolor{secondaryBackground}
 			methyl c. \SI{0.49}{\percent} & \num{18.7\pm0.4} & \num{0.344\pm0.003} & \num{0.270\pm0.003} & \num{18.7} \\
 			methyl c. \SI{0.59}{\percent} & \num{32.5\pm0.7} & \num{0.433\pm0.004} & \num{0.365\pm0.004} & \num{32.5} \\
+			\rowcolor{secondaryBackground}
 			methyl c. \SI{0.83}{\percent} & \num{81\pm2} & \num{0.714\pm0.009} & \num{0.496\pm0.006} & \num{81}
 		\end{tabular}
-		\caption{Parameters of the PTT model obtained by fitting to the rheological measurements in figures~\ref{fig:fit_alginate} and \ref{fig:fit_mc} and corresponding viscosity ratios from eq.~(\ref{eq:R_eta}).}
+		\caption{Parameters of the PTT model obtained by fitting to the rheological measurements in figures~\ref{fig:fit_alginate} and \ref{fig:fit_mc} along with corresponding viscosity ratios from eq.~(\ref{eq:R_eta}).}
 		\label{tab:PTTparameters}
 	\end{table}
 
@@ -316,7 +314,7 @@ We therefore set out to develop a novel viscoelastic LBM scheme which we will pr
 				Ma\cite{ma2020} & 100 & 9 & In 4.1: $\beta = \frac{\mu_\text{s}}{\mu_\text{s} + \mu_\text{p}} = \num{0.1}$ \\
 				\rowcolor{secondaryBackground}
 				Onishi\cite{onishi2006} & ? & 1 & In 3.1: $\beta = \frac{\mu_\text{p}}{\mu_\text{s} + \mu_\text{p}}$ \& Table 1: $\beta=\num{0.5}$ \\
-				Wang\cite{wang2020} & \glqq up to O(1)\grqq & 5 & In II: $\eta_\text{p} = c\eta_\text{s}$ \& FIG. 9: $c = \num{5}$\\
+				Wang\cite{wang2020} & "up to O(1)" & 5 & In II: $\eta_\text{p} = c\eta_\text{s}$ \& FIG. 9: $c = \num{5}$\\
 				\rowcolor{secondaryBackground}
 %				Dzanic\cite{dzanic2022_2} & 10 & 9 & In 5.1: $\beta = \frac{\nu_\text{s}}{\nu_\text{s} + \nu_\text{p}}$ \& In 5.1.2: $\beta = \num{0.1}$ \\
 				Su\cite{su2013_2} & 10 & 1  & In II: $\beta = \frac{\eta_\text{s}}{\eta_\text{s} + \eta_\text{p}}$ \& In IV.A: $\beta = \num{0.5}$ \\
@@ -426,17 +424,12 @@ A validation in simple shear flow can be found in appendix~\ref{sec:shearFlow}.
 
 We start by simulating the alginate and \SI{0.49}{\percent} methyl cellulose solutions with a viscosity ratio $R_\eta = \num{48.2e3}$ and $R_\eta = \num{18.7}$, respectively, in 2D planar Poiseuille flow.
 In physical units the channel has a height of \SI{20}{\micro\meter} which are discretized with 41 LBM nodes.
-For the viscosity shuffling, we set $\alpha_\text{s} = 1$ here and check different values further below. 
+For the viscosity shuffling, we set $\alpha_\text{s} = 1$ here and check different values further below.
 Along the flow direction, the channel is periodic, and the flow is driven by a pressure gradient of \SI{-1e7}{\pascal\per\meter} for alginate and  approximately \SI{-1.2e7}{\pascal\per\meter} for methyl cellulose.
 The velocity field is initialized with zero.
 For methyl cellulose, we simulate the full temporal evolution with the polymers starting in the unstretched configuration.
-In the case of alginate, we speed up the convergence and start from a situation in which the polymers are pre-stretched. For this we calculate $\tau_{xx}$ and $\tau_{xy}$ using equations~(\ref{eq:tau_xx}) and (\ref{eq:PTTDerivation2}) using the $\dot{\gamma}$ calculated from equation~(\ref{eq:semiAnalyticGD_3D}). The polymer stress is then initialized using these values. 
-%\SG{ give details }\RK{initialized to the semianalytical solution} \SG{ schreib am besten eine Referenz auf die Gleichung hin, muesste ja im Appendix stehen. }\RK{done}.
+In the case of alginate, we speed up the convergence and start from a situation in which the polymers are pre-stretched. For this we calculate $\tau_{xx}$ and $\tau_{xy}$ using equations~(\ref{eq:tau_xx}) and (\ref{eq:PTTDerivation2}) using the $\dot{\gamma}$ calculated from equation~(\ref{eq:semiAnalyticGD_3D}). The polymer stress is then initialized using these values.
 After \num{2e9} LBM time steps for alginate and \num{5e6} LBM time steps for methyl cellulose corresponding to approximately \SI{1.6}{\milli\second} and \SI{2.4}{\second} of physical time, respectively, the simulation is stopped and the flow field $u(y)$ is compared to the semi-analytical solution.
-%\RK{
-%	Alg 2e9 1.6455647956111251 ms (reveals the sim to be a scam)
-%	MC 5e6 10.065719379854297 ms
-%}
 As shown in figure~\ref{fig:2Dvel}, very good agreement is found.
 The time evolution of the center-line velocity is shown in figure~\ref{fig:2DTimeEvolution} of the appendix.
 For a quantitative assessment, we compute the L2 error as follows.
@@ -580,8 +573,9 @@ This means that even for fast flows, cells flowing close to the center experienc
 % shear:  We use richard/vtk 4dbc4d379842c538f084e68a5dcfe2555a674495 (2024-01-09)
 % RT-DC: We use richard/master fe0fc04115b9b6ea6628bcc6cb6593d3f72ac0ea (2023-11-05)
 
-Our next example is the RT-DC geometry in which cells from a reservoir are squeezed through a narrow observation channel \cite{Toepfner.2018, Fregin:2019gx} with a square cross-section of $40 \times 40 \mu$m. %\qtyproduct{40x40}{\micro\meter}.
-For this simulation we use periodic boundary conditions and a constant body force corresponding to a pressure gradient of \SI{1e7}{\pascal}. \SG{ units. Is this Pa/m or is this the pressure difference between inlet and outlet? }
+Our next example is the RT-DC geometry in which cells from a reservoir are squeezed through a narrow observation channel \cite{Toepfner.2018, Fregin:2019gx} with a square cross-section of \qtyproduct{40x40}{\micro\meter}.
+%$\SI{40}{\micro\meter} \times \SI{40}{\micro\meter}$.%Correctly typeset version, that compiles for Stephan.
+For this simulation we use periodic boundary conditions and a constant body force corresponding to a pressure gradient of \SI{1e7}{\pascal\per\meter}. \SG{ units. Is this Pa/m or is this the pressure difference between inlet and outlet? }\RK{done}
 In figure~\ref{fig:RT-DC}, we show the velocity profile, the von Mises stress and the shear component of the stress which is the relevant component if a local shear viscosity is to be defined.
 There are three qualitative differences compared to a purely viscous fluid.
 Directly after the inlet we find a region of low stress.
@@ -660,11 +654,11 @@ The authors would like to thank the Deutsche Forschungsgemeinschaft (DFG, German
 \section{Rheology measurements of alginate solutions}
 \label{app:experiment}
 
-The solutions were prepared by dissolving alginate (DuPont VIVAPHARM Alginate PH176) in ultrapure water at a ratio of 4 \% w/v. 
-To ensure homogeneous dissolution, the material was stored at 37$^\circ$C for 24 h and regularly mixed to ensure complete dissolution. 
-The measurements were conducted with a 25 mm plate-plate geometry at a 500 $\mu$m gap on a rheometer (Anton paar MCR 702). 
-A solvent trap was used to limit evaporation. 
-All measurements were done at a set temperature of 25$^\circ$C as shear rate sweep. 
+The solutions were prepared by dissolving alginate (DuPont VIVAPHARM Alginate PH176) in ultrapure water at a ratio of \SI{40}{\milli\gram\per\milli\liter}, which here is refereed to as \SI{4}{\percent}.
+To ensure homogeneous dissolution, the material was stored at \SI{37}{\celsius} for \SI{24}{\hour} and regularly mixed to ensure complete dissolution.
+The measurements were conducted with a \SI{25}{\milli\meter} plate-plate geometry at a \SI{500}{\micro\meter} gap on a rheometer (Anton paar MCR 702).
+A solvent trap was used to limit evaporation.
+All measurements were done at a set temperature of \SI{25}{\celsius} as shear rate sweep.
 Data is agglomerated from 21 independent measurements.
 The first normal stress difference $N_1$ is calculated from the measured normal force using the following equation \cite{kulicke1977}:
 	\begin{equation}
@@ -878,7 +872,7 @@ Importantly, we show in figure~\ref{fig:wiParameterStudy}~(b) that this very goo
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/wiParameterStudy.pdf}
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/suffleParameterStudy.pdf}
 		\caption{(a) The local viscosity determined by a shear flow simulation is in very good agreement with the semi-analytical theory.
-		(b) The error is negligibly small and independent of the shuffling parameter $\alpha_\text{s}$. \SG{ at which $ \dot{ \gamma  }$? }}
+		(b) The error is negligibly small and independent of the shuffling parameter $\alpha_\text{s}$. \SG{ at which $ \dot{ \gamma  }$? }\RK{\SI{1}{\per\second}}}
 		\label{fig:wiParameterStudy}
 	\end{figure}
 
@@ -941,7 +935,7 @@ Importantly, we show in figure~\ref{fig:wiParameterStudy}~(b) that this very goo
 		\begin{figure}[H]
 		\centering
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/ShuffleInPoiseuille.pdf}
-		\caption{In Poiseuille flow, the result is near identical for different $\alpha_\text{s}$. The error reveals minor differences. Aside from the wall nodes, the largest error appears for small shuffle fractions. For large ones, the error appears to become independent of $\alpha_\text{s}$. This indicates, that the observed difference might be due to the Mach number changing for different $\alpha_\text{s}$ and not due to the shuffling itself. This is due lower $\alpha_\text{s}$ leading to lower LBM viscosities and such to higher Mach numbers. \SG{ is this planar or cylindrical? }}
+		\caption{In planar Poiseuille flow, the result is near identical for different $\alpha_\text{s}$. The error reveals minor differences. Aside from the wall nodes, the largest error appears for small shuffle fractions. For large ones, the error appears to become independent of $\alpha_\text{s}$. This indicates, that the observed difference might be due to the Mach number changing for different $\alpha_\text{s}$ and not due to the shuffling itself. This is due lower $\alpha_\text{s}$ leading to lower LBM viscosities and such to higher Mach numbers. \SG{ is this planar or cylindrical? }\RK{done}}
 		\label{fig:ShuffleInPoiseuille}
 	\end{figure}
 	
