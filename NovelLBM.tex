@@ -159,7 +159,7 @@ We overcome this issue by moving ("shuffling") part of the polymer stress into t
 
 To illustrate our novel LBM algorithm, we consider two prototypical cell carrier fluids.
 The first is an alginate solution which is often used in biofabrication but can also serve as a common food additive.
-Our solution contains \SI{4}{\percent} alginate dissolved in PBS and was measured in a commercial plate-plate rheometer (see appendix~\ref{app:experiment} for experimental details).
+Our solution contains \SI{4}{\percent} w/v alginate dissolved in ultrapure water and was measured in a commercial plate-plate rheometer (see appendix~\ref{app:experiment} for experimental details).
 The shear-dependent viscosity $\eta$ and the first normal stress difference $N_1$ are shown as function of shear rate in figure~\ref{fig:fit_alginate}.
 We note the very high zero-shear viscosity of more than \SI{10000}{\milli\pascal\second}.
 Bioinks in biofabrication are in general characterized by such high viscosities to guarantee stability of the printed construct.
@@ -214,7 +214,6 @@ The material derivative is
 	\begin{equation}
 		\frac{\Dif\ma{A}}{\Dif t} = \frac{\partial\ma{A}}{\partial t} + \left(\vec{u}\cdot\nabla\right)\ma{A}.
 	\end{equation}
-\SG{ Kannst du der Vollständigkeit halber nochmal die Definition von $ \nabla \ma{ A }$ hinschreiben? }\RK{Nein}
 Finally, the total fluid stress $\ma{\sigma}$ is the sum of the polymer stress $\ma{\tau}$ and a solvent stress due to the Newtonian solvent with viscosity $\eta_\text{s}$:
 	\begin{align}
 		\ma{\sigma} &= \ma{\tau} + 2\eta_\text{s}\ma{D} 		\label{eq:totalStress}
@@ -238,7 +237,7 @@ The obtained parameters are given in table~\ref{tab:PTTparameters}.
 		\begin{tabular}{c|c|c|c|c}
 			Fluid & $\eta_\text{p}/\unit{\milli\pascal\second}$ & $\lambda/\unit{\milli\second}$ & $\epsilon$ & $R_\eta$ \\
 			\hline
-			alginate \SI{4}{\percent} & \num{48.2\pm0.4e3} & \num{343 \pm 4} & \num{0.545 \pm 0.010} & \num{4.82e4} \\
+			alginate \SI{4}{\percent} w/v & \num{48.2\pm0.4e3} & \num{343 \pm 4} & \num{0.545 \pm 0.010} & \num{4.82e4} \\
 			\rowcolor{secondaryBackground}
 			methyl c. \SI{0.49}{\percent} & \num{18.7\pm0.4} & \num{0.344\pm0.003} & \num{0.270\pm0.003} & \num{18.7} \\
 			methyl c. \SI{0.59}{\percent} & \num{32.5\pm0.7} & \num{0.433\pm0.004} & \num{0.365\pm0.004} & \num{32.5} \\
@@ -575,7 +574,7 @@ This means that even for fast flows, cells flowing close to the center experienc
 
 Our next example is the RT-DC geometry in which cells from a reservoir are squeezed through a narrow observation channel \cite{Toepfner.2018, Fregin:2019gx} with a square cross-section of \qtyproduct{40x40}{\micro\meter}.
 %$\SI{40}{\micro\meter} \times \SI{40}{\micro\meter}$.%Correctly typeset version, that compiles for Stephan.
-For this simulation we use periodic boundary conditions and a constant body force corresponding to a pressure gradient of \SI{1e7}{\pascal\per\meter}. \SG{ units. Is this Pa/m or is this the pressure difference between inlet and outlet? }\RK{done}
+For this simulation we use periodic boundary conditions and a constant body force corresponding to a pressure gradient of \SI{1e7}{\pascal\per\meter}.
 In figure~\ref{fig:RT-DC}, we show the velocity profile, the von Mises stress and the shear component of the stress which is the relevant component if a local shear viscosity is to be defined.
 There are three qualitative differences compared to a purely viscous fluid.
 Directly after the inlet we find a region of low stress.
@@ -633,7 +632,7 @@ We finally demonstrated the usability of our approach in realistic geometries su
 
 \section{Acknowledgements}
 
-The authors would like to thank the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) under Project number 326998133, TRR 225 Biofabrication (subprojects B07 and B09) and the Federal Ministry of Education and Research (BMBF) under Project SOP\_Bioprint under Contract Number 13XP5071B for enabling data collection.
+The authors would like to thank the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) under Project number 326998133, TRR 225 Biofabrication (subprojects B07, B09 and Z01) and the Federal Ministry of Education and Research (BMBF) under Project SOP\_Bioprint (Contract Number 13XP5071B) for enabling data collection.
 
 
 
@@ -654,7 +653,7 @@ The authors would like to thank the Deutsche Forschungsgemeinschaft (DFG, German
 \section{Rheology measurements of alginate solutions}
 \label{app:experiment}
 
-The solutions were prepared by dissolving alginate (DuPont VIVAPHARM Alginate PH176) in ultrapure water at a ratio of \SI{40}{\milli\gram\per\milli\liter}, which here is refereed to as \SI{4}{\percent}.
+The solutions were prepared by dissolving alginate (DuPont VIVAPHARM Alginate PH176) in ultrapure water at a ratio of \SI{40}{\milli\gram\per\milli\liter}, which here is refereed to as \SI{4}{\percent} w/v.
 To ensure homogeneous dissolution, the material was stored at \SI{37}{\celsius} for \SI{24}{\hour} and regularly mixed to ensure complete dissolution.
 The measurements were conducted with a \SI{25}{\milli\meter} plate-plate geometry at a \SI{500}{\micro\meter} gap on a rheometer (Anton paar MCR 702).
 A solvent trap was used to limit evaporation.
@@ -872,9 +871,9 @@ Importantly, we show in figure~\ref{fig:wiParameterStudy}~(b) that this very goo
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/wiParameterStudy.pdf}
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/suffleParameterStudy.pdf}
 		\caption{(a) The local viscosity determined by a shear flow simulation is in very good agreement with the semi-analytical theory.
-		(b) The error is negligibly small and independent of the shuffling parameter $\alpha_\text{s}$. \SG{ at which $ \dot{ \gamma  }$? }\RK{\SI{1}{\per\second}}}
+		(b) The error is negligibly small and independent of the shuffling parameter $\alpha_\text{s}$. Shown at \SI{1}{\per\second} and .}
 		\label{fig:wiParameterStudy}
-	\end{figure}
+	\end{figure}\todo{1e5; maybe write this in legend}
 
 
 
