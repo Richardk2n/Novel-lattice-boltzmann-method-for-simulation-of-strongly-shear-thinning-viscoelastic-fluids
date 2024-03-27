@@ -50,23 +50,98 @@ def process(index):
     return eta, D12
 
 
+def processNew(index):
+    baseDir = Path(f"../data/SuffleParameterStudy/{index}/")
+    cDir = baseDir / "vtkfiles/polymerConformationTensor/"
+    sDir = baseDir / "vtkfiles/strainRateTensor/"
+    jsonFile = baseDir / "parameters.json"
+    f = open(jsonFile)
+    parameters = json.load(f)
+    f.close()
+
+    V0 = parameters["info"]["conversions"]["V0"]
+    L0 = parameters["info"]["conversions"]["L0"]
+    T0 = parameters["info"]["conversions"]["T0"]
+    rho0 = 1e3
+
+    cFile = cDir / "A_10000000.vtk"
+    sFile = sDir / "D_10000000.vtk"
+    data = pv.read(cFile)
+    dataS = pv.read(sFile)
+    Lx, Ly, Lz = data.dimensions
+    tauField = data.get_array("data") * PTT.mc0_49.eta_p / PTT.mc0_49.lambda_p
+    tauField = np.reshape(tauField, (Lx, Ly, Lz, 6), "F")
+    sField = dataS.get_array("data") / T0
+    sField = np.reshape(sField, (Lx, Ly, Lz, 6), "F")
+
+    tau12 = tauField[Lx // 2, Ly // 2, Lz // 2, 3]
+    D12 = sField[Lx // 2, Ly // 2, Lz // 2, 3]
+    shearRateSI = parameters["shearRateSI"]
+    eta = tau12 / shearRateSI + 1e-3
+    return eta, D12
+
+
 etas = []
 ds = []
+
+etas2 = []
+ds2 = []
 for i in range(11):
     eta, D12 = process(i)
     etas.append(eta)
     ds.append(D12)
 
+for i in range(20, 31):
+    eta, D12 = processNew(i)
+    etas2.append(eta)
+    ds2.append(D12)
+
 alpha_s = np.arange(1, 2.1, 0.1)
 etas = np.asarray(etas) * 1e3
+etas2 = np.asarray(etas2) * 1e3
 
 plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
 plt.title("(b)", loc="left")
-plt.plot(alpha_s, etas, "rx")
+plt.plot(alpha_s, np.ones(alpha_s.shape) * PTT.mc0_49.eta(1) * 1e3, "k", label="Theory")
+plt.plot(alpha_s, etas, "rx", label="Simulation")
 # plt.plot(alpha_s, [PTT.mc0_49.eta(1) * 1e3] * len(alpha_s))
 plt.xlabel(r"$\alpha_\text{s}$")
 plt.ylabel(r"$\eta/\unit{\milli\pascal\second}$")
 # plt.legend(loc="center left", bbox_to_anchor=(1, 0.5))
+plt.legend()
+# plt.ylim(19.699998804, 19.699998806)
+plt.savefig("../plots/suffleParameterStudy_1.pdf", bbox_inches="tight", pad_inches=0)
+plt.show()
+
+plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
+plt.title("(c)", loc="left")
+plt.plot(alpha_s, np.ones(alpha_s.shape) * PTT.mc0_49.eta(1e5) * 1e3, "k", label="Theory")
+plt.plot(alpha_s, etas2, "bx", label="Simulation")
+# plt.plot(alpha_s, [PTT.mc0_49.eta(1) * 1e3] * len(alpha_s))
+plt.xlabel(r"$\alpha_\text{s}$")
+plt.ylabel(r"$\eta/\unit{\milli\pascal\second}$")
+# plt.legend(loc="center left", bbox_to_anchor=(1, 0.5))
+plt.legend()
+# plt.ylim(19.699998804, 19.699998806)
+plt.savefig("../plots/suffleParameterStudy_2.pdf", bbox_inches="tight", pad_inches=0)
+plt.show()
+
+plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
+plt.title("(b)", loc="left")
+plt.plot(
+    alpha_s, etas / PTT.mc0_49.eta(1) * 1e-3, "rx", label=r"$\dot{\gamma} = \SI{1}{\per\second}$"
+)
+plt.plot(
+    alpha_s,
+    etas2 / PTT.mc0_49.eta(1e5) * 1e-3,
+    "bx",
+    label=r"$\dot{\gamma} = \SI{1e5}{\per\second}$",
+)
+# plt.plot(alpha_s, [PTT.mc0_49.eta(1) * 1e3] * len(alpha_s))
+plt.xlabel(r"$\alpha_\text{s}$")
+plt.ylabel(r"$\eta_\text{Simulation}/\eta_\text{Theory}$")
+# plt.legend(loc="center left", bbox_to_anchor=(1, 0.5))
+plt.legend()
 # plt.ylim(19.699998804, 19.699998806)
 plt.savefig("../plots/suffleParameterStudy.pdf", bbox_inches="tight", pad_inches=0)
 plt.show()
