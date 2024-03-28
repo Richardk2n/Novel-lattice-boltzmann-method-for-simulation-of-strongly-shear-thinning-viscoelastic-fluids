@@ -221,6 +221,23 @@ def process():
     plt.savefig("../plots/RT-DC_eta_cut.pdf", bbox_inches="tight", pad_inches=0)
     plt.show()
 
+    plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
+    # plt.title("(c)", loc="left", pad=45, x=-0.11)
+    plt.imshow(
+        tau12.T,
+        cmap="coolwarm",
+        extent=[0, (Lx - 1) * L0 * 1e6, -Ly / 2 * L0 * 1e6, Ly / 2 * L0 * 1e6],
+    )
+    plt.xlabel(r"$x/\unit{\micro\meter}$")
+    plt.ylabel(r"$y/\unit{\micro\meter}$")
+    # plt.colorbar(location="top", label=r"$\tau_{12}/\unit{\pascal}$")
+    plt.gca().spines["top"].set_visible(False)
+    plt.gca().spines["right"].set_visible(False)
+    plt.savefig(
+        "../plots/RT-DC_tau_12_graphical_abstract.pdf", dpi=1200, bbox_inches="tight", pad_inches=0
+    )
+    plt.show()
+
 
 if __name__ == "__main__":
     t1 = time()

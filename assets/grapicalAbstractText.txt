@@ -1,0 +1,4 @@
+Novel lattice Boltzmann method for simulation of strongly shear thinning viscoelastic fluids
+Richard Kellnberger*, Tomasz Jüngst, Stephan Gekle
+
+We develop a novel viscosity shuffling LBM method to enable the simulation of shear thinning viscoelastic fluids with high viscosity ratios.

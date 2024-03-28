@@ -1,0 +1,5 @@
+There are several pre-existing LBM methods for non-Newtonian fluids.
+The ones that support viscoelastic fluids are very limited in terms of viscosity ratio due to stability issues.
+Our novel "viscosity shuffling" LBM algorithm enables simulations of arbitrary viscosity ratios.
+This for the first times enables simulations for realistic fluid properties, as the ratios achievable by
+pre-existing methods are orders of magnitude from typical values for cell-carrying fluids.
