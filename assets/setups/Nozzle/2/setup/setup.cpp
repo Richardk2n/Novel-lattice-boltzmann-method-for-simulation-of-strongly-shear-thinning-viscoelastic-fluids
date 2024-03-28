@@ -14,7 +14,7 @@ using std::regex, std::regex_match, std::smatch;
 #include <string>
 using std::stof, std::stoi, std::string;
 
-#include <fmt/core.h>
+#include <fmt/format.h>
 // using fmt::format
 using fmt::print;
 #include <fmt/color.h>
@@ -35,7 +35,7 @@ using fluidx3d::util::poiseuilleFlow::CircularPoiseuilleFlow;
 void example(SimulationOptions& options, Parameters& parameters) {
 	json raw = parameters.getRaw();
 	const int id = raw.at("id");
-	const string path_files = fmt::format("/tp6-gekle/nas/bt307867/cellsim/novel_2024-01-22/{}/", id);
+	const string path_files = fmt::format("/tp6-gekle/nas/bt307867/cellsim/novel_2024-03-26/{}/", id);
 	//const string path_files = fmt::format("Nozzle/{}/", id);
 	const path filesPath(path_files);
 	const string path_vtk = path_files + "vtkfiles/";
@@ -156,7 +156,7 @@ void example(SimulationOptions& options, Parameters& parameters) {
 		if(std::hypot(y - (Ly/2.) + 0.5, z - (Lz/2.) + 0.5) >= localR + 0.5) {
 			lattice.flags[n] = TYPE_W;
 		}else if(x == 0 || x == Lx-1) {
-			lattice.flags[n] = TYPE_W;
+			lattice.flags[n] = TYPE_VW;
 		} else {
 			lattice.flags[n] = TYPE_F; //TODO should be globally set  //TODO does not seem to be an issue??? Or is this messing with my sims?
 		}

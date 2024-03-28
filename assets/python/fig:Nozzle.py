@@ -21,7 +21,7 @@ from fluidx3d.eval.style import cm
 
 
 def process():
-    baseDir = Path("../data/novel_2024-01-22/0/")
+    baseDir = Path("../data/novel_2024-03-26/2/")
     cDir = baseDir / "vtkfiles/polymerConformationTensor/"
     sDir = baseDir / "vtkfiles/strainRateTensor/"
     vDir = baseDir / "vtkfiles/velocity/"
@@ -37,7 +37,7 @@ def process():
     p0 = rho0 * V0**2
 
     cFile = cDir / "CT_5000000.vtk"
-    sFile = sDir / "S_500000.vtk"
+    sFile = sDir / "S_5000000.vtk"
     vFile = vDir / "u_5000000.vtk"
 
     data = pv.read(cFile)

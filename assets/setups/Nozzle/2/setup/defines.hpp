@@ -12,7 +12,7 @@
 // There hides a D2Q5 in the code
 //#define D2Q9
 //#define D3Q7 // very very inaccurate
-//#define D3Q13 // very inaccurate; Only works with MRT according to Krüger book p. 87; Does not reproduce EQUILIBRIUM_STRESS correctly.
+//#define D3Q13 // very inaccurate; Only works with MRT according to Krüger book p. 87; Does not reproduce VISCOELASTIC correctly.
 
 // Only use these:
 //#define D3Q15
@@ -26,20 +26,20 @@
 //#define UPDATE_RHO // update density field after every step (not necessary for pure LBM)
 //#define UPDATE_U // update velocity field after every step (not necessary for pure LBM, makes tracer particle calculation faster)
 
-#define MOVING_WALLS // moving bounce-back boundaries (incompatible with EQUILIBRIUM_BOUNDARIES due to unnecessary flag recycling)
-//#define EQUILIBRIUM_BOUNDARIES // non-reflecting velocity boundaries, generally more stable, but less accurate (incompatible with MOVING_WALLS due to unnecessary flag recycling)
-//#define BOUNDARY_EXPRESSION // combinable with EQUILIBRIUM_BOUNDARIES xor MOVING_WALLS, !!!doesn't work on AMD for some reason!!!
+#define MOVING_WALLS // moving bounce-back boundaries
+//#define PRESSURE_WALLS // pressure boundaries
+//#define BOUNDARY_EXPRESSION // combinable with MOVING_WALLS, !!!doesn't work on AMD for some reason!!!
 
 #define VISCOELASTIC
-#define EQUILIBRIUM_STRESS // Include viscoelastic forces by shifting the equilibrium populations (Onishi 2005) instead of via force
-#define STRAIN_RATE_TENSOR_FROM_POP // If set, the strain rate tensor used for shuffling is calculated from the populations otherwise the one from the velocity gradient is used
 // Only one of the following models may be defined
 //#define OLDROYD_B
 //#define FENEP
 #define PTT // From Ferras 2019 eq (3) and (2) original PTT
+//#define CARREAU_YASUDA
 
 //#define IBM // immersed boundary method (### under construction ###)
 //#define IBM_CELLS // simulate RBCs with the immersed-boundary method
+//#define IBM_NEW // IBM implementation by Stephan Gekle; Conflicts with IBM and IBM_CELLS
 //#define INOUT // activate volume tracking for RBCs
 //#define INOUT_CHANGE // mark change of inside/outside in second bit
 
@@ -79,8 +79,6 @@
 	#define VOLUME_FORCE
 	#define FORCE_FIELD
 	#define STRAIN_RATE_TENSOR
-#else // !VISCOELASTIC
-	#undef EQUILIBRIUM_STRESS
 #endif // VISCOELASTIC
 
 #ifdef FORCE_EVALUATION
@@ -106,7 +104,7 @@
 	#define VOLUME_FORCE
 #endif // IBM
 
-#if defined(IBM) || defined(VISCOELASTIC)  // Only pure IBM does not need UPDATE_RHO & UPDATE_U
+#if defined(IBM) || defined(VISCOELASTIC) || defined(IBM_NEW) // Only pure IBM does not need UPDATE_RHO & UPDATE_U
 	#define UPDATE_RHO // density field need to be updated exactly every LBM step
 	#define UPDATE_U // velocity field need to be updated exactly every LBM step
 #endif // IBM || VISCOELASTIC
@@ -117,9 +115,6 @@
 
 
 
-#ifdef MOVING_WALLS
-	#undef EQUILIBRIUM_BOUNDARIES
-#endif // MOVING_WALLS
 #ifndef THREAD_BLOCK_SIZE
 	#define THREAD_BLOCK_SIZE 256 // default 256, best performance for 256, GPU warp size is 32; Actually this probably depends on GPU manufacturer
 #endif // THREAD_BLOCK_SIZE
