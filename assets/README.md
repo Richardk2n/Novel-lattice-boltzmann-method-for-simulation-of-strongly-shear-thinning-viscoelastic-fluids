@@ -37,26 +37,28 @@ fig:Nozzle/RT-DC_eta	 | Nozzle_eta.pdf				 | fig:Nozzle.py					 | novel_2024-03-
 The following plots are present in the repo but where not used in the paper.<br>
 The scripts without plots either where deprecated, did additional analysis not used in the paper or did prep work for sims.<br>
 
-plot								 | script					 | data
--------------------------------------|---------------------------|--------------------------
-2DParameterStudyErr{i}.pdf			 | fig:2DParameterStudy.py	 | 2DParameterStudy/{i}/ i=0-14
-2DParameterStudyU{i}.pdf			 | fig:2DParameterStudy.py	 | 2DParameterStudy/{i}/ i=0-14
-3DParameterStudyErr{i}.pdf			 | fig:3DParameterStudy.py	 | 3DParameterStudy/{i}/ i=0-11
-3DParameterStudyU{i}.pdf			 | fig:3DParameterStudy.py	 | 3DParameterStudy/{i}/ i=0-11
-cellInShear_v.pdf					 | fig:CellInShear.py		 | cellInShear_2024-01-23/0/
-RT-DC_eta_cut.pdf					 | fig:RT-DC.py				 | RT-DC/0/
-RT-DC_tau_12_graphical_abstract.pdf	 | fig:RT-DC.py				 | RT-DC/0/
-									 | cellInHighShearRoscoe.py	 | cellInShear_2024-02-05/0/
-									 | cellInShearRoscoe.py		 | cellInShear_2024-01-23/0/
-									 | CY.py					 |
-									 | fig:ptt_eta.py			 |
-									 | fig:ptt_N.py				 |
-									 | fig:RT-DC_CY.py			 | RT-DC/1/
-									 | flowRate.py				 |
-									 | inputForNozzle.py		 | Nozzle/{i}/ i=0,1
-									 | prepare2DAlginate.py		 |
-									 | prepare3DAlginate.py		 |
-									 | prepareCY.py				 |
+plot								 | script						 | data
+-------------------------------------|-------------------------------|--------------------------
+2DParameterStudyErr{i}.pdf			 | fig:2DParameterStudy.py		 | 2DParameterStudy/{i}/ i=0-14
+2DParameterStudyU{i}.pdf			 | fig:2DParameterStudy.py		 | 2DParameterStudy/{i}/ i=0-14
+3DParameterStudyErr{i}.pdf			 | fig:3DParameterStudy.py		 | 3DParameterStudy/{i}/ i=0-11
+3DParameterStudyU{i}.pdf			 | fig:3DParameterStudy.py		 | 3DParameterStudy/{i}/ i=0-11
+cellInShear_v.pdf					 | fig:CellInShear.py			 | cellInShear_2024-01-23/0/
+RT-DC_eta_cut.pdf					 | fig:RT-DC.py					 | RT-DC/0/
+RT-DC_tau_12_graphical_abstract.pdf	 | fig:RT-DC.py					 | RT-DC/0/
+suffleParameterStudy_1.pdf			 | fig:shuffleParameterStudy.py	 | SuffleParameterStudy/{i} i=0-10
+suffleParameterStudy_2.pdf			 | fig:shuffleParameterStudy.py	 | SuffleParameterStudy/{i} i=20-30
+									 | cellInHighShearRoscoe.py		 | cellInShear_2024-02-05/0/
+									 | cellInShearRoscoe.py			 | cellInShear_2024-01-23/0/
+									 | CY.py						 |
+									 | fig:ptt_eta.py				 |
+									 | fig:ptt_N.py					 |
+									 | fig:RT-DC_CY.py				 | RT-DC/1/
+									 | flowRate.py					 |
+									 | inputForNozzle.py			 | Nozzle/{i}/ i=0,1
+									 | prepare2DAlginate.py			 |
+									 | prepare3DAlginate.py			 |
+									 | prepareCY.py					 |
 
 In `python/fluidx3d` general analysis tools can be found. These where devoloped during the writing of this paper and as such are not used in all scripts.
 The setups used to generate the data can be found in setups using the same name as the python scripts evaluating the output.
