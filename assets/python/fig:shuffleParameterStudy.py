@@ -129,17 +129,20 @@ plt.show()
 plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
 plt.title("(b)", loc="left")
 plt.plot(
-    alpha_s, etas / PTT.mc0_49.eta(1) * 1e-3, "rx", label=r"$\dot{\gamma} = \SI{1}{\per\second}$"
+    alpha_s,
+    etas / PTT.mc0_49.eta(1) * 1e-3 - 1,
+    "rx",
+    label=r"$\dot{\gamma} = \SI{1}{\per\second}$",
 )
 plt.plot(
     alpha_s,
-    etas2 / PTT.mc0_49.eta(1e5) * 1e-3,
+    etas2 / PTT.mc0_49.eta(1e5) * 1e-3 - 1,
     "bx",
     label=r"$\dot{\gamma} = \SI{1e5}{\per\second}$",
 )
 # plt.plot(alpha_s, [PTT.mc0_49.eta(1) * 1e3] * len(alpha_s))
 plt.xlabel(r"$\alpha_\text{s}$")
-plt.ylabel(r"$\eta_\text{Simulation}/\eta_\text{Theory}$")
+plt.ylabel(r"$\eta_\text{Simulation}/\eta_\text{Theory} - 1$")
 # plt.legend(loc="center left", bbox_to_anchor=(1, 0.5))
 plt.legend()
 # plt.ylim(19.699998804, 19.699998806)
