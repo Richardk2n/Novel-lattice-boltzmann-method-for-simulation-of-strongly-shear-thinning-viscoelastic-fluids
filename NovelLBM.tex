@@ -34,6 +34,8 @@ sorting=none
 ]{biblatex}
 \addbibresource{assets/bib/bib.bib}
 
+\usepackage{orcidlink}
+
 \usepackage{todonotes}
 
 \usepackage[locale=US]{siunitx}
@@ -88,7 +90,7 @@ sorting=none
 \fi
 
 \title{Novel lattice Boltzmann method for simulation of strongly shear thinning viscoelastic fluids}
-\author{Richard Kellnberger$^1$, Tomasz Jüngst$^2$, Stephan Gekle$^1$}
+\author{Richard Kellnberger$^{1\dagger}$\orcidlink{0009-0003-1782-4735}, Tomasz Jüngst$^2$, Stephan Gekle$^1$\orcidlink{0000-0001-5597-1160}}
 \date{\today}
 \begin{document}
 	\maketitle
@@ -96,6 +98,9 @@ sorting=none
 	\begin{center}
 		$^1$ Biofluid Simulation and Modeling – Theoretische Physik VI, Universität Bayreuth, Bayreuth, Germany\\
 		$^2$ Department of Functional Materials in Medicine and Dentistry Institute of Functional Materials and Biofabrication (IFB) and KeyLab Polymers for Medicine of the Bavarian Polymer Institute (BPI) Universität Würzburg, Würzburg, Germany
+	\end{center}
+	\begin{center}
+		$^\dagger$ Corresponding author. Email: \href{mailto:Richard.Kellnberger@uni-bayreuth.de}{Richard.Kellnberger@uni-bayreuth.de}
 	\end{center}
 	\vspace{\fill}
 	%TODO keywords
