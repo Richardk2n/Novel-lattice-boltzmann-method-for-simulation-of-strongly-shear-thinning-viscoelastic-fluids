@@ -1,0 +1,60 @@
+Note: equation numbers refer to old numbering (numbers have shifted due to expanded description of LBM and FV)
+
+
+Reviewer 1:
+
+-What are the parameters η_0 and η_∞ appeared in Eq. (7)?
+
+Zero-shear viscosity and infinite-shear viscosity as stated in the sentence following eq. (7).
+
+-Please provide more details on the elements of the lattice Boltzmann method, for instance, lattice model considered in this work, the discrete velocities and the equilibrium populations.
+
+Assuming "latticel model" refers to the velocity set: We use D3Q19 (see 4.1), otherwiese please elaborate.
+# TODO the velocities and eqilibrium populations can be found on wikipedia
+
+-The authors should provide the relation between the relaxation time and viscosity appeared in first term on the right-hand side of Eq. (12). In addition, if Eq. (12) is considered, should the term B_i given by Eq. (9) be modified?
+
+# TODO The only reason you ask this is because you know the answer, so why write it down?
+Eq (12) described that \tau is modified, this has implications for eq (9), to reduce ambiguity we intrudced a \prime into the notation and qonsequently Eq (9) has been (slightly) modified and the text below has been expanded for clarity. A reference to \tau^\prime has been introduced below eq (12) as well
+
+-Is the relaxation time τ_r=1 adopted in numerical simulations?
+
+Yes, see 4.1
+
+-Why is the finite-volume method adopted for polymer stress? Please give some details on the finite-volume method. In addition, it is known that in the lattice Boltzmann method, the square or cubic lattice is adopted, and thus the finite-difference method seems a better choice?
+
+# TODO Why not?
+# TODO What details on the finite volume method are you missing?
+Finite difference is a lot harder to implement, requires more compute, has a lot more loose ends to tie and is a lot less stable. Why would I ever do this?
+
+-As seen from Fig. 4, there is an apparent difference between the numerical results and semi-analytical solution, especially in the center part of the channel. Please give some explanations on this point.
+
+As can be seen from Fig. 3 this descrapency is only present in 3D. As the 2D case was simulated using the same algorithm technically also in 3D (periodic on the extra axis), the only difference between the simulations is the geometry. The error is actually largest on the walls (see figure 14). As stated between figure 3 and 4, the approximation of a round channel using a cubic lattice introduces a staircase-effect resulting in significant error near the walls. These errors of course propagate to the center.
+
+-In the framework of lattice Boltzmann method, the multiple-relaxation-time (MRT) model can be considered to improve the numerical stability. Can MRT model be adopted in this work to overcome the numerical instability problem?
+
+MRT gets a lot more credit than it deserves. If tuned for a specific problem it can marginally improve stability. The stability issues discussed in the present work arise at R_\eta between 1 and 10, for realistic fluids we need to reach nearly 50k (alignate). MRT might be able to help if the algorithm is nearly stable anyway. For the issue presented here the classical approach is no where near stable. We do have MRT implemented and can switch it on with a single flag. We practically never do, because it is generally not worth the overhead.
+
+Reviewer 2:
+
+(1)The introduction is too simple. The development of LBM for simulating viscoelastic fluids is not reviewed thoroughly.
+
+# TODO this is physics and not a history lecture -> Delegated to Stephan
+
+(2) The numerical method should be given in detail and in a logical way. Section 4.1 does not given in detail of the LBM. Section 4.2 tries to show the finite-volume method for polymer stress but only presents the LBM for the flow field, which is incorrect. The finite volume method for the polymer stress is actually missing.
+
+# TODO The present work describes an extension to the LBM and as such only describes the part relevant to these extensions. Otherwise we refer to the literature.
+You seem to suggest, that the stated LBM equation is incorrect please elaborate.
+# TODO The finite volume method is actually fully described (without the use of a single equation)
+
+(3) In the validation part, the computational steps needs 2×10^9 for the simple 1D flow. The efficiency of the proposed method is really low. This is not acceptable for 3D simulations.
+
+There is no 1D flow in the present work. In the section you are referring to alginate was simulated for 2e9 steps in 2D and 3D. The "not acceptable" 3D simulation took 1d 8h on a gaming GPU from 2019.
+
+Runtime being inversly proportional to Re is an issue of LBM and not related to our method in particular. It can be addressed using Re scaling if one wishes to.
+
+(4) Validations and applications in 3D cases should be presented since authors claim to fill the gap in the abstract.
+
+Aside from figures 3 and 5, which are specifically stated to be planer, the whole paper is 3D.
+Technically even those two where calculated in 3D with an periodic axis with translational symmetry in order to be able to use the same velocity set for all simulations as stated in 4.1:
+"We use a D3Q19 lattice in full three dimensions together with a single relaxation time collision operator."

@@ -16,6 +16,7 @@
 
 \newcommand{\RK}[1]{{\color{cyan}RK: #1}}
 \newcommand{\SG}[1]{{\color{red}SG: #1}}
+\newcommand{\RR}[1]{{\color{orange}#1}} % review revision
 
 \usepackage{hyperref} %link support
 \hypersetup{colorlinks,breaklinks,allcolors=blue}
@@ -373,9 +374,9 @@ Specifically, we implement the LBM collision as follows.
 \end{equation}
 Here, $f_i$ are the populations, $f_i^\text{eq}$ are the equilibrium populations, $\vec{c_i}$ are the lattice velocities, $\Delta t$ is the time step, $\tau_\text{r}$ is the relaxation time and $B_i$ are the stress contributions defined as follows.
 \begin{equation}
-	B_i = w_i\left(\frac{\vec{c}_i\vec{c}_i}{2c_\text{s}^4}-\frac{\uT}{2c_\text{s}^2}\right):\ma{\tau}.
+	B_i = w_i\left(\frac{\vec{c}_i\vec{c}_i}{2c_\text{s}^4}-\frac{\uT}{2c_\text{s}^2}\right):\ma{\tau\RR{^\prime}}.
 \end{equation}
-Here, $w_i$ are the lattice weights, $c_\text{s}$ is the lattice speed of sound and $\ma{\tau}$ is the polymer stress tensor. The colon denotes the Frobenius inner product.
+Here, $w_i$ are the lattice weights, $c_\text{s}$ is the lattice speed of sound and $\ma{\tau\RR{^\prime}}$ is the \RR{stress tensor to be coupled into the LBM. In the case of viscoelastic fluids this typically is the} polymer stress tensor. \RR{For our method this tensor is modified as described in the following section. }The colon denotes the Frobenius inner product.
 To handle inflow/outflow boundaries, the polymer conformation tensor is specified on the boundary and advected using the corner transport upwind scheme.
 
 
@@ -403,7 +404,7 @@ Finally, this results in
 \end{align}
 In practice, the shuffling parameter $\alpha_\text{s}$ is chosen before the start of the simulation.
 The LBM solver is run with $\eta_\text{s} + \alpha_\text{s}\eta_\text{p}$ as its viscosity.
-The polymer stress determined by equation~\ref{eq:polymerStress} is reduced by the amount $2\alpha_\text{s}\eta_\text{p}\ma{D}$ at every time step before it is coupled into the LBM.
+The polymer stress determined by equation~\ref{eq:polymerStress} is reduced by the amount $2\alpha_\text{s}\eta_\text{p}\ma{D}$ at every time step before \RR{$\ma{\tau^\prime} = \ma{\tau} - 2\alpha_\text{s}\eta_\text{p}\ma{D}$} is coupled into the LBM.
 
 Using this procedure, we balance the stress contributions of the LB and the polymer components which vastly improves numerical stability.
 We emphasize that, in contrast to other remedies such as adding artificial diffusivity \cite{malaspinas2010,ma2020,wang2020,wang2021}, our viscosity shuffling algorithm is mathematically exact and does not affect the physics of the simulated system.
