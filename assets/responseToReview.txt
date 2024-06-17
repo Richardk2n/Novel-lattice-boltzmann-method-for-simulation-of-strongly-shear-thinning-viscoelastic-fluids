@@ -10,11 +10,11 @@ Zero-shear viscosity and infinite-shear viscosity as stated in the sentence foll
 -Please provide more details on the elements of the lattice Boltzmann method, for instance, lattice model considered in this work, the discrete velocities and the equilibrium populations.
 
 Assuming "latticel model" refers to the velocity set: We use D3Q19 (see 4.1), otherwiese please elaborate.
-# TODO the velocities and eqilibrium populations can be found on wikipedia
+Discrete velocities and equilibrium populations have been added to a new appendix linked from 4.1
 
 -The authors should provide the relation between the relaxation time and viscosity appeared in first term on the right-hand side of Eq. (12). In addition, if Eq. (12) is considered, should the term B_i given by Eq. (9) be modified?
 
-# TODO The only reason you ask this is because you know the answer, so why write it down?
+As mentioned below eq (12) this viscosity is used for the LBM solver, therefore the standard LBM relation (see new appendix) applies to this viscosity.
 Eq (12) described that \tau is modified, this has implications for eq (9), to reduce ambiguity we intrudced a \prime into the notation and qonsequently Eq (9) has been (slightly) modified and the text below has been expanded for clarity. A reference to \tau^\prime has been introduced below eq (12) as well
 
 -Is the relaxation time τ_r=1 adopted in numerical simulations?
