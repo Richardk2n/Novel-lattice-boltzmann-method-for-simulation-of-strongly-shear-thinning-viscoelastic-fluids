@@ -1,6 +1,3 @@
-Note: equation numbers refer to old numbering (numbers have shifted due to expanded description of LBM and FV)
-
-
 Reviewer 1:
 
 -What are the parameters η_0 and η_∞ appeared in Eq. (7)?
@@ -23,9 +20,9 @@ Yes, see 4.1
 
 -Why is the finite-volume method adopted for polymer stress? Please give some details on the finite-volume method. In addition, it is known that in the lattice Boltzmann method, the square or cubic lattice is adopted, and thus the finite-difference method seems a better choice?
 
-# TODO Why not?
-# TODO What details on the finite volume method are you missing?
-Finite difference is a lot harder to implement, requires more compute, has a lot more loose ends to tie and is a lot less stable. Why would I ever do this?
+Makes boundary conditions trivial (flux = 0); CTU (which is a FV scheme) has been reported to increase stability [Kuron]
+Added some more details to 4.2 how we use FV here.
+Finite difference is a lot harder to implement (boundary conditions), has a lot more loose ends to tie (to assure conservation for example) and is less stable.
 
 -As seen from Fig. 4, there is an apparent difference between the numerical results and semi-analytical solution, especially in the center part of the channel. Please give some explanations on this point.
 
@@ -43,9 +40,9 @@ Reviewer 2:
 
 (2) The numerical method should be given in detail and in a logical way. Section 4.1 does not given in detail of the LBM. Section 4.2 tries to show the finite-volume method for polymer stress but only presents the LBM for the flow field, which is incorrect. The finite volume method for the polymer stress is actually missing.
 
-# TODO The present work describes an extension to the LBM and as such only describes the part relevant to these extensions. Otherwise we refer to the literature.
-You seem to suggest, that the stated LBM equation is incorrect please elaborate.
-# TODO The finite volume method is actually fully described (without the use of a single equation)
+Added additional LBM section
+You seem to suggest, that the stated LBM equation is incorrect. Please elaborate.
+Added some more details to 4.2 how we use FV here.
 
 (3) In the validation part, the computational steps needs 2×10^9 for the simple 1D flow. The efficiency of the proposed method is really low. This is not acceptable for 3D simulations.
 
