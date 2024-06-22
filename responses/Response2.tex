@@ -1,0 +1,70 @@
+\documentclass[12pt,a4paper, onesided]{article}
+% !TeX program=pdflatex
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[ngerman,american]{babel}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{xcolor}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{Submission ID \SG{ to fill }}
+\rfoot{\thepage}
+\setlength\parindent{0pt}
+
+\newcommand{\SG}[1]{{\color{red}SG:~#1}}
+\newcommand{\SJM}[1]{{\color{orange}SM:~#1}}
+\newcommand{\SW}[1]{{\color{purple}SW:~#1}}
+
+
+\newcommand*{\referee}[1]{%
+    \small
+    \begin{quote} 
+        \textsf{#1}
+    \end{quote}
+    \normalsize
+}
+
+\begin{document}
+\section*{Response to Referee 2}
+
+\referee{The introduction is too simple. The development of LBM for simulating viscoelastic fluids is not reviewed thoroughly.}
+
+Indeed, the introduction gives only a very brief summary of existing LBM schemes for viscoelastic fluids.
+A detailed discussion of these approaches is given in section~3. 
+Our motivation for shifting the discussion from the introduction (which, we agree with the referee, would be the canonical place) to the main text is that we want to give the reader the necessary background on viscoelastic models in section 2 before.
+Having done so allows us a more thorough and more comprehensible discussion of the ensuing LBM schemes.
+
+We have added a reference to section 3 in the introduction to avoid misunderstandings in the revised version.
+
+\referee{The numerical method should be given in detail and in a logical way. Section 4.1 does not given in detail of the LBM. Section 4.2 tries to show the finite-volume method for polymer stress but only presents the LBM for the flow field, which is incorrect. The finite volume method for the polymer stress is actually missing.}
+
+Following the comment of the referee, we have added an entire new section (appendix E) where we give details about the LB method in general as well as our implementation in particular.
+In addition, we have extended section 4.2. where we present the finite-volume method that we use for the polymer stress.
+
+\referee{In the validation part, the computational steps needs $2 \cdot 10^9$ for the simple 1D flow. The efficiency of the proposed method is really low. This is not acceptable for 3D simulations.}
+
+We agree with the referee that the number of $2 \cdot 10^9$ time steps may appear rather large in the first place.
+However, LBM schemes can be implemented in an extremely efficient manner, especially using GPUs (note that our code, both the LBM and the finite-volume part, is entirely GPU-based).
+The longest simulation presented in the manuscript which is for a fully 3D cylindrical flow took 1 day and 8 hours on a five-year old gaming GPU.
+
+That said, the referee is right that highly viscous fluids such as, in particular, the alginate solution considered in this work, are a challenge to all LBM schemes.
+We hypothesize that this is one of the reasons why such highly viscous complex fluids have been simulated with LBM before.
+A possible remedy which may be considered in future work is the so-called Reynolds scaling.
+Herein, the Reynolds number of the flow is artificially increased which decreases the LBM runtime without modifying the physical flow field as long as Re remains (much) smaller than 1.
+We now mention this possibility above Eq. (13) in the manuscript.
+
+\referee{Validations and applications in 3D cases should be presented since authors claim to fill the gap in the abstract.}
+
+Aside from figures 3 and 5, which are planar geometries, all our systems are fully 3D.
+This includes the cylindrical flow in figure 4. 
+Even more important, it includes the RT-DC geometry shown in figure 7 and the fully three-dimensional cell in figure 8.
+To bring out more clearly the latter aspect, we have added to figure 8 an illustration of our simulated system \SG{ denote current figure as 8b, and add a standard 3D Paraview picture as 8a. }
+
+\end{document}

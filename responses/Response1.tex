@@ -1,0 +1,99 @@
+\documentclass[12pt,a4paper, onesided]{article}
+% !TeX program=pdflatex
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[ngerman,american]{babel}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{xcolor}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{Submission ID \SG{ to fill }}
+\rfoot{\thepage}
+\setlength\parindent{0pt}
+
+\newcommand{\SG}[1]{{\color{red}SG:~#1}}
+\newcommand{\SJM}[1]{{\color{orange}SM:~#1}}
+\newcommand{\SW}[1]{{\color{purple}SW:~#1}}
+
+
+\newcommand*{\referee}[1]{%
+    \small
+    \begin{quote} 
+        \textsf{#1}
+    \end{quote}
+    \normalsize
+}
+
+\begin{document}
+\section*{Response to Referee 1}
+
+\referee{What are the parameters $\eta_0$ and $\eta_ \infty $ appeared in Eq. (7)?}
+
+The parameters $ \eta _0$ and $ \eta _ \infty $ are the viscosities predicted by the model for zero and  and infinite shear rates, respectively.
+We now mention this just before Eq. (7).
+
+\referee{Please provide more details on the elements of the lattice Boltzmann method, for instance, lattice model considered in this work, the discrete velocities and the equilibrium populations.}
+
+We have added a new appendix E where we discuss the LB method in general as well as our specific implementation details. 
+\SG{der Appendix ist an sich ok, aber sollte noch frueher und deutlicher auf unsere Implementierung eingehen, z.B. D3Q19 bereits dort erwähnen, wo du auf velocity sets eingehst. Beim Guo forcing konkret sagen, wofuer wir es verwenden (''simple forces'' ist hier zu vage). Bei der Dichte und der Viskositaet ist es nicht so wichtig, was man ''typically'' nimmt, sondern was du konkret in deinen Simulationen genommen hast. }
+
+\referee{The authors should provide the relation between the relaxation time and viscosity appeared in first term on the right-hand side of Eq. (12). In addition, if Eq. (12) is considered, should the term $B_i$ given by Eq. (9) be modified?}
+
+As mentioned below eq (12) this viscosity is used for the LBM solver, therefore the standard LBM relation (see new appendix) applies to this viscosity.
+To reduce ambiguity between equations (9) and (12), we introduced a prime into the notation and consequently Eq (9) has been (slightly) modified and the text below has been expanded for clarity. 
+A reference to $\tau^\prime$ has been introduced below eq (12) as well.
+
+\referee{Is the relaxation time $\tau_r=1$ adopted in numerical simulations?}
+
+Yes, as we now mention in the new appendix E.
+
+\referee{Why is the finite-volume method adopted for polymer stress? Please give some details on the finite-volume method. In addition, it is known that in the lattice Boltzmann method, the square or cubic lattice is adopted, and thus the finite-difference method seems a better choice?}
+
+Our choice of the finite-volume method is motivated primarily by its clarity and simplicity when implementing complex boundary conditions.
+Furthermore, the finite-volume method matches well with the so-called corner-transport-upwind (CTU) scheme which we use for advection and for which earlier works \SG{ give ref of Kuron } reported increased stability.
+To make these points clearer to the reader, we added many corresponding details to section 4.2 of the revised manuscript.
+%Finite difference is a lot harder to implement (boundary conditions), has a lot more loose ends to tie (to assure conservation for example) and is less stable.
+
+\referee{As seen from Fig. 4, there is an apparent difference between the numerical results and semi-analytical solution, especially in the center part of the channel. Please give some explanations on this point.}
+
+As in most LBM simulations, an important source of error is the discretisation of the boundary.
+When discretising a physically round boundary such as the cylinder in figure 4 on a cubic lattice, the boundary shape necessarily becomes imprecise - the so-called ''staircase'' effect.
+As can be seen in figure 14, the relative error is indeed largest near the wall.
+We therefore explain the - apparently - large error in the center in figure 4 by a propagation of discretisation errors into the fluid.
+
+%As can be seen from Fig. 3 this discrepancy is only present in 3D. 
+%As the 2D case was simulated using the same algorithm technically also in 3D (periodic on the extra axis), the only difference between the simulations is the geometry. 
+%The error is actually largest on the walls (see figure 14). 
+%As stated between figure 3 and 4, the approximation of a round channel using a cubic lattice introduces a staircase-effect resulting in significant error near the walls. 
+%These errors of course propagate to the center.
+
+\referee{In the framework of lattice Boltzmann method, the multiple-relaxation-time (MRT) model can be considered to improve the numerical stability. Can MRT model be adopted in this work to overcome the numerical instability problem?}
+
+\SG{ Die Antwort geht so nicht, es geht hier nicht um eine Grundsatzdikussion zu MRT sondern um eine konkrete Frage zu unserem System.
+Es gibt drei Moeglichkeiten zur Antwort:
+
+(i) Wir bedanken uns artig für den Vorschlag und sagen, dass wir es in Zukunft ausprobieren werden, aber dass es für diese Arbeit zu weit fuehrt.
+
+(ii) Wir sagen, dass MRT hier nichts nuetzt. Dann brauchen wir aber konkrete Belege dafuer. Fuer welche Systeme wurde MRT ausprobiert? Was war der Effekt? Konnte die Stabilitaet fuer den klassischen Ansatz ohne viscosity shuffling durch MRT verbessert werden?
+
+(iii) Wir argumentieren, dass andere in der Literatur MRT benutzt haben und dass es dort auch nichts gebracht hat. Deswegen machen wir uns nicht die Muehe, es auszuprobieren.
+
+Man kann die Varianten auch kombinieren. Kannst du zu (ii) und (iii) mal raussuchen, was da der Stand ist?}
+
+%MRT gets a lot more credit than it deserves.
+%If tuned for a specific problem it can marginally improve stability. 
+%The stability issues discussed in the present work arise at $R_\eta$ between 1 and 10, for realistic fluids we need to reach nearly 50k (alignate). 
+%MRT might be able to help if the algorithm is nearly stable anyway. 
+%For the issue presented here the classical approach is no where near stable. 
+%We do have MRT implemented and can switch it on with a single flag. 
+%We practically never do, because it is generally not worth the overhead.
+
+
+\end{document}

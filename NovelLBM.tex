@@ -147,6 +147,7 @@ To understand the rheology of such complex liquids in non-trivial geometries, co
 While a number of numerical techniques have been developed, the simulation of viscoelastic liquids remains an involved subject \cite{Alves.2020}, in particular for high viscosity ratios.
 A very popular simulation technique for Newtonian fluids is the Lattice Boltzmann method (LBM) \cite{Kruger_book} due to its simplicity and high parallelizability.
 LBM has also been extended to viscoelastic situations, mainly in two \cite{ispolatov2002,wang2019,su2013,giraud1998,xie2018,dzanic2022,frank2006,zou2014,lee2017,dzanic2022_2,sedaghat2021,frantziskonis2011,qin2023,yoshino2008,papenkort2015,phillips2011,onishi2005} but occasionally also in three \cite{malaspinas2010,gupta2015,gupta2015_2,lallemand2003,ma2020,onishi2006,wang2020,dellar2014,su2013_2,wang2021,kuron2021,gupta2016} dimensions.
+\RR{We will discuss these approaches in detail in section~\ref{sec:existingLBM} below.}
 To alleviate stability problems, some of these works include an artificial diffusivity of the polymer stress \cite{malaspinas2010,ma2020,wang2020,wang2021}, or perform special decompositions of the stress tensor \cite{dzanic2022}.
 Despite these improvements, however, none of these methods has been applied to very high viscosity ratio fluids which are often used as cell carrier fluids in lab experiments or technological applications.
 
@@ -255,7 +256,7 @@ The obtained parameters are given in table~\ref{tab:PTTparameters}.
 		\label{tab:PTTparameters}
 	\end{table}
 
-We introduce the ratio between the polymer and the solvent viscosity as
+We introduce the ratio between the polymer and the solvent viscosity \RR{and express it as a ratio between the viscosity at zero shear rate, $ \eta _0$, and the viscosity at infinite shear rate $ \eta _ \infty $}:
 \begin{align}
 	R_\eta = \frac{\eta_\text{p}}{\eta_\text{s}} = \frac{\eta_0-\eta_\infty}{\eta_\infty}		\label{eq:R_eta}
 \end{align}
@@ -289,6 +290,7 @@ The \SI{0.49}{\percent} methyl cellulose solution used in RT-DC measurements, in
 %%
 
 \section{Existing LBM methods}
+\label{sec:existingLBM}
 Since the early days of LBM, variants for viscoelastic fluids have been developed.
 Keeping in mind our target geometries, we focus here on three-dimensional formulations.
 The first approaches avoided an explicit modeling of a viscoelastic constitutive equation and simply modified the LB collision operator to obtain a basic viscoelastic fluid obeying Jeffery's model \cite{lallemand2003}. This can also be achieved by the introduction of a second local stress tensor \cite{dellar2014}.
@@ -364,7 +366,8 @@ To drive the flow, we use either a constant body force (modeling a physical pres
 
 The spatio-temporal dynamics of the polymer stress $\ma{\tau}$ is given by equation~(\ref{eq:polymerStress}) in the form of an advection-reaction equation.
 We solve this equation by a finite-volume scheme running in parallel (with identical time step) to the LBM solver.\RR{ For this, the simulation volume is subdivided in $1\times1\times1$ (in LU) cubes centered around each lattice node. The average value of $\ma{\tau}$ within these volumes is takes as the value at the lattice node.}
-Advection is handled using the corner transport upwind scheme \cite{kuron2021}.\RR{ The remaining derivatives are calculated using finite differences.}
+Advection is handled using the corner transport upwind scheme \cite{kuron2021}. \SG{ add two phrases about CTU which somewhat non-standard }
+\RR{ The remaining derivatives are calculated using finite differences.} 
 At the walls\RR{, which coincide with the surfaces of the finite volumes}, a zero-flux boundary condition for the stress is used.
 The source terms are integrated using the Euler method.
 
@@ -436,6 +439,7 @@ The velocity field is initialized with zero.
 For methyl cellulose, we simulate the full temporal evolution with the polymers starting in the unstretched configuration.
 In the case of alginate, we speed up the convergence and start from a situation in which the polymers are pre-stretched. For this we calculate $\tau_{xx}$ and $\tau_{xy}$ using equations~(\ref{eq:tau_xx}) and (\ref{eq:PTTDerivation2}) using the $\dot{\gamma}$ calculated from equation~(\ref{eq:semiAnalyticGD_3D}). The polymer stress is then initialized using these values.
 After \num{2e9} LBM time steps for alginate and \num{5e6} LBM time steps for methyl cellulose corresponding to approximately \SI{1.6}{\milli\second} and \SI{2.4}{\second} of physical time, respectively, the simulation is stopped and the flow field $u(y)$ is compared to the semi-analytical solution.
+\RR{An artificial increase of the Reynolds number to reduce computational time is possible in principle, but is not employed here to bring out clearly the characteristics of our method.}
 As shown in figure~\ref{fig:2Dvel}, very good agreement is found.
 The time evolution of the center-line velocity is shown in figure~\ref{fig:2DTimeEvolution} of the appendix.
 For a quantitative assessment, we compute the L2 error as follows.
@@ -579,7 +583,7 @@ This means that even for fast flows, cells flowing close to the center experienc
 % shear:  We use richard/vtk 4dbc4d379842c538f084e68a5dcfe2555a674495 (2024-01-09)
 % RT-DC: We use richard/master fe0fc04115b9b6ea6628bcc6cb6593d3f72ac0ea (2023-11-05)
 
-Our next example is the RT-DC geometry in which cells from a reservoir are squeezed through a narrow observation channel \cite{Toepfner.2018, Fregin:2019gx} with a square cross-section of \qtyproduct{40x40}{\micro\meter}.
+Our next example is the RT-DC geometry in which cells from a reservoir are squeezed through a narrow observation channel \cite{Toepfner.2018, Fregin:2019gx} with a square cross-section of %\qtyproduct{40x40}{\micro\meter}.
 %$\SI{40}{\micro\meter} \times \SI{40}{\micro\meter}$.%Correctly typeset version, that compiles for Stephan.
 For this simulation we use periodic boundary conditions and a constant body force corresponding to a pressure gradient of \SI{1e7}{\pascal\per\meter}.
 In figure~\ref{fig:RT-DC}, we show the velocity profile, the von Mises stress and the shear component of the stress which is the relevant component if a local shear viscosity is to be defined.
@@ -956,13 +960,23 @@ Importantly, we show in figure~\ref{fig:wiParameterStudy}~(b) that this very goo
 	\end{figure}
 	
 	\RR{
-	\section{Basics of Lattice-Boltzmann}\label{app:LBM}
-	An excellent overview on Lattice-Boltzmann methods (LBM) can be found in the book by Krüger et al. on the subject \cite{Kruger_book}. Our implementation of the base algorithm mostly follows the book, though some implementation details differ. We mention the most important basics of LBM here and recommend the book for further reading.
-	Instead of solving the Navier-Stokes equation LBM solves the Boltzmann equation which is a generalization. The Boltzmann equation is discretized both in space $\vec{x}$ and time $t$. Also, the velocity is limited to discrete values $\vec{c}_i$, the so-called velocity sets. The velocity sets are usually denoted as D$d$Q$q$, with $d$ being the number of dimensions and $q$ being the number of discrete velocities. The density is split into the so-called populations $f_i\left(\vec{x}, t\right)$, which are parts of the density moving along a certain discrete velocity at a certain discrete point in time at a certain discrete point in space. With these discretizations the equation reads as follows.
+	\section{Lattice-Boltzmann Implementation}\label{app:LBM}
+	An excellent overview on Lattice-Boltzmann methods (LBM) can be found in the book by Krüger et al. on the subject \cite{Kruger_book}. 
+	Our implementation mostly follows the book, though some implementation details differ. 
+	We mention the most important basics of LBM here and recommend the book for further reading.
+	Instead of solving the Navier-Stokes equation LBM solves the Boltzmann equation for fluid particle distributions. 
+	The Boltzmann equation is discretized both in space $\vec{x}$ and time $t$. 
+	Also, the velocity is limited to discrete values $\vec{c}_i$, the so-called velocity sets. 
+	The velocity sets are usually denoted as D$d$Q$q$, with $d$ being the number of dimensions and $q$ being the number of discrete velocities. 
+	The density is split into the so-called populations $f_i\left(\vec{x}, t\right)$, which are parts of the density moving along a certain discrete velocity at a certain discrete point in time at a certain discrete point in space. 
+	With these discretizations the Boltzmann equation reads as follows.
 	\begin{equation}
 		f_i\left(\vec{x}+\vec{c}_i\Delta t, t+\Delta t\right) = f_i\left(\vec{x}, t\right) + \Omega_i\left(\vec{x}, t\right)
 	\end{equation}
-	Here $\Delta t$ is the duration of a time step (distance between the discrete points in time) and $\Omega_i\left(\vec{x}, t\right)$ is the collision operator. The equation describes the populations moving along the discrete velocities to a neighboring point (streaming) while exchanging momentum modeled by the collision operator (collision). The collision operator redistributes the populations, that meet at any given lattice point. This is highly complex and is therefore usually approximated using the Bhatnagar-Gross-Krook (BGK) operator, which reads as follows.
+	Here $\Delta t$ is the duration of a time step (distance between the discrete points in time) and $\Omega_i\left(\vec{x}, t\right)$ is the collision operator. 
+	The equation describes the populations moving along the discrete velocities to a neighboring point (streaming) while exchanging momentum modeled by the collision operator (collision). 
+	The collision operator redistributes the populations, that meet at any given lattice point. 
+	This is highly complex and is therefore usually approximated using the Bhatnagar-Gross-Krook (BGK) operator, which reads as follows.
 	\begin{equation}
 		\Omega_i = - \frac{f_i - f_i^\text{eq}}{\tau_\text{r}}\Delta t
 	\end{equation}
@@ -979,14 +993,29 @@ Importantly, we show in figure~\ref{fig:wiParameterStudy}~(b) that this very goo
 	\begin{equation}
 		f_i\left(\vec{x}+\vec{c}_i\Delta t, t+\Delta t\right) - f_i\left(\vec{x}, t\right) = -\frac{\Delta t}{\tau_\text{r}}\left[f_i\left(\vec{x}, t\right) - f_i^\text{eq}\left(\vec{x}, t\right)\right].
 	\end{equation}
-	It should be noted, that this is the simple case for a Newtonian fluid. If additional (extern) forces are to be considered, additional terms are added on the right-hand side to account for these. For simple forces we use the algorithm presented by Guo et al. \cite{guo2002}. The following equations relate the discrete quantities back to the physical quantities.
+	It should be noted, that this is the simple case for a Newtonian fluid. 
+	If additional (external) forces are to be considered, additional terms are added on the right-hand side to account for these. 
+	For simple forces we use the algorithm presented by Guo et al. \cite{guo2002}.  \SG{ what are ''simple forces''? }
+	The following equations relate the discrete quantities back to the physical quantities.
 	\begin{align}
 		\rho &= \sum_if_i^\text{eq} = \sum_if_i \\
 		\rho\vec{u} &= \sum_i\vec{c}_if_i^\text{eq} = \sum_i\vec{c}_if_i \\
 		\frac{\eta}{\rho} &= c_\text{s}^2\left(\tau_\text{r} - \frac{\Delta t}{2}\right)
 	\end{align}
-	Here $\eta$ is the viscosity. These equations are typically solved in lattice units (LU). These result from fixing three values in LU and calculating conversion factors for all other units accordingly from these. The physical values are then divided by these scaling factors. This is mathematically identical to scaling the whole equation and can be used to simplify the calculations and to keep the values in a range optimal for computation. Typically, one picks $\rho_\text{LU} = 1$ and $\eta_\text{LU} = \frac{1}{6}$. Naturally $\Delta x_\text{LU} = 1$ and $\Delta t_\text{LU} = 1$. A convenient third scale is the resolution, meaning the relation of $\Delta x$ to the size of the system. The relaxation time can be freely chosen, but is ideal at unity in LU.
-	The LBM scheme with the BGK operator is called single relaxation time (SRT). There are generalizations for two relaxation times (TRT) and for one relaxation time per $i$ (multi relaxation time, MRT). We found the more complex schemes to rarely yield worthwhile improvement and stick to SRT. While there are multiple valid options we use D3Q19 as the velocity set. The 19 velocities and their weights are noted in the following.
+	Here $\eta$ is the viscosity. 
+	These equations are typically solved in lattice units (LU). 
+	These result from fixing three values in LU and calculating conversion factors for all other units accordingly from these. 
+	The physical values are then divided by these scaling factors. 
+	This is mathematically identical to scaling the whole equation and can be used to simplify the calculations and to keep the values in a range optimal for computation. 
+	Typically, one picks $\rho_\text{LU} = 1$ and $\eta_\text{LU} = \frac{1}{6}$. 
+	Naturally $\Delta x_\text{LU} = 1$ and $\Delta t_\text{LU} = 1$. 
+	A convenient third scale is the resolution, meaning the relation of $\Delta x$ to the size of the system. 
+	The relaxation time can be freely chosen, but is ideal at unity in LU.
+	The LBM scheme with the BGK operator is called single relaxation time (SRT). 
+	There are generalizations for two relaxation times (TRT) and for one relaxation time per $i$ (multi relaxation time, MRT). 
+	We found the more complex schemes to rarely yield worthwhile improvement and stick to SRT. 
+	While there are multiple valid options we use D3Q19 as the velocity set. 
+	The 19 velocities and their weights are noted in the following.
 	
 	\begin{equation}
 		\begin{split}
