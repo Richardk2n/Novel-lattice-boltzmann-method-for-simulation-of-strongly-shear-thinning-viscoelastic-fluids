@@ -583,7 +583,7 @@ This means that even for fast flows, cells flowing close to the center experienc
 % shear:  We use richard/vtk 4dbc4d379842c538f084e68a5dcfe2555a674495 (2024-01-09)
 % RT-DC: We use richard/master fe0fc04115b9b6ea6628bcc6cb6593d3f72ac0ea (2023-11-05)
 
-Our next example is the RT-DC geometry in which cells from a reservoir are squeezed through a narrow observation channel \cite{Toepfner.2018, Fregin:2019gx} with a square cross-section of %\qtyproduct{40x40}{\micro\meter}.
+Our next example is the RT-DC geometry in which cells from a reservoir are squeezed through a narrow observation channel \cite{Toepfner.2018, Fregin:2019gx} with a square cross-section of \qtyproduct{40x40}{\micro\meter}.
 %$\SI{40}{\micro\meter} \times \SI{40}{\micro\meter}$.%Correctly typeset version, that compiles for Stephan.
 For this simulation we use periodic boundary conditions and a constant body force corresponding to a pressure gradient of \SI{1e7}{\pascal\per\meter}.
 In figure~\ref{fig:RT-DC}, we show the velocity profile, the von Mises stress and the shear component of the stress which is the relevant component if a local shear viscosity is to be defined.
@@ -961,21 +961,21 @@ Importantly, we show in figure~\ref{fig:wiParameterStudy}~(b) that this very goo
 	
 	\RR{
 	\section{Lattice-Boltzmann Implementation}\label{app:LBM}
-	An excellent overview on Lattice-Boltzmann methods (LBM) can be found in the book by Krüger et al. on the subject \cite{Kruger_book}. 
-	Our implementation mostly follows the book, though some implementation details differ. 
+	An excellent overview on Lattice-Boltzmann methods (LBM) can be found in the book by Krüger et al. on the subject \cite{Kruger_book}.
+	Our implementation mostly follows the book, though some implementation details differ.
 	We mention the most important basics of LBM here and recommend the book for further reading.
-	Instead of solving the Navier-Stokes equation LBM solves the Boltzmann equation for fluid particle distributions. 
-	The Boltzmann equation is discretized both in space $\vec{x}$ and time $t$. 
-	Also, the velocity is limited to discrete values $\vec{c}_i$, the so-called velocity sets. 
-	The velocity sets are usually denoted as D$d$Q$q$, with $d$ being the number of dimensions and $q$ being the number of discrete velocities. 
-	The density is split into the so-called populations $f_i\left(\vec{x}, t\right)$, which are parts of the density moving along a certain discrete velocity at a certain discrete point in time at a certain discrete point in space. 
+	Instead of solving the Navier-Stokes equation LBM solves the Boltzmann equation for fluid particle distributions.
+	The Boltzmann equation is discretized both in space $\vec{x}$ and time $t$.
+	Also, the velocity is limited to discrete values $\vec{c}_i$, the so-called velocity sets.
+	The velocity sets are usually denoted as D$d$Q$q$, with $d$ being the number of dimensions and $q$ being the number of discrete velocities.
+	The density is split into the so-called populations $f_i\left(\vec{x}, t\right)$, which are parts of the density moving along a certain discrete velocity at a certain discrete point in time at a certain discrete point in space.
 	With these discretizations the Boltzmann equation reads as follows.
 	\begin{equation}
 		f_i\left(\vec{x}+\vec{c}_i\Delta t, t+\Delta t\right) = f_i\left(\vec{x}, t\right) + \Omega_i\left(\vec{x}, t\right)
 	\end{equation}
-	Here $\Delta t$ is the duration of a time step (distance between the discrete points in time) and $\Omega_i\left(\vec{x}, t\right)$ is the collision operator. 
-	The equation describes the populations moving along the discrete velocities to a neighboring point (streaming) while exchanging momentum modeled by the collision operator (collision). 
-	The collision operator redistributes the populations, that meet at any given lattice point. 
+	Here $\Delta t$ is the duration of a time step (distance between the discrete points in time) and $\Omega_i\left(\vec{x}, t\right)$ is the collision operator.
+	The equation describes the populations moving along the discrete velocities to a neighboring point (streaming) while exchanging momentum modeled by the collision operator (collision).
+	The collision operator redistributes the populations, that meet at any given lattice point.
 	This is highly complex and is therefore usually approximated using the Bhatnagar-Gross-Krook (BGK) operator, which reads as follows.
 	\begin{equation}
 		\Omega_i = - \frac{f_i - f_i^\text{eq}}{\tau_\text{r}}\Delta t
@@ -993,8 +993,8 @@ Importantly, we show in figure~\ref{fig:wiParameterStudy}~(b) that this very goo
 	\begin{equation}
 		f_i\left(\vec{x}+\vec{c}_i\Delta t, t+\Delta t\right) - f_i\left(\vec{x}, t\right) = -\frac{\Delta t}{\tau_\text{r}}\left[f_i\left(\vec{x}, t\right) - f_i^\text{eq}\left(\vec{x}, t\right)\right].
 	\end{equation}
-	It should be noted, that this is the simple case for a Newtonian fluid. 
-	If additional (external) forces are to be considered, additional terms are added on the right-hand side to account for these. 
+	It should be noted, that this is the simple case for a Newtonian fluid.
+	If additional (external) forces are to be considered, additional terms are added on the right-hand side to account for these.
 	For simple forces we use the algorithm presented by Guo et al. \cite{guo2002}.  \SG{ what are ''simple forces''? }
 	The following equations relate the discrete quantities back to the physical quantities.
 	\begin{align}
@@ -1002,19 +1002,19 @@ Importantly, we show in figure~\ref{fig:wiParameterStudy}~(b) that this very goo
 		\rho\vec{u} &= \sum_i\vec{c}_if_i^\text{eq} = \sum_i\vec{c}_if_i \\
 		\frac{\eta}{\rho} &= c_\text{s}^2\left(\tau_\text{r} - \frac{\Delta t}{2}\right)
 	\end{align}
-	Here $\eta$ is the viscosity. 
-	These equations are typically solved in lattice units (LU). 
-	These result from fixing three values in LU and calculating conversion factors for all other units accordingly from these. 
-	The physical values are then divided by these scaling factors. 
-	This is mathematically identical to scaling the whole equation and can be used to simplify the calculations and to keep the values in a range optimal for computation. 
-	Typically, one picks $\rho_\text{LU} = 1$ and $\eta_\text{LU} = \frac{1}{6}$. 
-	Naturally $\Delta x_\text{LU} = 1$ and $\Delta t_\text{LU} = 1$. 
-	A convenient third scale is the resolution, meaning the relation of $\Delta x$ to the size of the system. 
+	Here $\eta$ is the viscosity.
+	These equations are typically solved in lattice units (LU).
+	These result from fixing three values in LU and calculating conversion factors for all other units accordingly from these.
+	The physical values are then divided by these scaling factors.
+	This is mathematically identical to scaling the whole equation and can be used to simplify the calculations and to keep the values in a range optimal for computation.
+	Typically, one picks $\rho_\text{LU} = 1$ and $\eta_\text{LU} = \frac{1}{6}$.
+	Naturally $\Delta x_\text{LU} = 1$ and $\Delta t_\text{LU} = 1$.
+	A convenient third scale is the resolution, meaning the relation of $\Delta x$ to the size of the system.
 	The relaxation time can be freely chosen, but is ideal at unity in LU.
-	The LBM scheme with the BGK operator is called single relaxation time (SRT). 
-	There are generalizations for two relaxation times (TRT) and for one relaxation time per $i$ (multi relaxation time, MRT). 
-	We found the more complex schemes to rarely yield worthwhile improvement and stick to SRT. 
-	While there are multiple valid options we use D3Q19 as the velocity set. 
+	The LBM scheme with the BGK operator is called single relaxation time (SRT).
+	There are generalizations for two relaxation times (TRT) and for one relaxation time per $i$ (multi relaxation time, MRT).
+	We found the more complex schemes to rarely yield worthwhile improvement and stick to SRT.
+	While there are multiple valid options we use D3Q19 as the velocity set.
 	The 19 velocities and their weights are noted in the following.
 	
 	\begin{equation}
