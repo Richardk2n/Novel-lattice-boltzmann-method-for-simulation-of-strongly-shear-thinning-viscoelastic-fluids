@@ -968,6 +968,7 @@ Importantly, we show in figure~\ref{fig:wiParameterStudy}~(b) that this very goo
 	The Boltzmann equation is discretized both in space $\vec{x}$ and time $t$.
 	Also, the velocity is limited to discrete values $\vec{c}_i$, the so-called velocity sets.
 	The velocity sets are usually denoted as D$d$Q$q$, with $d$ being the number of dimensions and $q$ being the number of discrete velocities.
+	We use D3Q19. Its 19 velocities can be found in equation~(\ref{eq:D3Q19c}).
 	The density is split into the so-called populations $f_i\left(\vec{x}, t\right)$, which are parts of the density moving along a certain discrete velocity at a certain discrete point in time at a certain discrete point in space.
 	With these discretizations the Boltzmann equation reads as follows.
 	\begin{equation}
@@ -984,7 +985,7 @@ Importantly, we show in figure~\ref{fig:wiParameterStudy}~(b) that this very goo
 	\begin{equation}
 		f_i^\text{eq} = w_i\rho\left[1 + \frac{\vec{u}\cdot\vec{c_i}}{c_\text{s}^2} + \frac{\left(\vec{u}\cdot\vec{c_i}\right)^2}{2c_\text{s}^4} + \frac{\vec{u}\cdot\vec{u}}{2c_\text{s}^2}\right]
 	\end{equation}
-	Here $\vec{u}$ is the local fluid velocity, $\rho$ is the local density, $w_i$ are the lattice weights associated to the chosen velocity set and $c_\text{s}$ is the lattice speed of sound defined as follows.
+	Here $\vec{u}$ is the local fluid velocity, $\rho$ is the local density, $w_i$ are the lattice weights associated to the chosen velocity set (given in equation~(\ref{eq:D3Q19w}) for D3Q19) and $c_\text{s}$ is the lattice speed of sound defined as follows.
 	\begin{equation}
 		c_\text{s}^2 = \frac{1}{3}\frac{\Delta x^2}{\Delta t^2}
 	\end{equation}
@@ -995,7 +996,7 @@ Importantly, we show in figure~\ref{fig:wiParameterStudy}~(b) that this very goo
 	\end{equation}
 	It should be noted, that this is the simple case for a Newtonian fluid.
 	If additional (external) forces are to be considered, additional terms are added on the right-hand side to account for these.
-	For forces we use the algorithm presented by Guo et al. \cite{guo2002}.  \SG{ what are ''simple forces''? }\RK{as opposed to stresses which are generalized forces. -> removed the "simple"}
+	For the forces used to drive the simple periodic flows and the forces from the IBM used to simulate cells, we use the algorithm presented by Guo et al. \cite{guo2002}.  \SG{ what are ''simple forces''? }\RK{as opposed to stresses which are generalized forces. -> removed the "simple"}
 	The following equations relate the discrete quantities back to the physical quantities.
 	\begin{align}
 		\rho &= \sum_if_i^\text{eq} = \sum_if_i \\
@@ -1007,9 +1008,9 @@ Importantly, we show in figure~\ref{fig:wiParameterStudy}~(b) that this very goo
 	These result from fixing three values in LU and calculating conversion factors for all other units accordingly from these.
 	The physical values are then divided by these scaling factors.
 	This is mathematically identical to scaling the whole equation and can be used to simplify the calculations and to keep the values in a range optimal for computation.
-	Typically, one picks $\rho_\text{LU} = 1$ and $\eta_\text{LU} = \frac{1}{6}$.
+	We pick $\rho_\text{LU} = 1$ and $\eta_\text{LU} = \frac{1}{6}$ as is typically done.
 	Naturally $\Delta x_\text{LU} = 1$ and $\Delta t_\text{LU} = 1$.
-	A convenient third scale is the resolution, meaning the relation of $\Delta x$ to the size of the system.
+	A convenient third scale is the resolution, meaning the relation of $\Delta x$ to the size of the system, which we pick depending on the geometry.
 	The relaxation time can be freely chosen, but is ideal at unity in LU.
 	The LBM scheme with the BGK operator is called single relaxation time (SRT).
 	There are generalizations for two relaxation times (TRT) and for one relaxation time per $i$ (multi relaxation time, MRT).
@@ -1017,7 +1018,7 @@ Importantly, we show in figure~\ref{fig:wiParameterStudy}~(b) that this very goo
 	While there are multiple valid options we use D3Q19 as the velocity set.
 	The 19 velocities and their weights are noted in the following.
 	
-	\begin{equation}
+	\begin{equation}\label{eq:D3Q19c}
 		\begin{split}
 			&\frac{\Delta t}{\Delta x}\vec{c}_i = \\
 			&\begin{Bmatrix}
@@ -1028,7 +1029,7 @@ Importantly, we show in figure~\ref{fig:wiParameterStudy}~(b) that this very goo
 		\end{split}
 	\end{equation}
 	Where each column is a vector.
-	\begin{equation}
+	\begin{equation}\label{eq:D3Q19w}
 		w_i = \begin{cases}
 			\frac{1}{3},\quad i=0\\
 			\frac{1}{18},\quad 1 \leq i \leq 6\\
