@@ -366,8 +366,8 @@ To drive the flow, we use either a constant body force (modeling a physical pres
 
 The spatio-temporal dynamics of the polymer stress $\ma{\tau}$ is given by equation~(\ref{eq:polymerStress}) in the form of an advection-reaction equation.
 We solve this equation by a finite-volume scheme running in parallel (with identical time step) to the LBM solver.\RR{ For this, the simulation volume is subdivided in $1\times1\times1$ (in LU) cubes centered around each lattice node. The average value of $\ma{\tau}$ within these volumes is takes as the value at the lattice node.}
-Advection is handled using the corner transport upwind scheme \cite{kuron2021}. \SG{ add two phrases about CTU which somewhat non-standard }
-\RR{ The remaining derivatives are calculated using finite differences.} 
+Advection is handled using the corner transport upwind scheme\RR{ (CTU)} \cite{kuron2021}.\RR{ CTU considers the finite volume cell to be virtually displaced by $\vec{u}\Delta t$, where $\vec{u}$ is the local velocity and $\Delta t$ is the size of a time step. The resulting overlap with the neighboring cells (as a fraction of the cell volume) dictates what percentage of the polymer stress currently located at the cell is advected to the respective neighbor. This scheme prevents checkerboard instabilities.} \SG{ add two phrases about CTU which somewhat non-standard }\RK{done}
+\RR{ The remaining derivatives are calculated using finite differences.}
 At the walls\RR{, which coincide with the surfaces of the finite volumes}, a zero-flux boundary condition for the stress is used.
 The source terms are integrated using the Euler method.
 
@@ -995,7 +995,7 @@ Importantly, we show in figure~\ref{fig:wiParameterStudy}~(b) that this very goo
 	\end{equation}
 	It should be noted, that this is the simple case for a Newtonian fluid.
 	If additional (external) forces are to be considered, additional terms are added on the right-hand side to account for these.
-	For simple forces we use the algorithm presented by Guo et al. \cite{guo2002}.  \SG{ what are ''simple forces''? }
+	For forces we use the algorithm presented by Guo et al. \cite{guo2002}.  \SG{ what are ''simple forces''? }\RK{as opposed to stresses which are generalized forces. -> removed the "simple"}
 	The following equations relate the discrete quantities back to the physical quantities.
 	\begin{align}
 		\rho &= \sum_if_i^\text{eq} = \sum_if_i \\
