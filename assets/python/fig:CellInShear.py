@@ -95,6 +95,7 @@ def process():
     plt.show()
 
     plt.figure(figsize=(15.5 * cm, 15.5 / 2 * cm))
+    plt.title("(b)", loc="left")
     plt.imshow(
         vonMiesesSlice.T,
         cmap="coolwarm",
