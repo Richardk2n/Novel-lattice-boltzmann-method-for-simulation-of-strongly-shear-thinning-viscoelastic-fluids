@@ -147,7 +147,7 @@ To understand the rheology of such complex liquids in non-trivial geometries, co
 While a number of numerical techniques have been developed, the simulation of viscoelastic liquids remains an involved subject \cite{Alves.2020}, in particular for high viscosity ratios.
 A very popular simulation technique for Newtonian fluids is the Lattice Boltzmann method (LBM) \cite{Kruger_book} due to its simplicity and high parallelizability.
 LBM has also been extended to viscoelastic situations, mainly in two \cite{ispolatov2002,wang2019,su2013,giraud1998,xie2018,dzanic2022,frank2006,zou2014,lee2017,dzanic2022_2,sedaghat2021,frantziskonis2011,qin2023,yoshino2008,papenkort2015,phillips2011,onishi2005} but occasionally also in three \cite{malaspinas2010,gupta2015,gupta2015_2,lallemand2003,ma2020,onishi2006,wang2020,dellar2014,su2013_2,wang2021,kuron2021,gupta2016} dimensions.
-\RR{We will discuss these approaches in detail in section~\ref{sec:existingLBM} below.}
+We will discuss these approaches in detail in section~\ref{sec:existingLBM} below.
 To alleviate stability problems, some of these works include an artificial diffusivity of the polymer stress \cite{malaspinas2010,ma2020,wang2020,wang2021}, or perform special decompositions of the stress tensor \cite{dzanic2022}.
 Despite these improvements, however, none of these methods has been applied to very high viscosity ratio fluids which are often used as cell carrier fluids in lab experiments or technological applications.
 
@@ -256,7 +256,7 @@ The obtained parameters are given in table~\ref{tab:PTTparameters}.
 		\label{tab:PTTparameters}
 	\end{table}
 
-We introduce the ratio between the polymer and the solvent viscosity \RR{and express it as a ratio between the viscosity at zero shear rate, $ \eta _0$, and the viscosity at infinite shear rate $ \eta _ \infty $}:
+We introduce the ratio between the polymer and the solvent viscosity and express it as a ratio between the viscosity at zero shear rate, $\eta_0$, and the viscosity at infinite shear rate $\eta_\infty$:
 \begin{align}
 	R_\eta = \frac{\eta_\text{p}}{\eta_\text{s}} = \frac{\eta_0-\eta_\infty}{\eta_\infty}		\label{eq:R_eta}
 \end{align}
@@ -352,7 +352,7 @@ Our algorithm contains a Lattice-Boltzmann solver for the Navier-Stokes equation
 
 \subsection{Lattice-Boltzmann for Navier-Stokes}
 
-The Lattice-Boltzmann method (LBM) has become a standard tool in numerical fluid mechanics \cite{Kruger_book}, and we therefore \RR{only mention the key choices here. Further details can be found in the appendix~\ref{app:LBM} or in literature.}
+The Lattice-Boltzmann method (LBM) has become a standard tool in numerical fluid mechanics \cite{Kruger_book}, and we therefore only mention the key choices here. Further details can be found in the appendix~\ref{app:LBM} or in literature.
 We use a D3Q19 lattice in full three dimensions together with a single relaxation time collision operator.
 Our implementation is based on FluidX3D which has been extensively used and validated in earlier publications \cite{lehmann2021, Lehmann.20229da}.
 The core of the algorithm is implemented in OpenCL and thus capable of running on GPUs from different vendors.
@@ -365,10 +365,10 @@ To drive the flow, we use either a constant body force (modeling a physical pres
 \subsection{Finite-volume for polymer stress }
 
 The spatio-temporal dynamics of the polymer stress $\ma{\tau}$ is given by equation~(\ref{eq:polymerStress}) in the form of an advection-reaction equation.
-We solve this equation by a finite-volume scheme running in parallel (with identical time step) to the LBM solver.\RR{ For this, the simulation volume is subdivided in $1\times1\times1$ (in LU) cubes centered around each lattice node. The average value of $\ma{\tau}$ within these volumes is takes as the value at the lattice node.}
-Advection is handled using the corner transport upwind scheme\RR{ (CTU)} \cite{kuron2021}.\RR{ CTU considers the finite volume cell to be virtually displaced by $\vec{u}\Delta t$, where $\vec{u}$ is the local velocity and $\Delta t$ is the size of a time step. The resulting overlap with the neighboring cells (as a fraction of the cell volume) dictates what percentage of the polymer stress currently located at the cell is advected to the respective neighbor. This scheme prevents checkerboard instabilities.} \SG{ add two phrases about CTU which somewhat non-standard }\RK{done}
-\RR{ The remaining derivatives are calculated using finite differences.}
-At the walls\RR{, which coincide with the surfaces of the finite volumes}, a zero-flux boundary condition for the stress is used.
+We solve this equation by a finite-volume scheme running in parallel (with identical time step) to the LBM solver. For this, the simulation volume is subdivided in $1\times1\times1$ (in LU) cubes centered around each lattice node. The average value of $\ma{\tau}$ within these volumes is takes as the value at the lattice node.
+Advection is handled using the corner transport upwind scheme (CTU) \cite{kuron2021}. CTU considers the finite volume cell to be virtually displaced by $\vec{u}\Delta t$, where $\vec{u}$ is the local velocity and $\Delta t$ is the size of a time step. The resulting overlap with the neighboring cells (as a fraction of the cell volume) dictates what percentage of the polymer stress currently located at the cell is advected to the respective neighbor. This scheme prevents checkerboard instabilities.
+The remaining derivatives are calculated using finite differences.
+At the walls, which coincide with the surfaces of the finite volumes, a zero-flux boundary condition for the stress is used.
 The source terms are integrated using the Euler method.
 
 To include the polymer stress into the LBM, we use the stress coupling scheme according to Dzanic \textit{et al.} \cite{dzanic2022_2, gupta2015, onishi2006}.
@@ -378,9 +378,9 @@ Specifically, we implement the LBM collision as follows.
 \end{equation}
 Here, $f_i$ are the populations, $f_i^\text{eq}$ are the equilibrium populations, $\vec{c_i}$ are the lattice velocities, $\Delta t$ is the time step, $\tau_\text{r}$ is the relaxation time and $B_i$ are the stress contributions defined as follows.
 \begin{equation}
-	B_i = w_i\left(\frac{\vec{c}_i\vec{c}_i}{2c_\text{s}^4}-\frac{\uT}{2c_\text{s}^2}\right):\ma{\tau\RR{^\prime}}.
+	B_i = w_i\left(\frac{\vec{c}_i\vec{c}_i}{2c_\text{s}^4}-\frac{\uT}{2c_\text{s}^2}\right):\ma{\tau^\prime}.
 \end{equation}
-Here, $w_i$ are the lattice weights, $c_\text{s}$ is the lattice speed of sound and $\ma{\tau\RR{^\prime}}$ is the \RR{stress tensor to be coupled into the LBM. In the case of viscoelastic fluids this typically is the} polymer stress tensor. \RR{For our method this tensor is modified as described in the following section. }The colon denotes the Frobenius inner product.
+Here, $w_i$ are the lattice weights, $c_\text{s}$ is the lattice speed of sound and $\ma{\tau^\prime}$ is the stress tensor to be coupled into the LBM. In the case of viscoelastic fluids this typically is the polymer stress tensor. For our method this tensor is modified as described in the following section. The colon denotes the Frobenius inner product.
 To handle inflow/outflow boundaries, the polymer conformation tensor is specified on the boundary and advected using the corner transport upwind scheme.
 
 
@@ -408,7 +408,7 @@ Finally, this results in
 \end{align}
 In practice, the shuffling parameter $\alpha_\text{s}$ is chosen before the start of the simulation.
 The LBM solver is run with $\eta_\text{s} + \alpha_\text{s}\eta_\text{p}$ as its viscosity.
-The polymer stress determined by equation~\ref{eq:polymerStress} is reduced by the amount $2\alpha_\text{s}\eta_\text{p}\ma{D}$ at every time step before \RR{$\ma{\tau^\prime} = \ma{\tau} - 2\alpha_\text{s}\eta_\text{p}\ma{D}$} is coupled into the LBM.
+The polymer stress determined by equation~\ref{eq:polymerStress} is reduced by the amount $2\alpha_\text{s}\eta_\text{p}\ma{D}$ at every time step before $\ma{\tau^\prime} = \ma{\tau} - 2\alpha_\text{s}\eta_\text{p}\ma{D}$ is coupled into the LBM.
 
 Using this procedure, we balance the stress contributions of the LB and the polymer components which vastly improves numerical stability.
 We emphasize that, in contrast to other remedies such as adding artificial diffusivity \cite{malaspinas2010,ma2020,wang2020,wang2021}, our viscosity shuffling algorithm is mathematically exact and does not affect the physics of the simulated system.
@@ -439,7 +439,7 @@ The velocity field is initialized with zero.
 For methyl cellulose, we simulate the full temporal evolution with the polymers starting in the unstretched configuration.
 In the case of alginate, we speed up the convergence and start from a situation in which the polymers are pre-stretched. For this we calculate $\tau_{xx}$ and $\tau_{xy}$ using equations~(\ref{eq:tau_xx}) and (\ref{eq:PTTDerivation2}) using the $\dot{\gamma}$ calculated from equation~(\ref{eq:semiAnalyticGD_3D}). The polymer stress is then initialized using these values.
 After \num{2e9} LBM time steps for alginate and \num{5e6} LBM time steps for methyl cellulose corresponding to approximately \SI{1.6}{\milli\second} and \SI{2.4}{\second} of physical time, respectively, the simulation is stopped and the flow field $u(y)$ is compared to the semi-analytical solution.
-\RR{An artificial increase of the Reynolds number to reduce computational time is possible in principle, but is not employed here to bring out clearly the characteristics of our method.}
+An artificial increase of the Reynolds number to reduce computational time is possible in principle, but is not employed here to bring out clearly the characteristics of our method.
 As shown in figure~\ref{fig:2Dvel}, very good agreement is found.
 The time evolution of the center-line velocity is shown in figure~\ref{fig:2DTimeEvolution} of the appendix.
 For a quantitative assessment, we compute the L2 error as follows.
@@ -621,7 +621,7 @@ These are particularly pronounced along the longest axis of the deformed cell.
 		\centering
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=0.15]{assets/images/cellInShear.png}
 		\adjincludegraphics[trim=0 0 0 0, clip, scale=1]{assets/plots/cellInShear_sigma_vM.pdf}
-		\caption{The deformed cell (a) and the von Mises stress around a cell in viscoelastic shear flow (b).}
+		\caption{Cell in viscoelastic shear flow. (a) The 3D shape of the deformed cell and (b) a 2D cross-section of the von Mises stress.}
 		\label{fig:cellInShear_vM}
 	\end{figure}
 
@@ -960,7 +960,6 @@ Importantly, we show in figure~\ref{fig:wiParameterStudy}~(b) that this very goo
 		\label{fig:Nozzle/RT-DC_eta}
 	\end{figure}
 	
-	\RR{
 	\section{Lattice-Boltzmann Implementation}\label{app:LBM}
 	An excellent overview on Lattice-Boltzmann methods (LBM) can be found in the book by Krüger et al. on the subject \cite{Kruger_book}.
 	Our implementation mostly follows the book, though some implementation details differ.
@@ -997,7 +996,7 @@ Importantly, we show in figure~\ref{fig:wiParameterStudy}~(b) that this very goo
 	\end{equation}
 	It should be noted, that this is the simple case for a Newtonian fluid.
 	If additional (external) forces are to be considered, additional terms are added on the right-hand side to account for these.
-	For the forces used to drive the simple periodic flows and the forces from the IBM used to simulate cells, we use the algorithm presented by Guo et al. \cite{guo2002}.  \SG{ what are ''simple forces''? }\RK{as opposed to stresses which are generalized forces. -> removed the "simple"}
+	For the forces used to drive the simple periodic flows and the forces from the IBM used to simulate cells, we use the algorithm presented by Guo et al. \cite{guo2002}.
 	The following equations relate the discrete quantities back to the physical quantities.
 	\begin{align}
 		\rho &= \sum_if_i^\text{eq} = \sum_if_i \\
@@ -1037,7 +1036,6 @@ Importantly, we show in figure~\ref{fig:wiParameterStudy}~(b) that this very goo
 			\frac{1}{36},\quad \text{otherwise}
 		\end{cases}
 	\end{equation}
-	}
 
 
 

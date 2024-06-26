@@ -14,7 +14,7 @@
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\rhead{Submission ID \SG{ to fill }}
+\rhead{Submission ID FLD-24-0080}
 \rfoot{\thepage}
 \setlength\parindent{0pt}
 
@@ -30,6 +30,10 @@ maxbibnames=10,
 sorting=none
 ]{biblatex}
 \addbibresource{../assets/bib/bib.bib}
+
+\usepackage[locale=US]{siunitx}
+\sisetup{per-mode=fraction}
+\sisetup{separate-uncertainty=true}
 
 
 \newcommand*{\referee}[1]{%
@@ -50,8 +54,7 @@ We now mention this just before Eq. (7).\RK{Eigentlich beziehen sich die auf CY 
 
 \referee{Please provide more details on the elements of the lattice Boltzmann method, for instance, lattice model considered in this work, the discrete velocities and the equilibrium populations.}
 
-We have added a new appendix E where we discuss the LB method in general as well as our specific implementation details. 
-\SG{der Appendix ist an sich ok, aber sollte noch frueher und deutlicher auf unsere Implementierung eingehen, z.B. D3Q19 bereits dort erwähnen, wo du auf velocity sets eingehst. Beim Guo forcing konkret sagen, wofuer wir es verwenden (''simple forces'' ist hier zu vage). Bei der Dichte und der Viskositaet ist es nicht so wichtig, was man ''typically'' nimmt, sondern was du konkret in deinen Simulationen genommen hast. }\RK{Habe deine Beispiele übernommen}
+We have added a new appendix E where we discuss the LB method in general as well as our specific implementation details.
 
 \referee{The authors should provide the relation between the relaxation time and viscosity appeared in first term on the right-hand side of Eq. (12). In addition, if Eq. (12) is considered, should the term $B_i$ given by Eq. (9) be modified?}
 
@@ -66,7 +69,7 @@ Yes, as we now mention in the new appendix E.
 \referee{Why is the finite-volume method adopted for polymer stress? Please give some details on the finite-volume method. In addition, it is known that in the lattice Boltzmann method, the square or cubic lattice is adopted, and thus the finite-difference method seems a better choice?}
 
 Our choice of the finite-volume method is motivated primarily by its clarity and simplicity when implementing complex boundary conditions.
-Furthermore, the finite-volume method matches well with the so-called corner-transport-upwind (CTU) scheme which we use for advection and for which earlier works \cite{kuron2021}\SG{ give ref of Kuron }\RK{done} reported increased stability.
+Furthermore, the finite-volume method matches well with the so-called corner-transport-upwind (CTU) scheme which we use for advection and for which earlier works \cite{kuron2021} reported increased stability.
 To make these points clearer to the reader, we added many corresponding details to section 4.2 of the revised manuscript.
 %Finite difference is a lot harder to implement (boundary conditions), has a lot more loose ends to tie (to assure conservation for example) and is less stable.
 
@@ -85,38 +88,7 @@ We therefore explain the - apparently - large error in the center in figure 4 by
 
 \referee{In the framework of lattice Boltzmann method, the multiple-relaxation-time (MRT) model can be considered to improve the numerical stability. Can MRT model be adopted in this work to overcome the numerical instability problem?}
 
-\SG{ Die Antwort geht so nicht, es geht hier nicht um eine Grundsatzdikussion zu MRT sondern um eine konkrete Frage zu unserem System.
-Es gibt drei Moeglichkeiten zur Antwort:
-
-(i) Wir bedanken uns artig für den Vorschlag und sagen, dass wir es in Zukunft ausprobieren werden, aber dass es für diese Arbeit zu weit fuehrt.
-
-(ii) Wir sagen, dass MRT hier nichts nuetzt. Dann brauchen wir aber konkrete Belege dafuer. Fuer welche Systeme wurde MRT ausprobiert? Was war der Effekt? Konnte die Stabilitaet fuer den klassischen Ansatz ohne viscosity shuffling durch MRT verbessert werden?
-
-(iii) Wir argumentieren, dass andere in der Literatur MRT benutzt haben und dass es dort auch nichts gebracht hat. Deswegen machen wir uns nicht die Muehe, es auszuprobieren.
-
-Man kann die Varianten auch kombinieren. Kannst du zu (ii) und (iii) mal raussuchen, was da der Stand ist?}
-\RK{
-(i) Der Vorschlag ist in etwa so sinnvoll wie vorzuschlagen unsere GPUs pink anzumalen und zu schauen ob das hilft. Da wir MRT ohnehin schon implementiert haben wäre das auch deutlich einfacher gewesen als das Zeug hier zu erfinden. Das führt also mit Nichten zu weit. Mir ist ein Rätsel wie du diese Antwort für eine echte Möglichkeit halten kannst.
-
-(ii) Wir haben es ausprobiert. Es hatte schon für die simpelsten Systeme keinerlei Effekt. Was auch wenig überraschend ist, denn wenn wir die Literatur mal eben nach Leuten durchsuchen die nicht nur nachplappern MRT würde die Stabilität verbessern sondern die raussuchen die dazu was konkretes zeigen (z.B. https://doi.org/10.1016/j.jnnfm.2011.01.002 https://ntrs.nasa.gov/api/citations/20020075050/downloads/20020075050.pdf), so stellen wir fest, dass die von Re = 100 und aufwärts reden. Bei MRT geht es um die Verbesserung der Stabilität zeigabhängiger bis turbulenter Strömungen. Das hat mit unserem Problem schlichtweg nichts zu tun, deshalb haben wir nie für irgendwas einen relevanten Effekt durch MRT gesehen.
-
-(iii) Die Literatur die wir zitieren (Dzanic) gibt sogar an, dass MRT für ihren klassischen Ansatz nicht angemessen ist weil nicht turbulent "Although the current LB solver
-uses the SRT model, which is appropriate for the
-current investigation [i.e., Re $\tilde{}$ O (1)], exten-
-sions to two-relaxation-time (TRT) and multiple-
-relaxation-time (MRT) models are easily applica-
-ble for the scheme in scenarios involving inertialess
-(Re << 1) or turbulent (Re >> 1e3 ) conditions."
-oder ganz allgemein zu MRT von Krüger:
-"However, the simplicity and efficiency of the lattice Boltzmann
-BGK collision operator comes at the cost of reduced accuracy (in particular for large
-viscosities) and stability (especially for small viscosities). Multiple-relaxation-time
-(MRT) collision operators offer a larger number of free parameters that can be tuned
-to overcome these problems."
-Die Literatur die wir zitieren (mit Ausnahme von Gupta) benutzt kein MRT (Kuron TRT rest SRT), weil MRT hier nichts verloren hat. Und Gupta rechtfertigt seine Verwendung auch nur mit "Ist besser, siehe paper das von hohen Re spricht" ohne das selbst für seinen Fall zu belegen. In unserem Literaturvergleich ist er der Schlechteste.
-
-Wenn du möchtest, können wir gerne schreiben "haben wir ausprobiert, bringt nichts" (ich wüsste aber nicht welche Belege wir hierfür liefern sollten/müssten, die Simulation ergibt so und so nan), aber ich halte diesen "Vorschlag" für nicht angemessen und will nicht riskieren, dass dem auch noch einfällt wir könnten die ganzen Parameter ja mal durchtunen.
-}
+MRT is considered to improve numerical stability of time dependent or turbulent flow in high $Re$ cases \cite{dzanic2022, Kruger_book}, it is used for $Re = \num{100}$ \cite{chai2011} and above \cite{dhumieres2002}. As the problem discussed in the present work has very low $Re$, it would not be expected to improve stability here. Consequently, SRT is used by all authors we list in our literature overview except for Kuron et al. (TRT) \cite{kuron2021} and Gupta et al. (MRT) \cite{gupta2015}. Notably, while Gupta et al. use MRT their method achieves the lowest $max\left(R_\eta\right)$ in our overview. We do not want to imply, that MRT might be counterproductive here (Gupta et al. did not compare to SRT), but it is also clearly no remedy. That being said, given, that we have MRT implemented anyway, we of course tried it before coming up with the present algorithm and were not able to observe any improvement.
 
 %MRT gets a lot more credit than it deserves.
 %If tuned for a specific problem it can marginally improve stability. 
