@@ -49,8 +49,8 @@ sorting=none
 
 \referee{What are the parameters $\eta_0$ and $\eta_ \infty $ appeared in Eq. (7)?}
 
-The parameters $\eta_0$ and $\eta_\infty$ are the viscosities predicted by the model for zero and infinite shear rates, respectively.
-We now mention this just before Eq. (7).\RK{Eigentlich beziehen sich die auf CY bzw. auf experimentelle Daten.}
+The parameters $\eta_0$ and $\eta_\infty$ are the viscosities for zero and infinite shear rates, respectively.
+We now mention this just before Eq. (7).
 
 \referee{Please provide more details on the elements of the lattice Boltzmann method, for instance, lattice model considered in this work, the discrete velocities and the equilibrium populations.}
 
@@ -88,7 +88,14 @@ We therefore explain the - apparently - large error in the center in figure 4 by
 
 \referee{In the framework of lattice Boltzmann method, the multiple-relaxation-time (MRT) model can be considered to improve the numerical stability. Can MRT model be adopted in this work to overcome the numerical instability problem?}
 
-MRT is considered to improve numerical stability of time dependent or turbulent flow in high $Re$ cases \cite{dzanic2022, Kruger_book}, it is used for $Re = \num{100}$ \cite{chai2011} and above \cite{dhumieres2002}. As the problem discussed in the present work has very low $Re$, it would not be expected to improve stability here. Consequently, SRT is used by all authors we list in our literature overview except for Kuron et al. (TRT) \cite{kuron2021} and Gupta et al. (MRT) \cite{gupta2015}. Notably, while Gupta et al. use MRT their method achieves the lowest $max\left(R_\eta\right)$ in our overview. We do not want to imply, that MRT might be counterproductive here (Gupta et al. did not compare to SRT), but it is also clearly no remedy. That being said, given, that we have MRT implemented anyway, we of course tried it before coming up with the present algorithm and were not able to observe any improvement.
+MRT is considered to improve numerical stability of time dependent or turbulent flow in high $Re$ cases \cite{dzanic2022, Kruger_book}, it is used for $Re = \num{100}$ \cite{chai2011} and above \cite{dhumieres2002}. 
+As the problem discussed in the present work has very low $Re$, it would not be expected to improve stability here. 
+Consequently, SRT is used by all authors we list in our literature overview except for Kuron et al. (TRT) \cite{kuron2021} and Gupta et al. (MRT) \cite{gupta2015}. 
+Notably, while Gupta et al. use MRT their method achieves the lowest $max\left(R_\eta\right)$ in our overview, which leads us to believe that MRT does not lead to stability improvement for low Reynolds viscoelastic situations such as ours.
+
+To confirm the above hints from the literature, we have done ourselves some tests with MRT (which is implemented in our code) but could not find any stability improvement. 
+We now mention this in the revised manuscript in section 4.1.
+
 
 %MRT gets a lot more credit than it deserves.
 %If tuned for a specific problem it can marginally improve stability. 

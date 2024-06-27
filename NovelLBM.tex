@@ -353,7 +353,8 @@ Our algorithm contains a Lattice-Boltzmann solver for the Navier-Stokes equation
 \subsection{Lattice-Boltzmann for Navier-Stokes}
 
 The Lattice-Boltzmann method (LBM) has become a standard tool in numerical fluid mechanics \cite{Kruger_book}, and we therefore only mention the key choices here. Further details can be found in the appendix~\ref{app:LBM} or in literature.
-We use a D3Q19 lattice in full three dimensions together with a single relaxation time collision operator.
+We use a D3Q19 lattice in full three dimensions together with a single relaxation time (SRT) collision operator.
+\RR{Various tests with a multiple relaxation time (MRT) collision operator did not show significant differences.}
 Our implementation is based on FluidX3D which has been extensively used and validated in earlier publications \cite{lehmann2021, Lehmann.20229da}.
 The core of the algorithm is implemented in OpenCL and thus capable of running on GPUs from different vendors.
 Non-periodic boundaries are modeled using the half-way bounce back algorithm. To model fixed inflow/outflow, bounce back boundaries using a Dirichlet boundary condition as described by Krüger \textit{et al.} \cite{Kruger_book} are used.
