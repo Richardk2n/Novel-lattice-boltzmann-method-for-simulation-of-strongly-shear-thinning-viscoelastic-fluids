@@ -395,7 +395,7 @@ To handle inflow/outflow boundaries, the polymer conformation tensor is specifie
 
 The key difficulty for simulating many realistic viscoelastic fluids is the imbalance between the viscous stress of the solvent and the polymer stress.
 While the former is handled efficiently and reliably by the LBM streaming-collision scheme, the latter enters the LB equations as an additional source term.
-The relative magnitude of the two terms is given by the viscosity ratio $R_\eta$ as defined in equation~\ref{eq:R_eta} which for many situations is of the order of $10^2-10^3$ (see figures~\ref{fig:fit_alginate}, \ref{tab:bioinks} and table~\ref{tab:bioinks}).
+The relative magnitude of the two terms is given by the viscosity ratio $R_\eta$ as defined in equation~\ref{eq:R_eta} which for many situations is of the order of $10^2-10^3$ (see figures~\ref{fig:fit_alginate}, \ref{fig:fit_mc} and table~\ref{tab:bioinks}).
 The key idea of our scheme is to artificially increase the LBM viscous stress while at the same time reducing the polymer stress by the same amount.
 Starting from equation~\ref{eq:totalStress}, we write
 \begin{align}
